@@ -125,11 +125,15 @@ npm run build:win   # produces an NSIS installer in release/
 
 ## Known limitation
 
-Hold-to-Spam / Focus-Hold detect physical key state via a global hook. Because
-simulated input also reaches that hook, the app suppresses its own synthetic
-events with a short cooldown. In rare cases a release event can land inside that
-window and the spam keeps going — just tap the key again or hit the emergency
-stop. The toggle hotkey and Start/Stop button always work.
+Hold-to-Spam / Focus-Hold detect physical key state via a global hook, which
+also sees the app's own simulated input. The app suppresses its synthetic events
+**per key**, so Hold-to-Spam (where the held key is never one being spammed)
+starts and stops reliably.
+
+**Focus Hold** is the exception: it fires the *same* key it watches, so a
+release can occasionally coincide with a simulated press of that key and the
+spam keeps going. If that happens, tap the key again or hit the emergency stop
+(`Esc`). The toggle hotkey and Start/Stop button always work.
 
 ## Data location
 

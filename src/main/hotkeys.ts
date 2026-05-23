@@ -2,7 +2,7 @@ import { globalShortcut } from 'electron'
 import { uIOhook, type UiohookKeyboardEvent, type UiohookMouseEvent } from 'uiohook-napi'
 import type { Profile, AppSettings, RecordedKey, HotkeyConflict, SpamMode } from '@shared/types'
 import type { SpamEngine } from './engine'
-import { isSynthetic } from './input'
+import { isSyntheticToken } from './input'
 import { nameForKeycode, keycodeForName } from './keymap'
 
 interface Deps {
@@ -155,31 +155,35 @@ export class GlobalInput {
   // Physical hold detection
   // -------------------------------------------------------------------------
   private onKeyDown(e: UiohookKeyboardEvent): void {
-    if (isSynthetic()) return
+    const token = `k:${e.keycode}`
+    if (isSyntheticToken(token)) return
     if (this.recording) {
       this.deps.onRecorded({ kind: 'key', key: nameForKeycode(e.keycode) })
       return
     }
-    this.handleHoldDown(`k:${e.keycode}`)
+    this.handleHoldDown(token)
   }
 
   private onKeyUp(e: UiohookKeyboardEvent): void {
-    if (isSynthetic()) return
-    this.handleHoldUp(`k:${e.keycode}`)
+    const token = `k:${e.keycode}`
+    if (isSyntheticToken(token)) return
+    this.handleHoldUp(token)
   }
 
   private onMouseDown(e: UiohookMouseEvent): void {
-    if (isSynthetic()) return
+    const token = `m:${e.button}`
+    if (isSyntheticToken(token)) return
     if (this.recording) {
       this.deps.onRecorded({ kind: e.button === 2 ? 'mouse-right' : 'mouse-left', key: '' })
       return
     }
-    this.handleHoldDown(`m:${e.button}`)
+    this.handleHoldDown(token)
   }
 
   private onMouseUp(e: UiohookMouseEvent): void {
-    if (isSynthetic()) return
-    this.handleHoldUp(`m:${e.button}`)
+    const token = `m:${e.button}`
+    if (isSyntheticToken(token)) return
+    this.handleHoldUp(token)
   }
 
   private handleHoldDown(token: string): void {
