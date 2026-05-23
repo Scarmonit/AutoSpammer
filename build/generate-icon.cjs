@@ -1,0 +1,81 @@
+const fs = require('fs')
+const zlib = require('zlib')
+
+// Render the Auto Spammer mark (dark rounded panel + blue gradient square)
+// at a given size with 2x supersampling, returns an RGBA PNG buffer.
+function renderPng(OUT) {
+  const SS = 2
+  const N = OUT * SS
+  const buf = Buffer.alloc(N * N * 4, 0)
+  const set = (x, y, r, g, b, a) => { const i = (y * N + x) * 4; buf[i] = r; buf[i + 1] = g; buf[i + 2] = b; buf[i + 3] = a }
+
+  // signed distance to rounded rect (negative inside)
+  const rr = (x, y, x0, y0, x1, y1, rad) => {
+    const cx = Math.min(Math.max(x, x0 + rad), x1 - rad)
+    const cy = Math.min(Math.max(y, y0 + rad), y1 - rad)
+    return Math.hypot(x - cx, y - cy) - rad
+  }
+  const k = (OUT / 512) * SS // scale factor from the 512-space design
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    if (rr(x, y, 16 * k, 16 * k, 496 * k, 496 * k, 96 * k) < 0) set(x, y, 0x24, 0x27, 0x2e, 255)
+    const i0 = 150 * k, i1 = 362 * k
+    if (rr(x, y, i0, i0, i1, i1, 56 * k) < 0) {
+      const t = Math.min(1, Math.max(0, (y - i0) / (i1 - i0)))
+      set(x, y, Math.round(0x3b + (0x7a - 0x3b) * t), Math.round(0x82 + (0xa7 - 0x82) * t), Math.round(0xf6 + (0xff - 0xf6) * t), 255)
+    }
+  }
+
+  const out = Buffer.alloc(OUT * OUT * 4)
+  for (let y = 0; y < OUT; y++) for (let x = 0; x < OUT; x++) {
+    let r = 0, g = 0, b = 0, a = 0
+    for (let dy = 0; dy < SS; dy++) for (let dx = 0; dx < SS; dx++) {
+      const i = ((y * SS + dy) * N + (x * SS + dx)) * 4
+      r += buf[i]; g += buf[i + 1]; b += buf[i + 2]; a += buf[i + 3]
+    }
+    const n = SS * SS, o = (y * OUT + x) * 4
+    out[o] = r / n; out[o + 1] = g / n; out[o + 2] = b / n; out[o + 3] = a / n
+  }
+  return encodePng(OUT, out)
+}
+
+const crcTable = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0 } return t })()
+const crc32 = (b) => { let c = 0xffffffff; for (let i = 0; i < b.length; i++) c = crcTable[(c ^ b[i]) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0 }
+function chunk(type, data) {
+  const len = Buffer.alloc(4); len.writeUInt32BE(data.length, 0)
+  const t = Buffer.from(type, 'ascii')
+  const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(Buffer.concat([t, data])), 0)
+  return Buffer.concat([len, t, data, crc])
+}
+function encodePng(size, rgba) {
+  const ihdr = Buffer.alloc(13)
+  ihdr.writeUInt32BE(size, 0); ihdr.writeUInt32BE(size, 4); ihdr[8] = 8; ihdr[9] = 6
+  const raw = Buffer.alloc(size * (size * 4 + 1))
+  for (let y = 0; y < size; y++) { raw[y * (size * 4 + 1)] = 0; rgba.copy(raw, y * (size * 4 + 1) + 1, y * size * 4, (y + 1) * size * 4) }
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw, { level: 9 })), chunk('IEND', Buffer.alloc(0))
+  ])
+}
+
+// .ico holding multiple PNG-encoded sizes (Vista+ format)
+function buildIco(sizes) {
+  const imgs = sizes.map((s) => ({ s, png: renderPng(s) }))
+  const count = imgs.length
+  const dir = Buffer.alloc(6 + 16 * count)
+  dir.writeUInt16LE(0, 0); dir.writeUInt16LE(1, 2); dir.writeUInt16LE(count, 4)
+  let offset = 6 + 16 * count
+  imgs.forEach((im, i) => {
+    const e = 6 + i * 16
+    dir[e] = im.s >= 256 ? 0 : im.s
+    dir[e + 1] = im.s >= 256 ? 0 : im.s
+    dir[e + 2] = 0; dir[e + 3] = 0
+    dir.writeUInt16LE(1, e + 4); dir.writeUInt16LE(32, e + 6)
+    dir.writeUInt32LE(im.png.length, e + 8); dir.writeUInt32LE(offset, e + 12)
+    offset += im.png.length
+  })
+  return Buffer.concat([dir, ...imgs.map((im) => im.png)])
+}
+
+fs.writeFileSync('build/icon.png', renderPng(512))
+fs.writeFileSync('build/icon.ico', buildIco([256, 128, 64, 48, 32, 16]))
+console.log('wrote build/icon.png (512) and build/icon.ico (16-256)')

@@ -1,5 +1,8 @@
 appId: com.scarmonit.autospammer
 productName: Auto Spammer
+# Native modules ship prebuilt N-API binaries that load directly in Electron,
+# so skip the from-source rebuild (which would require Visual Studio).
+npmRebuild: false
 directories:
   output: release
   buildResources: build
@@ -11,12 +14,18 @@ asarUnpack:
   - "**/node_modules/uiohook-napi/**"
   - "**/node_modules/@nut-tree-fork/**"
 win:
+  icon: build/icon.ico
   target:
     - target: nsis
       arch:
         - x64
-  artifactName: ${productName}-${version}-setup.${ext}
+  artifactName: AutoSpammer-Setup-${version}.${ext}
 nsis:
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Auto Spammer
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico

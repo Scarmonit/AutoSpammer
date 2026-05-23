@@ -1,151 +1,124 @@
-# Auto Spammer
+# 🎯 Auto Spammer
 
-A dark-themed Windows desktop **macro / auto key-spammer** utility built with
-**Electron + React + TypeScript**. It simulates keyboard and mouse input
-globally, supports global hotkeys while unfocused, hold-to-spam and focus-hold
-modes, sequence playback, loop controls, a text-typing function, and JSON
-profiles that persist to disk.
-
-> ⚠️ **Use responsibly.** This tool sends synthetic input to whatever window is
-> focused. Many online games and competitive platforms forbid input automation —
-> using it there can get your account banned. Only use it where automation is
-> allowed (single-player games, your own apps, accessibility, testing, etc.).
+A simple, dark-themed **auto key-presser / clicker** for Windows. Pick the keys
+you want repeated, choose how fast, and press **Start** — Auto Spammer presses
+them for you. Great for games and apps that involve a lot of repeated tapping.
 
 ---
 
-## Features
+## ⬇️ Download & Install (the easy way)
 
-- **Keys to Spam** — reorderable (drag) list of keys, each with an optional
-  per-key delay that overrides the global default. Mouse-click entries supported.
-- **Record** — capture physical key/button presses straight into the list.
-- **Options** — toggle Spacebar / Left Click / Right Click, set a global default
-  delay, and enable **Sequence Mode** (fire one entry per cycle instead of all).
-- **Text Function** — type a full string each cycle with its own delay.
-- **Profiles** — create / rename / save / delete; everything persists to JSON.
-- **Loop** — Forever, Play Once, or a fixed number of times.
-- **Toggle Hotkey** — global start/stop that works even when unfocused.
-- **Emergency Stop** — global hotkey (default `Esc`) active while running.
-- **Hold-to-Spam** — spam your list only while a chosen key/button is physically held.
-- **Focus Hold** — rapidly fire *only* the chosen key itself while held.
-- **Safety** — running indicator, numeric validation, hotkey-conflict detection,
-  debounced hotkey re-registration, single set of input listeners, and a spam
-  loop that runs in the main process off the UI thread.
+You do **not** need any programming tools. Just:
+
+1. Go to the **[Latest Release ➜](https://github.com/Scarmonit/AutoSpammer/releases/latest)** page.
+2. Under **Assets**, click **`AutoSpammer-Setup-1.0.0.exe`** to download it.
+3. Double-click the downloaded file to install.
+4. Windows may show a blue **"Windows protected your PC"** box (this happens for
+   apps that aren't code-signed). Click **More info → Run anyway**. *(The app is
+   open source — you can read every line of code in this repo.)*
+5. Finish the installer. You'll get an **Auto Spammer** shortcut on your Desktop
+   and in the Start menu. 🎉
+
+> 💡 **One-click download:**
+> [AutoSpammer-Setup-1.0.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.0.0.exe)
 
 ---
 
-## Tech / architecture
+## 🎮 How to use it
+
+1. **Open Auto Spammer** from the Desktop/Start-menu shortcut.
+2. In **Keys to Spam** (left side), type the key you want repeated — for example
+   `a`, `space`, `1`, or `f6`. Click **+ Add Key** for more, or click **Record**
+   and press keys to capture them automatically.
+   - The **"Will spam:"** line shows exactly what will be pressed.
+3. (Optional) Set how fast under **Default Delay** — lower number = faster
+   (10 ms ≈ very fast). Each key can have its own delay too.
+4. **Click into the game or app** you want the keys sent to, so it's the active
+   window.
+5. Press the big **Start Spam** button — or tap **F6** anywhere, even while the
+   game is focused.
+6. To stop: press **F6** again, click **Stop Spam**, or hit **Esc** (emergency
+   stop).
+
+### Handy extras
+- **Spacebar / Left Click / Right Click** checkboxes — add those without typing.
+- **Sequence Mode** — fire your keys one at a time per cycle instead of all at once.
+- **Loop** — repeat forever, once, or a set number of times.
+- **Hold-to-Spam** — pick a key; it only spams *while you physically hold it*.
+- **Focus Hold** — hold a key to rapidly fire *that same key* (e.g. hold `F` to
+  machine-gun `F`).
+- **Profiles** — save different setups and switch between them. They're remembered
+  the next time you open the app.
+
+---
+
+## ⚠️ Please use responsibly
+
+Auto Spammer sends real key/mouse input to whatever window is focused. **Many
+online/competitive games forbid input automation and may ban your account.** Only
+use it where automation is allowed — single-player games, your own apps,
+accessibility, testing, and the like. You're responsible for how you use it.
+
+---
+
+## ❓ Troubleshooting
+
+- **"Windows protected your PC" popup** → click **More info → Run anyway**. It's
+  just because the app isn't signed with a paid certificate.
+- **Keys go to the wrong window** → click into the target window first; Auto
+  Spammer sends to whatever is focused.
+- **It won't stop** → press **Esc**, or **F6**, or click **Stop Spam**.
+- **Antivirus flags it** → key-pressers look like automation tools to antivirus,
+  so false positives happen. The full source is in this repo if you want to build
+  it yourself (below).
+
+---
+
+## 🛠️ For developers (build from source — optional)
+
+Only needed if you want to modify the app or build the installer yourself.
+
+**Requirements:** [Node.js](https://nodejs.org/) 18+ (built on Node 24), Windows
+10/11. No Visual Studio needed — the native modules ship prebuilt binaries.
+
+```bash
+git clone https://github.com/Scarmonit/AutoSpammer.git
+cd AutoSpammer
+npm install          # download dependencies
+
+npm run dev          # run the app in development (hot reload)
+npm run build:win    # build the installer -> release/AutoSpammer-Setup-<version>.exe
+```
+
+### Tech & layout
+Electron + React + TypeScript (via `electron-vite`).
 
 ```
 src/
-  shared/        types, IPC channel names, default data  (used by all layers)
-  main/          Electron main process
-    index.ts       window + IPC orchestration + input validation
-    engine.ts      cancellable spam loop (off the UI thread)
-    hotkeys.ts     globalShortcut + uiohook listeners (record / hold detection)
-    input.ts       nut-js simulation wrappers + synthetic-event guard
+  shared/    types, IPC channel names, default profile
+  main/      Electron main process: window, IPC, input validation
+    engine.ts      cancellable spam loop (runs off the UI thread)
+    hotkeys.ts     global hotkeys + uiohook (record / hold detection)
+    input.ts       nut-js input simulation + synthetic-event accounting
     keymap.ts      logical key name <-> nut-js / uiohook codes
-    persistence.ts JSON load/save (debounced) in userData
-  preload/       contextBridge security boundary (window.api)
-  renderer/      React UI (no Node access; contextIsolation on)
-    src/components/  one component per panel
-    src/store.tsx    central state + IPC wiring
+    persistence.ts profiles saved as JSON in %APPDATA%\auto-spammer
+  preload/   secure contextBridge (window.api)
+  renderer/  React UI (one component per panel)
 ```
 
 - **Input simulation:** [`@nut-tree-fork/nut-js`](https://github.com/nut-tree/nut.js)
-- **Global input listening (record + hold):** [`uiohook-napi`](https://github.com/SnosMe/uiohook-napi)
-- **Global hotkeys:** Electron's built-in `globalShortcut`
-- Security: `contextIsolation: true`, `nodeIntegration: false`, a typed preload
-  bridge, and a strict renderer CSP. No native modules are exposed to the renderer.
+- **Global input listening:** [`uiohook-napi`](https://github.com/SnosMe/uiohook-napi)
+- **Global hotkeys:** Electron `globalShortcut`
+- Security: `contextIsolation` on, `nodeIntegration` off, typed preload bridge,
+  strict renderer CSP.
 
----
-
-## Prerequisites
-
-- **Windows 10/11**
-- **Node.js 18+** (built/tested on Node 24)
-- Build tools are **not** required for normal use — both native modules ship
-  prebuilt N-API binaries that load directly in Electron.
-
-## Install
-
-```bash
-npm install
-```
-
-Both native modules ship prebuilt **N-API** binaries (`uiohook-napi/prebuilds`
-and `@nut-tree-fork/libnut-win32`), which are ABI-stable and load directly in
-Electron — no Visual Studio / `node-gyp` build step is required. If you ever
-need to rebuild from source (e.g. an unusual platform), install the
-[Windows build tools](https://github.com/nodejs/node-gyp#on-windows) first.
-
-## Run (development)
-
-```bash
-npm run dev
-```
-
-Hot-reloads the renderer; the main process restarts on change.
-
-## Build a production bundle
-
-```bash
-npm run build       # compiles main / preload / renderer into out/
-npm run preview     # runs the built app
-```
-
-## Package a Windows installer
-
-```bash
-npm run build:win   # produces an NSIS installer in release/
-```
-
----
-
-## How each mode behaves
-
-| Mode | Trigger | What fires |
-|------|---------|------------|
-| **Manual** | Start button or toggle hotkey | All entries (+ enabled options + text) each cycle, honoring the Loop setting |
-| **Sequence** | Manual, with Sequence Mode on | One entry per cycle, advancing through the list |
-| **Hold-to-Spam** | Hold the configured key/button | Your whole list, repeatedly, until you release |
-| **Focus Hold** | Hold the configured key/button | Only that one key/button, repeatedly, until you release |
-
-- **Per-key delay** overrides the global **Default Delay**. Leave a row's delay
-  blank to use the default.
-- **Loop**: *Forever* runs until stopped; *Once* runs a single cycle; *N times*
-  runs N cycles (a "cycle" = one full pass through the list).
-
-## Hotkey notes
-
-- Toggle and emergency hotkeys are global. They must be different from each
-  other — the app flags the conflict if they match, and warns if the OS or
-  another app already owns the chosen combo.
-- The emergency key is only captured **while spamming**, so it doesn't swallow
-  (e.g.) `Esc` system-wide the rest of the time.
-
-## Hold detection
-
-Hold-to-Spam and Focus Hold detect physical key state via a global hook, which
-also sees the app's own simulated input. Rather than time-based suppression, the
-app **accounts for every synthetic key-up it emits**. Because a physically held
-key produces auto-repeat key*downs* but no key-up until release, an unaccounted
-key-up is unambiguously the user's real release. This makes both modes — including
-Focus Hold, which fires the very key it watches — start and stop reliably.
-
-The emergency stop (`Esc`), toggle hotkey, and Start/Stop button are always
-available as a fallback regardless.
-
-## Data location
-
-Profiles and settings are stored at:
-
-```
-%APPDATA%\auto-spammer\autospammer-data.json
-```
-
-A starter profile (`resources/example-profile.json`) is included for reference;
-the app seeds an equivalent default on first launch.
+### How hold detection stays reliable
+A physically held key produces auto-repeat key-*downs* but no key-*up* until you
+release it. The app records every synthetic key-up it emits and matches them off
+as the global hook reports them, so an *unaccounted* key-up is unambiguously your
+real release. This is what makes Hold-to-Spam and Focus Hold stop reliably even
+while spamming the same key.
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
