@@ -8,7 +8,7 @@ const MODE_LABEL: Record<string, string> = {
 }
 
 export function StatusIndicator(): JSX.Element {
-  const { status } = useStore()
+  const { status, aux } = useStore()
   const running = status.status === 'running'
   const label = running ? MODE_LABEL[status.mode ?? 'manual'] ?? 'Running' : 'Idle'
 
@@ -17,6 +17,8 @@ export function StatusIndicator(): JSX.Element {
       <span className="status__dot" />
       <span className="status__text">{label}</span>
       {running && <span className="status__cycles">· {status.cyclesDone} cycles</span>}
+      {aux.holdActive && <span className="status__badge">HOLD</span>}
+      {aux.periodicActive && <span className="status__badge">PERIODIC</span>}
     </div>
   )
 }

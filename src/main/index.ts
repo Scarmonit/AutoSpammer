@@ -8,18 +8,26 @@ import type {
   RecordedKey,
   HotkeyConflict
 } from '@shared/types'
-import type { ClickPosition } from '@shared/types'
+import type { ClickPosition, AuxStatus } from '@shared/types'
 import { IPC } from '@shared/ipc'
 import { createDefaultProfile, makeId } from '@shared/defaults'
 import { loadData, saveData, flushData, activeProfile } from './persistence'
 import { SpamEngine } from './engine'
 import { GlobalInput } from './hotkeys'
+import { AuxController } from './auxmodes'
 import { getMousePosition } from './input'
 
 let mainWindow: BrowserWindow | null = null
 let data: PersistedData
 let engine: SpamEngine
 let globalInput: GlobalInput
+let aux: AuxController
+
+/** Arm the emergency-stop hotkey whenever anything is active. */
+function updateEmergencyArmed(): void {
+  const s = aux.getStatus()
+  globalInput.setEmergencyArmed(engine.isRunning() || s.holdActive || s.periodicActive)
+}
 
 // ---------------------------------------------------------------------------
 // Window
@@ -91,6 +99,14 @@ function sanitizeProfile(p: Profile): Profile {
       button: c.button === 'right' ? 'right' : 'left',
       delayMs: c.delayMs === null ? null : clampInt(c.delayMs, 0, 600000, 0)
     })),
+    holdKeys: {
+      keys: (p.holdKeys?.keys ?? []).map((k) => String(k))
+    },
+    periodicKey: {
+      key: String(p.periodicKey?.key ?? ''),
+      // seconds, clamped to a sane range (0.1s – 3600s)
+      intervalSec: Math.min(3600, Math.max(0.1, Number(p.periodicKey?.intervalSec) || 5))
+    },
     loop: {
       ...p.loop,
       count: clampInt(p.loop.count, 1, 1000000, 1)
@@ -177,6 +193,18 @@ function registerIpc(): void {
   })
 
   ipcMain.handle(IPC.GetMousePosition, () => getMousePosition())
+
+  ipcMain.handle(IPC.ToggleHold, () => {
+    aux.toggleHold()
+    return aux.getStatus()
+  })
+
+  ipcMain.handle(IPC.TogglePeriodic, () => {
+    aux.togglePeriodic()
+    return aux.getStatus()
+  })
+
+  ipcMain.handle(IPC.GetAuxStatus, () => aux.getStatus())
 }
 
 /**
@@ -213,7 +241,16 @@ if (!gotLock) {
     engine = new SpamEngine({
       onStatus: (s: StatusPayload) => {
         send(IPC.StatusChanged, s)
-        globalInput.setRunning(s.status === 'running')
+        updateEmergencyArmed()
+      },
+      onError: (message: string) => send(IPC.ErrorEvent, message)
+    })
+
+    aux = new AuxController({
+      getProfile: () => activeProfile(data),
+      onStatus: (s: AuxStatus) => {
+        send(IPC.AuxStatusChanged, s)
+        updateEmergencyArmed()
       },
       onError: (message: string) => send(IPC.ErrorEvent, message)
     })
@@ -226,6 +263,12 @@ if (!gotLock) {
       onConflict: (c: HotkeyConflict) => send(IPC.HotkeyConflict, c),
       onRecordPosition: () => {
         void recordCurrentPosition()
+      },
+      onToggleHold: () => aux.toggleHold(),
+      onTogglePeriodic: () => aux.togglePeriodic(),
+      onEmergencyStop: () => {
+        engine.stop()
+        aux.stopAll()
       }
     })
 
@@ -245,6 +288,7 @@ if (!gotLock) {
   app.on('will-quit', async (e) => {
     e.preventDefault()
     engine?.stop()
+    aux?.stopAll() // release any held keys / stop the periodic timer
     globalInput?.dispose()
     await flushData()
     app.exit(0)

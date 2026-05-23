@@ -8,6 +8,8 @@ import { ProfilesPanel } from './components/ProfilesPanel'
 import { LoopPanel } from './components/LoopPanel'
 import { HotkeyPanel } from './components/HotkeyPanel'
 import { HoldKeyPanel } from './components/HoldKeyPanel'
+import { HoldKeysPanel } from './components/HoldKeysPanel'
+import { PeriodicKeyPanel } from './components/PeriodicKeyPanel'
 import { StatusIndicator } from './components/StatusIndicator'
 import { BottomBar } from './components/BottomBar'
 
@@ -49,6 +51,7 @@ export function App(): JSX.Element {
           <OptionsPanel />
           <ClickPositionsPanel />
           <TextFunctionPanel />
+          <HoldKeysPanel />
         </div>
         <div className="column">
           <ProfilesPanel />
@@ -64,6 +67,7 @@ export function App(): JSX.Element {
             title="Focus Hold Key"
             helper="Hold to rapidly fire ONLY this key/button itself."
           />
+          <PeriodicKeyPanel />
         </div>
       </main>
 

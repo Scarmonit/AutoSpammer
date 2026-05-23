@@ -53,6 +53,17 @@ export interface Options {
   sequenceMode: boolean
 }
 
+/** Keys to physically hold DOWN continuously (not tapped) while active. */
+export interface HoldKeysConfig {
+  keys: string[]
+}
+
+/** A single chosen key pressed once every N seconds while active. */
+export interface PeriodicKeyConfig {
+  key: string
+  intervalSec: number
+}
+
 export interface Profile {
   id: string
   name: string
@@ -60,6 +71,8 @@ export interface Profile {
   options: Options
   textFunction: TextFunctionConfig
   clickPositions: ClickPosition[]
+  holdKeys: HoldKeysConfig
+  periodicKey: PeriodicKeyConfig
   loop: LoopConfig
   holdToSpam: HoldConfig
   focusHold: HoldConfig
@@ -72,6 +85,10 @@ export interface AppSettings {
   emergencyHotkey: string
   /** Global hotkey to record the current mouse position, e.g. "F7". */
   recordPositionHotkey: string
+  /** Global hotkey to toggle the hold-keys-down mode, e.g. "F8". */
+  holdKeysHotkey: string
+  /** Global hotkey to toggle the periodic key press, e.g. "F9". */
+  periodicKeyHotkey: string
   activeProfileId: string
 }
 
@@ -95,8 +112,15 @@ export interface RecordedKey {
   key: string
 }
 
+export type HotkeyField =
+  | 'toggleHotkey'
+  | 'emergencyHotkey'
+  | 'recordPositionHotkey'
+  | 'holdKeysHotkey'
+  | 'periodicKeyHotkey'
+
 export interface HotkeyConflict {
-  field: 'toggleHotkey' | 'emergencyHotkey' | 'recordPositionHotkey'
+  field: HotkeyField
   accelerator: string
   message: string
 }
@@ -104,4 +128,10 @@ export interface HotkeyConflict {
 export interface MousePoint {
   x: number
   y: number
+}
+
+/** Runtime on/off state of the auxiliary modes (not persisted). */
+export interface AuxStatus {
+  holdActive: boolean
+  periodicActive: boolean
 }

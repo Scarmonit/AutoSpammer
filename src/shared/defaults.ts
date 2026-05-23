@@ -30,6 +30,13 @@ export function createDefaultProfile(name = 'Default'): Profile {
       delayMs: 25
     },
     clickPositions: [],
+    holdKeys: {
+      keys: []
+    },
+    periodicKey: {
+      key: 'f',
+      intervalSec: 5
+    },
     loop: {
       mode: 'forever',
       count: 10
@@ -52,6 +59,8 @@ export function createDefaultSettings(activeProfileId: string): AppSettings {
     toggleHotkey: 'F6',
     emergencyHotkey: 'Escape',
     recordPositionHotkey: 'F7',
+    holdKeysHotkey: 'F8',
+    periodicKeyHotkey: 'F9',
     activeProfileId
   }
 }

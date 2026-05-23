@@ -7,7 +7,8 @@ import type {
   StatusPayload,
   RecordedKey,
   HotkeyConflict,
-  MousePoint
+  MousePoint,
+  AuxStatus
 } from '@shared/types'
 
 /** Subscribe helper that returns an unsubscribe function. */
@@ -38,12 +39,16 @@ const api = {
   recordStart: (): Promise<void> => ipcRenderer.invoke(IPC.RecordStart),
   recordStop: (): Promise<void> => ipcRenderer.invoke(IPC.RecordStop),
   getMousePosition: (): Promise<MousePoint> => ipcRenderer.invoke(IPC.GetMousePosition),
+  toggleHold: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.ToggleHold),
+  togglePeriodic: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.TogglePeriodic),
+  getAuxStatus: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.GetAuxStatus),
 
   onStatus: (cb: (s: StatusPayload) => void) => on<StatusPayload>(IPC.StatusChanged, cb),
   onKeyRecorded: (cb: (rk: RecordedKey) => void) => on<RecordedKey>(IPC.KeyRecorded, cb),
   onError: (cb: (message: string) => void) => on<string>(IPC.ErrorEvent, cb),
   onHotkeyConflict: (cb: (c: HotkeyConflict) => void) => on<HotkeyConflict>(IPC.HotkeyConflict, cb),
-  onDataUpdated: (cb: (data: PersistedData) => void) => on<PersistedData>(IPC.DataUpdated, cb)
+  onDataUpdated: (cb: (data: PersistedData) => void) => on<PersistedData>(IPC.DataUpdated, cb),
+  onAuxStatus: (cb: (s: AuxStatus) => void) => on<AuxStatus>(IPC.AuxStatusChanged, cb)
 }
 
 export type AutoSpammerApi = typeof api

@@ -34,10 +34,13 @@ function migrate(data: PersistedData): PersistedData {
   data.version = DATA_VERSION
 
   const defaults = createDefaultData()
+  const defaultProfile = defaults.profiles[0]
   // Backfill fields added in newer versions so older saves stay valid.
   data.settings = { ...defaults.settings, ...data.settings }
   for (const p of data.profiles) {
     if (!Array.isArray(p.clickPositions)) p.clickPositions = []
+    if (!p.holdKeys || !Array.isArray(p.holdKeys.keys)) p.holdKeys = { keys: [] }
+    if (!p.periodicKey) p.periodicKey = { ...defaultProfile.periodicKey }
   }
 
   // Ensure the active profile id points at something real.

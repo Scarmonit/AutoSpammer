@@ -20,6 +20,13 @@
   "clickPositions": [
     { "id": "pos_1", "x": 960, "y": 540, "button": "left", "delayMs": null }
   ],
+  "holdKeys": {
+    "keys": ["w"]
+  },
+  "periodicKey": {
+    "key": "f",
+    "intervalSec": 5
+  },
   "loop": {
     "mode": "forever",
     "count": 10

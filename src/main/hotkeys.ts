@@ -12,6 +12,9 @@ interface Deps {
   onRecorded: (rk: RecordedKey) => void
   onConflict: (c: HotkeyConflict) => void
   onRecordPosition: () => void
+  onToggleHold: () => void
+  onTogglePeriodic: () => void
+  onEmergencyStop: () => void
 }
 
 /**
@@ -78,19 +81,23 @@ export class GlobalInput {
     }, 300)
   }
 
-  /** Re-register the always-on accelerators; emergency is managed by setRunning(). */
+  /** Re-register the always-on accelerators; emergency is managed by setEmergencyArmed(). */
   private registerHotkeys(): void {
-    const { toggleHotkey, emergencyHotkey, recordPositionHotkey } = this.deps.getSettings()
+    const s = this.deps.getSettings()
 
     for (const accel of this.registered) globalShortcut.unregister(accel)
     this.registered.clear()
 
     const taken = new Set<string>()
-    if (emergencyHotkey) taken.add(emergencyHotkey)
+    if (s.emergencyHotkey) taken.add(s.emergencyHotkey)
 
-    this.tryRegister('toggleHotkey', toggleHotkey, taken, () => this.toggle())
-    this.tryRegister('recordPositionHotkey', recordPositionHotkey, taken, () =>
+    this.tryRegister('toggleHotkey', s.toggleHotkey, taken, () => this.toggle())
+    this.tryRegister('recordPositionHotkey', s.recordPositionHotkey, taken, () =>
       this.deps.onRecordPosition()
+    )
+    this.tryRegister('holdKeysHotkey', s.holdKeysHotkey, taken, () => this.deps.onToggleHold())
+    this.tryRegister('periodicKeyHotkey', s.periodicKeyHotkey, taken, () =>
+      this.deps.onTogglePeriodic()
     )
   }
 
@@ -129,21 +136,22 @@ export class GlobalInput {
   private emergencyRegistered = false
 
   /**
-   * Emergency stop is only captured while spamming, so we don't swallow the
-   * Escape key system-wide the rest of the time.
+   * Emergency stop is only captured while something is active (spamming, holding
+   * keys, or periodic press), so we don't swallow the Escape key system-wide the
+   * rest of the time.
    */
-  setRunning(running: boolean): void {
+  setEmergencyArmed(armed: boolean): void {
     const { emergencyHotkey } = this.deps.getSettings()
     if (!emergencyHotkey) return
-    if (running && !this.emergencyRegistered) {
+    if (armed && !this.emergencyRegistered) {
       try {
         this.emergencyRegistered = globalShortcut.register(emergencyHotkey, () =>
-          this.deps.engine.stop()
+          this.deps.onEmergencyStop()
         )
       } catch {
         this.emergencyRegistered = false
       }
-    } else if (!running && this.emergencyRegistered) {
+    } else if (!armed && this.emergencyRegistered) {
       globalShortcut.unregister(emergencyHotkey)
       this.emergencyRegistered = false
     }

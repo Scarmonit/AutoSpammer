@@ -50,6 +50,26 @@ export function nutKeyFor(name: string): Key | null {
   return null
 }
 
+/**
+ * Resolve a key name to a nut-js Key for press-and-HOLD use, where literal
+ * typing isn't an option. Covers specials, letters, and digits; returns null
+ * for keys that can't be held (e.g. punctuation that only types literally).
+ */
+export function nutHoldKey(name: string): Key | null {
+  const lower = name.trim().toLowerCase()
+  const special = NUT_SPECIAL[lower]
+  if (special && special in Key) return Key[special] as unknown as Key
+  if (/^[a-z]$/.test(lower)) {
+    const m = lower.toUpperCase() as keyof typeof Key
+    if (m in Key) return Key[m] as unknown as Key
+  }
+  if (/^[0-9]$/.test(lower)) {
+    const m = `Num${lower}` as keyof typeof Key
+    if (m in Key) return Key[m] as unknown as Key
+  }
+  return null
+}
+
 // ---------------------------------------------------------------------------
 // Listening side (uiohook): keycode <-> logical name.
 // ---------------------------------------------------------------------------

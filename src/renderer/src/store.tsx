@@ -6,7 +6,8 @@ import type {
   StatusPayload,
   Options,
   SpamEntry,
-  ClickPosition
+  ClickPosition,
+  AuxStatus
 } from '@shared/types'
 import { makeId } from '@shared/defaults'
 
@@ -17,6 +18,7 @@ interface Store {
   data: PersistedData | null
   activeProfile: Profile | null
   status: StatusPayload
+  aux: AuxStatus
   recording: boolean
   message: Message
   dismissMessage: () => void
@@ -35,6 +37,8 @@ interface Store {
   stop: () => Promise<void>
   toggleRecording: () => Promise<void>
   addCurrentPosition: () => Promise<void>
+  toggleHold: () => Promise<void>
+  togglePeriodic: () => Promise<void>
 }
 
 const Ctx = createContext<Store | null>(null)
@@ -44,6 +48,7 @@ const IDLE: StatusPayload = { status: 'idle', mode: null, cyclesDone: 0 }
 export function StoreProvider({ children }: { children: React.ReactNode }): JSX.Element {
   const [data, setData] = useState<PersistedData | null>(null)
   const [status, setStatus] = useState<StatusPayload>(IDLE)
+  const [aux, setAux] = useState<AuxStatus>({ holdActive: false, periodicActive: false })
   const [recording, setRecording] = useState(false)
   const [message, setMessage] = useState<Message>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -66,6 +71,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     )
     // The global record-position hotkey mutates data in the main process.
     const offData = window.api.onDataUpdated(setData)
+    // Hold-keys / periodic toggles can change from global hotkeys too.
+    const offAux = window.api.onAuxStatus(setAux)
+    void window.api.getAuxStatus().then(setAux)
     const offRecorded = window.api.onKeyRecorded((rk) => {
       const entry: SpamEntry = {
         id: makeId('key'),
@@ -81,6 +89,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
       offError()
       offConflict()
       offData()
+      offAux()
       offRecorded()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,6 +168,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     updateProfile((p) => ({ ...p, clickPositions: [...p.clickPositions, pos] }))
   }, [updateProfile])
 
+  const toggleHold = useCallback(async () => {
+    setAux(await window.api.toggleHold())
+  }, [])
+  const togglePeriodic = useCallback(async () => {
+    setAux(await window.api.togglePeriodic())
+  }, [])
+
   const toggleRecording = useCallback(async () => {
     if (recording) {
       await window.api.recordStop()
@@ -176,6 +192,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     data,
     activeProfile,
     status,
+    aux,
     recording,
     message,
     dismissMessage: () => setMessage(null),
@@ -190,7 +207,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     start,
     stop,
     toggleRecording,
-    addCurrentPosition
+    addCurrentPosition,
+    toggleHold,
+    togglePeriodic
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

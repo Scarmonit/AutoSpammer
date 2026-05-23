@@ -1,5 +1,5 @@
 import { keyboard, mouse, Button, Point } from '@nut-tree-fork/nut-js'
-import { nutKeyFor, keycodeForName } from './keymap'
+import { nutKeyFor, nutHoldKey, keycodeForName } from './keymap'
 import type { MousePoint } from '@shared/types'
 
 // Fire as fast as the OS allows; we manage our own pacing in the engine.
@@ -111,4 +111,21 @@ export async function clickAt(x: number, y: number, button: 'left' | 'right'): P
 export async function getMousePosition(): Promise<MousePoint> {
   const p = await mouse.getPosition()
   return { x: Math.round(p.x), y: Math.round(p.y) }
+}
+
+/** Press a key DOWN and keep it held. Returns false if the key can't be held. */
+export async function holdKeyDown(name: string): Promise<boolean> {
+  const key = nutHoldKey(name)
+  if (key === null) return false
+  await keyboard.pressKey(key)
+  return true
+}
+
+/** Release a previously held key. */
+export async function releaseKey(name: string): Promise<void> {
+  const key = nutHoldKey(name)
+  if (key === null) return
+  // The release produces a keyup; account for it so hold listeners ignore it.
+  recordSyntheticUp(keyToken(name))
+  await keyboard.releaseKey(key)
 }

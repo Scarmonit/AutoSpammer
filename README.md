@@ -11,7 +11,7 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 You do **not** need any programming tools. Just:
 
 1. Go to the **[Latest Release ➜](https://github.com/Scarmonit/AutoSpammer/releases/latest)** page.
-2. Under **Assets**, click **`AutoSpammer-Setup-1.1.0.exe`** to download it.
+2. Under **Assets**, click **`AutoSpammer-Setup-1.2.0.exe`** to download it.
 3. Double-click the downloaded file to install.
 4. Windows may show a blue **"Windows protected your PC"** box (this happens for
    apps that aren't code-signed). Click **More info → Run anyway**. *(The app is
@@ -20,7 +20,7 @@ You do **not** need any programming tools. Just:
    and in the Start menu. 🎉
 
 > 💡 **One-click download:**
-> [AutoSpammer-Setup-1.1.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.1.0.exe)
+> [AutoSpammer-Setup-1.2.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.2.0.exe)
 
 ---
 
@@ -52,6 +52,15 @@ Want it to click exact places on screen (not just where your cursor is)?
 
 You can change the record hotkey from **F7** to anything else in that panel.
 
+### ⌨️ Hold Keys Down
+Hold any keys *down* continuously (not tapped) — e.g. hold **W** to keep walking
+in a game. Add the keys in the **Hold Keys Down** panel, then toggle it with the
+button or **F8**. Press again (or **Esc**) to release.
+
+### ⏱️ Periodic Key
+Press one chosen key on a timer — e.g. press **F** every 5 seconds. Set the key
+and interval in the **Periodic Key** panel, then toggle with the button or **F9**.
+
 ### Handy extras
 - **Spacebar / Left Click / Right Click** checkboxes — add those without typing.
 - **Sequence Mode** — fire your keys one at a time per cycle instead of all at once.
@@ -61,6 +70,15 @@ You can change the record hotkey from **F7** to anything else in that panel.
   machine-gun `F`).
 - **Profiles** — save different setups and switch between them. They're remembered
   the next time you open the app.
+
+### ⌨️ Default hotkeys (all rebindable)
+| Key | Action |
+|-----|--------|
+| **F6** | Start / stop spamming |
+| **F7** | Record current mouse position |
+| **F8** | Toggle Hold Keys Down |
+| **F9** | Toggle Periodic Key |
+| **Esc** | Emergency stop (stops everything, releases held keys) |
 
 ---
 

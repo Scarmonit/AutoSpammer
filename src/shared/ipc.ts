@@ -16,13 +16,17 @@ export const IPC = {
   RecordStart: 'record:start',
   RecordStop: 'record:stop',
   GetMousePosition: 'mouse:get-position',
+  ToggleHold: 'aux:toggle-hold',
+  TogglePeriodic: 'aux:toggle-periodic',
+  GetAuxStatus: 'aux:status',
 
   // main -> renderer (events)
   StatusChanged: 'event:status',
   KeyRecorded: 'event:key-recorded',
   ErrorEvent: 'event:error',
   HotkeyConflict: 'event:hotkey-conflict',
-  DataUpdated: 'event:data-updated'
+  DataUpdated: 'event:data-updated',
+  AuxStatusChanged: 'event:aux-status'
 } as const
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]
