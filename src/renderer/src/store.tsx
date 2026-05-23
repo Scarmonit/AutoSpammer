@@ -1,0 +1,191 @@
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
+import type {
+  PersistedData,
+  Profile,
+  AppSettings,
+  StatusPayload,
+  Options,
+  SpamEntry
+} from '@shared/types'
+import { makeId } from '@shared/defaults'
+
+type Message = { kind: 'error' | 'info'; text: string } | null
+
+interface Store {
+  loaded: boolean
+  data: PersistedData | null
+  activeProfile: Profile | null
+  status: StatusPayload
+  recording: boolean
+  message: Message
+  dismissMessage: () => void
+
+  updateProfile: (updater: (p: Profile) => Profile) => void
+  patchOptions: (patch: Partial<Options>) => void
+
+  createProfile: (name: string) => Promise<void>
+  renameProfile: (id: string, name: string) => Promise<void>
+  deleteProfile: (id: string) => Promise<void>
+  setActiveProfile: (id: string) => Promise<void>
+  saveNow: () => Promise<void>
+  updateSettings: (patch: Partial<AppSettings>) => Promise<void>
+
+  start: () => Promise<void>
+  stop: () => Promise<void>
+  toggleRecording: () => Promise<void>
+}
+
+const Ctx = createContext<Store | null>(null)
+
+const IDLE: StatusPayload = { status: 'idle', mode: null, cyclesDone: 0 }
+
+export function StoreProvider({ children }: { children: React.ReactNode }): JSX.Element {
+  const [data, setData] = useState<PersistedData | null>(null)
+  const [status, setStatus] = useState<StatusPayload>(IDLE)
+  const [recording, setRecording] = useState(false)
+  const [message, setMessage] = useState<Message>(null)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const dataRef = useRef<PersistedData | null>(null)
+  dataRef.current = data
+
+  const activeProfile =
+    data?.profiles.find((p) => p.id === data.settings.activeProfileId) ??
+    data?.profiles[0] ??
+    null
+
+  // Initial load + event subscriptions.
+  useEffect(() => {
+    void window.api.getData().then(setData)
+
+    const offStatus = window.api.onStatus(setStatus)
+    const offError = window.api.onError((text) => setMessage({ kind: 'error', text }))
+    const offConflict = window.api.onHotkeyConflict((c) =>
+      setMessage({ kind: 'error', text: c.message })
+    )
+    const offRecorded = window.api.onKeyRecorded((rk) => {
+      const entry: SpamEntry = {
+        id: makeId('key'),
+        kind: rk.kind,
+        key: rk.kind === 'key' ? rk.key : '',
+        delayMs: null
+      }
+      updateProfileRef.current((p) => ({ ...p, entries: [...p.entries, entry] }))
+    })
+
+    return () => {
+      offStatus()
+      offError()
+      offConflict()
+      offRecorded()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Persist the active profile (debounced) without blocking the UI.
+  const scheduleSave = useCallback((profile: Profile) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(() => {
+      void window.api.saveProfile(profile)
+    }, 350)
+  }, [])
+
+  const updateProfile = useCallback(
+    (updater: (p: Profile) => Profile) => {
+      setData((prev) => {
+        if (!prev) return prev
+        const current = prev.profiles.find((p) => p.id === prev.settings.activeProfileId)
+        if (!current) return prev
+        const next = updater(current)
+        scheduleSave(next)
+        return {
+          ...prev,
+          profiles: prev.profiles.map((p) => (p.id === next.id ? next : p))
+        }
+      })
+    },
+    [scheduleSave]
+  )
+
+  // Keep a stable ref so the recorded-key listener always calls the latest fn.
+  const updateProfileRef = useRef(updateProfile)
+  updateProfileRef.current = updateProfile
+
+  const patchOptions = useCallback(
+    (patch: Partial<Options>) => {
+      updateProfile((p) => ({ ...p, options: { ...p.options, ...patch } }))
+    },
+    [updateProfile]
+  )
+
+  const createProfile = useCallback(async (name: string) => setData(await window.api.createProfile(name)), [])
+  const renameProfile = useCallback(
+    async (id: string, name: string) => setData(await window.api.renameProfile(id, name)),
+    []
+  )
+  const deleteProfile = useCallback(async (id: string) => setData(await window.api.deleteProfile(id)), [])
+  const setActiveProfile = useCallback(
+    async (id: string) => setData(await window.api.setActiveProfile(id)),
+    []
+  )
+  const updateSettings = useCallback(
+    async (patch: Partial<AppSettings>) => setData(await window.api.updateSettings(patch)),
+    []
+  )
+
+  const saveNow = useCallback(async () => {
+    const current = dataRef.current
+    const prof = current?.profiles.find((p) => p.id === current.settings.activeProfileId)
+    if (!prof) return
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    await window.api.saveProfile(prof)
+    setMessage({ kind: 'info', text: 'Profile saved.' })
+  }, [])
+
+  const start = useCallback(async () => {
+    setStatus(await window.api.start())
+  }, [])
+  const stop = useCallback(async () => {
+    setStatus(await window.api.stop())
+  }, [])
+
+  const toggleRecording = useCallback(async () => {
+    if (recording) {
+      await window.api.recordStop()
+      setRecording(false)
+      setMessage(null)
+    } else {
+      await window.api.recordStart()
+      setRecording(true)
+      setMessage({ kind: 'info', text: 'Recording… press keys/buttons to add them, then click Stop.' })
+    }
+  }, [recording])
+
+  const value: Store = {
+    loaded: data !== null,
+    data,
+    activeProfile,
+    status,
+    recording,
+    message,
+    dismissMessage: () => setMessage(null),
+    updateProfile,
+    patchOptions,
+    createProfile,
+    renameProfile,
+    deleteProfile,
+    setActiveProfile,
+    saveNow,
+    updateSettings,
+    start,
+    stop,
+    toggleRecording
+  }
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
+}
+
+export function useStore(): Store {
+  const ctx = useContext(Ctx)
+  if (!ctx) throw new Error('useStore must be used within StoreProvider')
+  return ctx
+}

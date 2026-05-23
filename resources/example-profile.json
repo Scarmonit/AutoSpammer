@@ -1,0 +1,34 @@
+{
+  "id": "profile_example",
+  "name": "Default",
+  "entries": [
+    { "id": "key_1", "kind": "key", "key": "space", "delayMs": null },
+    { "id": "key_2", "kind": "key", "key": "1", "delayMs": 50 }
+  ],
+  "options": {
+    "spacebar": false,
+    "leftClick": false,
+    "rightClick": false,
+    "defaultDelayMs": 100,
+    "sequenceMode": false
+  },
+  "textFunction": {
+    "enabled": false,
+    "text": "gg",
+    "delayMs": 250
+  },
+  "loop": {
+    "mode": "forever",
+    "count": 10
+  },
+  "holdToSpam": {
+    "enabled": false,
+    "key": "",
+    "delayMs": 50
+  },
+  "focusHold": {
+    "enabled": false,
+    "key": "",
+    "delayMs": 50
+  }
+}

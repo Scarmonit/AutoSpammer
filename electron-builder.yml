@@ -1,0 +1,22 @@
+appId: com.scarmonit.autospammer
+productName: Auto Spammer
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+# Native N-API addons must stay unpacked so their .node binaries load at runtime.
+asarUnpack:
+  - "**/node_modules/uiohook-napi/**"
+  - "**/node_modules/@nut-tree-fork/**"
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-setup.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
