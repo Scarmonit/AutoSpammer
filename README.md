@@ -11,7 +11,7 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 You do **not** need any programming tools. Just:
 
 1. Go to the **[Latest Release ➜](https://github.com/Scarmonit/AutoSpammer/releases/latest)** page.
-2. Under **Assets**, click **`AutoSpammer-Setup-1.2.2.exe`** to download it.
+2. Under **Assets**, click **`AutoSpammer-Setup-1.3.0.exe`** to download it.
 3. Double-click the downloaded file to install.
 4. Windows may show a blue **"Windows protected your PC"** box (this happens for
    apps that aren't code-signed). Click **More info → Run anyway**. *(The app is
@@ -20,7 +20,7 @@ You do **not** need any programming tools. Just:
    and in the Start menu. 🎉
 
 > 💡 **One-click download:**
-> [AutoSpammer-Setup-1.2.2.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.2.2.exe)
+> [AutoSpammer-Setup-1.3.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.3.0.exe)
 
 ---
 
@@ -60,6 +60,13 @@ button or **F8**. Press again (or **Esc**) to release.
 ### ⏱️ Periodic Key
 Press one chosen key on a timer — e.g. press **F** every 5 seconds. Set the key
 and interval in the **Periodic Key** panel, then toggle with the button or **F9**.
+
+### 🔻 System tray
+Auto Spammer lives in the **system tray** so it stays out of your way while you
+game. Closing the window **minimizes it to the tray** (it keeps running, and the
+global hotkeys still work). Right-click the tray icon to **Show**, **Start/Stop
+Spam**, **Panic Stop** everything, or **Quit**. Left-click the icon to bring the
+window back.
 
 ### Handy extras
 - **Spacebar / Left Click / Right Click** checkboxes — add those without typing.

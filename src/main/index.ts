@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, Notification } from 'electron'
 import { join } from 'path'
 import type {
   PersistedData,
@@ -16,12 +16,22 @@ import { SpamEngine } from './engine'
 import { GlobalInput } from './hotkeys'
 import { AuxController } from './auxmodes'
 import { getMousePosition } from './input'
+import { createTray, type TrayHandle } from './tray'
 
 let mainWindow: BrowserWindow | null = null
 let data: PersistedData
 let engine: SpamEngine
 let globalInput: GlobalInput
 let aux: AuxController
+let trayHandle: TrayHandle | null = null
+let isQuitting = false
+let trayHintShown = false
+
+/** Start/stop manual spam (used by the tray menu). */
+function toggleSpam(): void {
+  if (engine.isRunning()) engine.stop()
+  else engine.start(activeProfile(data), 'manual')
+}
 
 /** Arm the emergency-stop hotkey whenever anything is active. */
 function updateEmergencyArmed(): void {
@@ -53,6 +63,21 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => mainWindow?.show())
+
+  // Close-to-tray: hide the window instead of quitting, so global hotkeys keep
+  // working in the background. Real quit goes through the tray / before-quit.
+  mainWindow.on('close', (e) => {
+    if (isQuitting) return
+    e.preventDefault()
+    mainWindow?.hide()
+    if (!trayHintShown && Notification.isSupported()) {
+      trayHintShown = true
+      new Notification({
+        title: 'Auto Spammer is still running',
+        body: 'It lives in the system tray. Right-click the tray icon to quit.'
+      }).show()
+    }
+  })
 
   // Security hardening (Electron security checklist / Electronegativity):
   // open external links only for safe schemes, and never in-app.
@@ -250,6 +275,7 @@ if (!gotLock) {
       onStatus: (s: StatusPayload) => {
         send(IPC.StatusChanged, s)
         updateEmergencyArmed()
+        trayHandle?.update()
       },
       onError: (message: string) => send(IPC.ErrorEvent, message)
     })
@@ -259,6 +285,7 @@ if (!gotLock) {
       onStatus: (s: AuxStatus) => {
         send(IPC.AuxStatusChanged, s)
         updateEmergencyArmed()
+        trayHandle?.update()
       },
       onError: (message: string) => send(IPC.ErrorEvent, message)
     })
@@ -284,9 +311,29 @@ if (!gotLock) {
     createWindow()
     globalInput.start()
 
+    trayHandle = createTray({
+      getWindow: () => mainWindow,
+      isSpamming: () => engine.isRunning() || aux.getStatus().holdActive || aux.getStatus().periodicActive,
+      onToggleSpam: toggleSpam,
+      onPanic: () => {
+        engine.stop()
+        aux.stopAll()
+      },
+      onQuit: () => {
+        isQuitting = true
+        app.quit()
+      }
+    })
+
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
+  })
+
+  // Any quit path (tray, OS, app.quit) marks us as quitting so the window's
+  // close-to-tray handler lets it actually close.
+  app.on('before-quit', () => {
+    isQuitting = true
   })
 
   app.on('window-all-closed', () => {
@@ -311,6 +358,11 @@ if (!gotLock) {
     }
     try {
       globalInput?.dispose()
+    } catch {
+      /* ignore */
+    }
+    try {
+      trayHandle?.tray.destroy()
     } catch {
       /* ignore */
     }

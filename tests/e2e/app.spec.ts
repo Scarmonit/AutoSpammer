@@ -23,7 +23,10 @@ test.beforeAll(async () => {
 })
 
 test.afterAll(async () => {
-  await app?.close()
+  // The app uses close-to-tray, so closing the window only hides it. Force a
+  // real exit for the test teardown.
+  await app?.evaluate(({ app }) => app.exit(0)).catch(() => {})
+  await app?.close().catch(() => {})
 })
 
 test('window title is "Auto Spammer"', async () => {
