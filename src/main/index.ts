@@ -46,16 +46,24 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false
+      // The preload only uses contextBridge + ipcRenderer, which work under the
+      // OS sandbox — so keep Electron's secure default enabled.
+      sandbox: true
     }
   })
 
   mainWindow.on('ready-to-show', () => mainWindow?.show())
 
+  // Security hardening (Electron security checklist / Electronegativity):
+  // open external links only for safe schemes, and never in-app.
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    void shell.openExternal(url)
+    if (/^https?:\/\//i.test(url)) void shell.openExternal(url)
     return { action: 'deny' }
   })
+  // This app only renders its own bundled content — block any navigation away.
+  mainWindow.webContents.on('will-navigate', (e) => e.preventDefault())
+  // Deny every permission request (camera, mic, geolocation, …); we use none.
+  mainWindow.webContents.session.setPermissionRequestHandler((_wc, _perm, cb) => cb(false))
 
   if (process.env['ELECTRON_RENDERER_URL']) {
     void mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])

@@ -3,6 +3,8 @@ productName: Auto Spammer
 # Native modules ship prebuilt N-API binaries that load directly in Electron,
 # so skip the from-source rebuild (which would require Visual Studio).
 npmRebuild: false
+# Harden the packaged binary with Electron Fuses (see build/afterPack.cjs).
+afterPack: build/afterPack.cjs
 directories:
   output: release
   buildResources: build

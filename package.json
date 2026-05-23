@@ -1,6 +1,6 @@
 {
   "name": "auto-spammer",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Auto Spammer — a Windows desktop macro / auto key spammer utility",
   "author": "Scarmonit",
   "license": "MIT",
@@ -21,6 +21,7 @@
     "uiohook-napi": "^1.5.4"
   },
   "devDependencies": {
+    "@electron/fuses": "^1.8.0",
     "@playwright/test": "^1.49.1",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",

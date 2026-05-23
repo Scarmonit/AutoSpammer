@@ -11,7 +11,7 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 You do **not** need any programming tools. Just:
 
 1. Go to the **[Latest Release ➜](https://github.com/Scarmonit/AutoSpammer/releases/latest)** page.
-2. Under **Assets**, click **`AutoSpammer-Setup-1.2.1.exe`** to download it.
+2. Under **Assets**, click **`AutoSpammer-Setup-1.2.2.exe`** to download it.
 3. Double-click the downloaded file to install.
 4. Windows may show a blue **"Windows protected your PC"** box (this happens for
    apps that aren't code-signed). Click **More info → Run anyway**. *(The app is
@@ -20,7 +20,7 @@ You do **not** need any programming tools. Just:
    and in the Start menu. 🎉
 
 > 💡 **One-click download:**
-> [AutoSpammer-Setup-1.2.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.2.1.exe)
+> [AutoSpammer-Setup-1.2.2.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.2.2.exe)
 
 ---
 
@@ -168,8 +168,25 @@ src/
 - **Input simulation:** [`@nut-tree-fork/nut-js`](https://github.com/nut-tree/nut.js)
 - **Global input listening:** [`uiohook-napi`](https://github.com/SnosMe/uiohook-napi)
 - **Global hotkeys:** Electron `globalShortcut`
-- Security: `contextIsolation` on, `nodeIntegration` off, typed preload bridge,
-  strict renderer CSP.
+
+### Security hardening
+Follows the Electron security checklist (and was audited with
+[Electronegativity](https://github.com/doyensec/electronegativity)):
+
+- `contextIsolation: true`, `nodeIntegration: false`, **`sandbox: true`**, and a
+  typed `contextBridge` preload — the renderer gets no Node/Electron access
+  beyond the small `window.api` surface.
+- Strict renderer CSP (`script-src 'self'`).
+- `setWindowOpenHandler` denies in-app windows and only `shell.openExternal`s
+  http/https URLs; `will-navigate` is blocked; all permission requests are denied.
+- **[Electron Fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)**
+  flipped at package time (`build/afterPack.cjs`): `RunAsNode` off,
+  `EnableNodeOptionsEnvironmentVariable` off, `EnableNodeCliInspectArguments`
+  off, `EnableCookieEncryption` on, `OnlyLoadAppFromAsar` on — so the shipped
+  binary can't be repurposed as a generic Node runtime or have debug flags
+  injected.
+- Native modules are unpacked from the asar (`asarUnpack`) so their `.node`
+  binaries load correctly.
 
 ### How hold detection stays reliable
 A physically held key produces auto-repeat key-*downs* but no key-*up* until you
