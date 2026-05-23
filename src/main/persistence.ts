@@ -1,5 +1,5 @@
 import { app } from 'electron'
-import { promises as fs } from 'fs'
+import { promises as fs, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { PersistedData, Profile, AppSettings } from '@shared/types'
 import { createDefaultData, DATA_VERSION } from '@shared/defaults'
@@ -71,6 +71,21 @@ export async function flushData(): Promise<void> {
     writeTimer = null
   }
   if (pending) await writeNow(pending)
+}
+
+/** Synchronous flush for use during app shutdown (no awaiting on quit). */
+export function flushDataSync(): void {
+  if (writeTimer) {
+    clearTimeout(writeTimer)
+    writeTimer = null
+  }
+  if (pending) {
+    try {
+      writeFileSync(dataPath(), JSON.stringify(pending, null, 2), 'utf-8')
+    } catch {
+      /* best effort on shutdown */
+    }
+  }
 }
 
 export function findProfile(data: PersistedData, id: string): Profile | undefined {

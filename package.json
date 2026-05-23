@@ -1,6 +1,6 @@
 {
   "name": "auto-spammer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Auto Spammer — a Windows desktop macro / auto key spammer utility",
   "author": "Scarmonit",
   "license": "MIT",
@@ -9,13 +9,19 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
-    "build:win": "electron-vite build && electron-builder --win"
+    "build:win": "electron-vite build && electron-builder --win",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "npm run build && playwright test",
+    "test:all": "npm run typecheck && npm run test && npm run test:e2e"
   },
   "dependencies": {
     "@nut-tree-fork/nut-js": "^4.2.6",
     "uiohook-napi": "^1.5.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
@@ -26,6 +32,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.7.3",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
   }
 }

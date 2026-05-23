@@ -11,7 +11,7 @@ import type {
 import type { ClickPosition, AuxStatus } from '@shared/types'
 import { IPC } from '@shared/ipc'
 import { createDefaultProfile, makeId } from '@shared/defaults'
-import { loadData, saveData, flushData, activeProfile } from './persistence'
+import { loadData, saveData, flushDataSync, activeProfile } from './persistence'
 import { SpamEngine } from './engine'
 import { GlobalInput } from './hotkeys'
 import { AuxController } from './auxmodes'
@@ -285,12 +285,27 @@ if (!gotLock) {
     if (process.platform !== 'darwin') app.quit()
   })
 
-  app.on('will-quit', async (e) => {
-    e.preventDefault()
-    engine?.stop()
-    aux?.stopAll() // release any held keys / stop the periodic timer
-    globalInput?.dispose()
-    await flushData()
-    app.exit(0)
+  let cleanedUp = false
+  app.on('will-quit', () => {
+    if (cleanedUp) return
+    cleanedUp = true
+    // Synchronous, best-effort cleanup so the app exits promptly (no
+    // preventDefault, which can stall graceful shutdown / automated close).
+    try {
+      engine?.stop()
+    } catch {
+      /* ignore */
+    }
+    try {
+      aux?.stopAll() // release any held keys / stop the periodic timer
+    } catch {
+      /* ignore */
+    }
+    try {
+      globalInput?.dispose()
+    } catch {
+      /* ignore */
+    }
+    flushDataSync()
   })
 }

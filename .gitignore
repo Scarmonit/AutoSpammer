@@ -7,3 +7,8 @@ release/
 .env
 .env.*
 .vite/
+
+# test output
+test-results/
+playwright-report/
+coverage/

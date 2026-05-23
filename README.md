@@ -11,7 +11,7 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 You do **not** need any programming tools. Just:
 
 1. Go to the **[Latest Release ➜](https://github.com/Scarmonit/AutoSpammer/releases/latest)** page.
-2. Under **Assets**, click **`AutoSpammer-Setup-1.2.0.exe`** to download it.
+2. Under **Assets**, click **`AutoSpammer-Setup-1.2.1.exe`** to download it.
 3. Double-click the downloaded file to install.
 4. Windows may show a blue **"Windows protected your PC"** box (this happens for
    apps that aren't code-signed). Click **More info → Run anyway**. *(The app is
@@ -20,7 +20,7 @@ You do **not** need any programming tools. Just:
    and in the Start menu. 🎉
 
 > 💡 **One-click download:**
-> [AutoSpammer-Setup-1.2.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.2.0.exe)
+> [AutoSpammer-Setup-1.2.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.2.1.exe)
 
 ---
 
@@ -119,6 +119,35 @@ npm install          # download dependencies
 npm run dev          # run the app in development (hot reload)
 npm run build:win    # build the installer -> release/AutoSpammer-Setup-<version>.exe
 ```
+
+### Testing
+
+Automated tests follow Electron's
+[testing guidance](https://www.electronjs.org/docs/latest/tutorial/automated-testing):
+
+```bash
+npm run typecheck    # TypeScript, no emit
+npm test             # Vitest unit tests (engine logic, keymap, defaults)
+npm run test:e2e     # builds, then Playwright drives the real Electron app
+npm run test:all     # typecheck + unit + e2e
+```
+
+- **Unit tests** (`tests/unit/`, Vitest) cover the pure logic — the spam engine
+  (loop modes, sequence mode, options/positions/text, focus-hold) with the native
+  input layer mocked, plus the key-name mappings and default data.
+- **End-to-end tests** (`tests/e2e/`, Playwright) launch the built app via
+  `_electron.launch` and assert the UI, IPC, and persistence wiring.
+- CI runs all of the above on every push (`.github/workflows/test.yml`), using
+  `xvfb` so the Electron window runs headless on Linux.
+
+### Debugging
+
+`.vscode/launch.json` includes ready-to-use configs (see Electron's
+[debugging docs](https://www.electronjs.org/docs/latest/tutorial/application-debugging)):
+
+- **Debug Main Process** — builds, then launches Electron under the Node debugger.
+- **Debug Unit Tests (Vitest)** — run/break in the unit tests.
+- For the **renderer**, open DevTools in the running app (`Ctrl+Shift+I`).
 
 ### Tech & layout
 Electron + React + TypeScript (via `electron-vite`).

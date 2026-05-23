@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+    branches: [Scarmonit]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Electron + the global-input native module (uiohook) need X11/GTK libs,
+      # and a virtual display (xvfb) to run headless in CI.
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            xvfb libgtk-3-0 libnss3 libasound2t64 libgbm1 \
+            libxtst6 libx11-6 libxext6 libxss1
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Unit tests (Vitest)
+        run: xvfb-run -a npm test
+
+      - name: Build app
+        run: npm run build
+
+      - name: End-to-end tests (Playwright + Electron)
+        run: xvfb-run -a npx playwright test
