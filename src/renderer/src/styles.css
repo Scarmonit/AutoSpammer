@@ -242,6 +242,14 @@ body {
 }
 
 /* ---------- Inputs ---------- */
+input,
+textarea,
+select {
+  /* Re-enable selection/typing under the global `user-select: none`. */
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 .input {
   background: #1c1f25;
   border: 1px solid var(--border);

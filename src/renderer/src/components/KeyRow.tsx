@@ -23,8 +23,21 @@ export function KeyRow({
   const isMouse = entry.kind !== 'key'
 
   return (
-    <div className="keyrow" draggable onDragStart={onDragStart} onDragOver={onDragOver} onDrop={onDrop}>
-      <span className="keyrow__grip" title="Drag to reorder">⋮⋮</span>
+    <div className="keyrow" onDragOver={onDragOver} onDrop={onDrop}>
+      {/* Only the grip is draggable — making the whole row draggable blocks
+          focus/typing in the inputs (a Chromium quirk). */}
+      <span
+        className="keyrow__grip"
+        title="Drag to reorder"
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.effectAllowed = 'move'
+          e.dataTransfer.setData('text/plain', '')
+          onDragStart()
+        }}
+      >
+        ⋮⋮
+      </span>
 
       {isMouse ? (
         <span className="keyrow__mouse">{prettyName(entry.key || entry.kind)}</span>
