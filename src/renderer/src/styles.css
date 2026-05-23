@@ -226,7 +226,9 @@ body {
 }
 
 .keyrow__key {
-  flex: 1;
+  /* explicit basis 0 so the global `.input { width: 100% }` can't override the
+     flex sizing; this fills the remaining row width. */
+  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -238,7 +240,8 @@ body {
 }
 
 .keyrow__delay {
-  width: 64px;
+  /* fixed width via flex-basis (beats the global `.input { width: 100% }`). */
+  flex: 0 0 80px;
   text-align: right;
 }
 
@@ -294,7 +297,7 @@ body {
 }
 
 .posrow__delay {
-  width: 64px;
+  flex: 0 0 80px;
   text-align: right;
 }
 

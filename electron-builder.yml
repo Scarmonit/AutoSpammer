@@ -18,10 +18,14 @@ asarUnpack:
 win:
   icon: build/icon.ico
   target:
+    # Installer (Start-menu + desktop shortcuts) ...
     - target: nsis
       arch:
         - x64
-  artifactName: AutoSpammer-Setup-${version}.${ext}
+    # ... and a single portable .exe that just runs on double-click, no install.
+    - target: portable
+      arch:
+        - x64
 nsis:
   oneClick: false
   perMachine: false
@@ -31,3 +35,6 @@ nsis:
   shortcutName: Auto Spammer
   installerIcon: build/icon.ico
   uninstallerIcon: build/icon.ico
+  artifactName: AutoSpammer-Setup-${version}.${ext}
+portable:
+  artifactName: AutoSpammer-Portable-${version}.${ext}

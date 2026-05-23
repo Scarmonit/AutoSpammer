@@ -4,23 +4,36 @@ A simple, dark-themed **auto key-presser / clicker** for Windows. Pick the keys
 you want repeated, choose how fast, and press **Start** — Auto Spammer presses
 them for you. Great for games and apps that involve a lot of repeated tapping.
 
+[![Download latest](https://img.shields.io/github/v/release/Scarmonit/AutoSpammer?label=Download&sort=semver&style=for-the-badge&color=3b82f6)](https://github.com/Scarmonit/AutoSpammer/releases/latest)
+&nbsp;
+[![Total downloads](https://img.shields.io/github/downloads/Scarmonit/AutoSpammer/total?style=for-the-badge&color=2f6fe0)](https://github.com/Scarmonit/AutoSpammer/releases)
+&nbsp;
+![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0a7bbb?style=for-the-badge)
+&nbsp;
+[![MIT](https://img.shields.io/badge/license-MIT-3ddc84?style=for-the-badge)](LICENSE)
+
+![Auto Spammer](docs/screenshot.png)
+
 ---
 
-## ⬇️ Download & Install (the easy way)
+## ⬇️ Download (no setup or tools needed)
 
-You do **not** need any programming tools. Just:
+Pick **one** — both are a single file you just run:
 
-1. Go to the **[Latest Release ➜](https://github.com/Scarmonit/AutoSpammer/releases/latest)** page.
-2. Under **Assets**, click **`AutoSpammer-Setup-1.3.0.exe`** to download it.
-3. Double-click the downloaded file to install.
-4. Windows may show a blue **"Windows protected your PC"** box (this happens for
-   apps that aren't code-signed). Click **More info → Run anyway**. *(The app is
-   open source — you can read every line of code in this repo.)*
-5. Finish the installer. You'll get an **Auto Spammer** shortcut on your Desktop
-   and in the Start menu. 🎉
+### ▶️ Option 1 — Portable (easiest: just run it)
+**[⬇️ Download AutoSpammer-Portable-1.3.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.3.1.exe)**
+→ double-click it and the app opens **immediately**. Nothing to install.
 
-> 💡 **One-click download:**
-> [AutoSpammer-Setup-1.3.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.3.0.exe)
+### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
+**[⬇️ Download AutoSpammer-Setup-1.3.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.3.1.exe)**
+→ run it, click through, and launch from your Desktop / Start menu.
+
+> ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
+> box because the app isn't code-signed. Click **More info → Run anyway** — it's
+> open source and every line of code is in this repo.
+
+*(Or open the **[Latest Release page ➜](https://github.com/Scarmonit/AutoSpammer/releases/latest)**
+and grab either file under **Assets**.)*
 
 ---
 
