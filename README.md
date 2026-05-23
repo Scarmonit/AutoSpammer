@@ -123,17 +123,17 @@ npm run build:win   # produces an NSIS installer in release/
 - The emergency key is only captured **while spamming**, so it doesn't swallow
   (e.g.) `Esc` system-wide the rest of the time.
 
-## Known limitation
+## Hold detection
 
-Hold-to-Spam / Focus-Hold detect physical key state via a global hook, which
-also sees the app's own simulated input. The app suppresses its synthetic events
-**per key**, so Hold-to-Spam (where the held key is never one being spammed)
-starts and stops reliably.
+Hold-to-Spam and Focus Hold detect physical key state via a global hook, which
+also sees the app's own simulated input. Rather than time-based suppression, the
+app **accounts for every synthetic key-up it emits**. Because a physically held
+key produces auto-repeat key*downs* but no key-up until release, an unaccounted
+key-up is unambiguously the user's real release. This makes both modes — including
+Focus Hold, which fires the very key it watches — start and stop reliably.
 
-**Focus Hold** is the exception: it fires the *same* key it watches, so a
-release can occasionally coincide with a simulated press of that key and the
-spam keeps going. If that happens, tap the key again or hit the emergency stop
-(`Esc`). The toggle hotkey and Start/Stop button always work.
+The emergency stop (`Esc`), toggle hotkey, and Start/Stop button are always
+available as a fallback regardless.
 
 ## Data location
 

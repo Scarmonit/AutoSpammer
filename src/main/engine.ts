@@ -1,5 +1,5 @@
 import type { Profile, SpamMode, StatusPayload, ActionKind, LoopConfig } from '@shared/types'
-import { pressKey, typeText, clickMouse } from './input'
+import { pressKey, typeText, clickMouse, clearSynthetic } from './input'
 
 interface Fireable {
   kind: ActionKind | 'text'
@@ -117,6 +117,7 @@ export class SpamEngine {
       this.running = false
       this.mode = null
       this.wake = null
+      clearSynthetic() // drop any outstanding synthetic-up accounting
       this.emit(true)
     }
   }

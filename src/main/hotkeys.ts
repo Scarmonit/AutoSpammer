@@ -2,7 +2,7 @@ import { globalShortcut } from 'electron'
 import { uIOhook, type UiohookKeyboardEvent, type UiohookMouseEvent } from 'uiohook-napi'
 import type { Profile, AppSettings, RecordedKey, HotkeyConflict, SpamMode } from '@shared/types'
 import type { SpamEngine } from './engine'
-import { isSyntheticToken } from './input'
+import { consumeSyntheticUp } from './input'
 import { nameForKeycode, keycodeForName } from './keymap'
 
 interface Deps {
@@ -156,23 +156,23 @@ export class GlobalInput {
   // -------------------------------------------------------------------------
   private onKeyDown(e: UiohookKeyboardEvent): void {
     const token = `k:${e.keycode}`
-    if (isSyntheticToken(token)) return
     if (this.recording) {
       this.deps.onRecorded({ kind: 'key', key: nameForKeycode(e.keycode) })
       return
     }
+    // Down events need no synthetic filtering: while a run is active the
+    // start guard ignores them, and while idle no synthetic input exists.
     this.handleHoldDown(token)
   }
 
   private onKeyUp(e: UiohookKeyboardEvent): void {
     const token = `k:${e.keycode}`
-    if (isSyntheticToken(token)) return
+    if (consumeSyntheticUp(token)) return // our own simulated key-up
     this.handleHoldUp(token)
   }
 
   private onMouseDown(e: UiohookMouseEvent): void {
     const token = `m:${e.button}`
-    if (isSyntheticToken(token)) return
     if (this.recording) {
       this.deps.onRecorded({ kind: e.button === 2 ? 'mouse-right' : 'mouse-left', key: '' })
       return
@@ -182,7 +182,7 @@ export class GlobalInput {
 
   private onMouseUp(e: UiohookMouseEvent): void {
     const token = `m:${e.button}`
-    if (isSyntheticToken(token)) return
+    if (consumeSyntheticUp(token)) return // our own simulated mouse-up
     this.handleHoldUp(token)
   }
 
