@@ -3,6 +3,7 @@ import { useStore } from './store'
 import { KeyList } from './components/KeyList'
 import { OptionsPanel } from './components/OptionsPanel'
 import { TextFunctionPanel } from './components/TextFunctionPanel'
+import { ClickPositionsPanel } from './components/ClickPositionsPanel'
 import { ProfilesPanel } from './components/ProfilesPanel'
 import { LoopPanel } from './components/LoopPanel'
 import { HotkeyPanel } from './components/HotkeyPanel'
@@ -46,6 +47,7 @@ export function App(): JSX.Element {
         <div className="column">
           <KeyList />
           <OptionsPanel />
+          <ClickPositionsPanel />
           <TextFunctionPanel />
         </div>
         <div className="column">

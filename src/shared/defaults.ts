@@ -29,6 +29,7 @@ export function createDefaultProfile(name = 'Default'): Profile {
       text: 'gg',
       delayMs: 25
     },
+    clickPositions: [],
     loop: {
       mode: 'forever',
       count: 10
@@ -50,6 +51,7 @@ export function createDefaultSettings(activeProfileId: string): AppSettings {
   return {
     toggleHotkey: 'F6',
     emergencyHotkey: 'Escape',
+    recordPositionHotkey: 'F7',
     activeProfileId
   }
 }

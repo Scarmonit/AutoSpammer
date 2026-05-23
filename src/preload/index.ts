@@ -6,7 +6,8 @@ import type {
   AppSettings,
   StatusPayload,
   RecordedKey,
-  HotkeyConflict
+  HotkeyConflict,
+  MousePoint
 } from '@shared/types'
 
 /** Subscribe helper that returns an unsubscribe function. */
@@ -36,11 +37,13 @@ const api = {
 
   recordStart: (): Promise<void> => ipcRenderer.invoke(IPC.RecordStart),
   recordStop: (): Promise<void> => ipcRenderer.invoke(IPC.RecordStop),
+  getMousePosition: (): Promise<MousePoint> => ipcRenderer.invoke(IPC.GetMousePosition),
 
   onStatus: (cb: (s: StatusPayload) => void) => on<StatusPayload>(IPC.StatusChanged, cb),
   onKeyRecorded: (cb: (rk: RecordedKey) => void) => on<RecordedKey>(IPC.KeyRecorded, cb),
   onError: (cb: (message: string) => void) => on<string>(IPC.ErrorEvent, cb),
-  onHotkeyConflict: (cb: (c: HotkeyConflict) => void) => on<HotkeyConflict>(IPC.HotkeyConflict, cb)
+  onHotkeyConflict: (cb: (c: HotkeyConflict) => void) => on<HotkeyConflict>(IPC.HotkeyConflict, cb),
+  onDataUpdated: (cb: (data: PersistedData) => void) => on<PersistedData>(IPC.DataUpdated, cb)
 }
 
 export type AutoSpammerApi = typeof api

@@ -8,11 +8,13 @@ import type {
   RecordedKey,
   HotkeyConflict
 } from '@shared/types'
+import type { ClickPosition } from '@shared/types'
 import { IPC } from '@shared/ipc'
 import { createDefaultProfile, makeId } from '@shared/defaults'
 import { loadData, saveData, flushData, activeProfile } from './persistence'
 import { SpamEngine } from './engine'
 import { GlobalInput } from './hotkeys'
+import { getMousePosition } from './input'
 
 let mainWindow: BrowserWindow | null = null
 let data: PersistedData
@@ -82,6 +84,13 @@ function sanitizeProfile(p: Profile): Profile {
       ...p.textFunction,
       delayMs: clampInt(p.textFunction.delayMs, 0, 600000, 25)
     },
+    clickPositions: (p.clickPositions ?? []).map((c) => ({
+      ...c,
+      x: clampInt(c.x, -100000, 100000, 0),
+      y: clampInt(c.y, -100000, 100000, 0),
+      button: c.button === 'right' ? 'right' : 'left',
+      delayMs: c.delayMs === null ? null : clampInt(c.delayMs, 0, 600000, 0)
+    })),
     loop: {
       ...p.loop,
       count: clampInt(p.loop.count, 1, 1000000, 1)
@@ -166,6 +175,22 @@ function registerIpc(): void {
   ipcMain.handle(IPC.RecordStop, () => {
     globalInput.setRecording(false)
   })
+
+  ipcMain.handle(IPC.GetMousePosition, () => getMousePosition())
+}
+
+/**
+ * Capture the cursor's current position and append it to the active profile's
+ * click list. Triggered by the global record-position hotkey (works in-game),
+ * so it owns the data mutation and pushes the result back to the renderer.
+ */
+async function recordCurrentPosition(): Promise<void> {
+  const profile = activeProfile(data)
+  const { x, y } = await getMousePosition()
+  const pos: ClickPosition = { id: makeId('pos'), x, y, button: 'left', delayMs: null }
+  profile.clickPositions = [...(profile.clickPositions ?? []), pos]
+  saveData(data)
+  send(IPC.DataUpdated, data)
 }
 
 // ---------------------------------------------------------------------------
@@ -198,7 +223,10 @@ if (!gotLock) {
       getSettings: () => data.settings,
       engine,
       onRecorded: (rk: RecordedKey) => send(IPC.KeyRecorded, rk),
-      onConflict: (c: HotkeyConflict) => send(IPC.HotkeyConflict, c)
+      onConflict: (c: HotkeyConflict) => send(IPC.HotkeyConflict, c),
+      onRecordPosition: () => {
+        void recordCurrentPosition()
+      }
     })
 
     registerIpc()

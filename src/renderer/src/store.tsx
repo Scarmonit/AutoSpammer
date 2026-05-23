@@ -5,7 +5,8 @@ import type {
   AppSettings,
   StatusPayload,
   Options,
-  SpamEntry
+  SpamEntry,
+  ClickPosition
 } from '@shared/types'
 import { makeId } from '@shared/defaults'
 
@@ -33,6 +34,7 @@ interface Store {
   start: () => Promise<void>
   stop: () => Promise<void>
   toggleRecording: () => Promise<void>
+  addCurrentPosition: () => Promise<void>
 }
 
 const Ctx = createContext<Store | null>(null)
@@ -62,6 +64,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     const offConflict = window.api.onHotkeyConflict((c) =>
       setMessage({ kind: 'error', text: c.message })
     )
+    // The global record-position hotkey mutates data in the main process.
+    const offData = window.api.onDataUpdated(setData)
     const offRecorded = window.api.onKeyRecorded((rk) => {
       const entry: SpamEntry = {
         id: makeId('key'),
@@ -76,6 +80,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
       offStatus()
       offError()
       offConflict()
+      offData()
       offRecorded()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,6 +153,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     setStatus(await window.api.stop())
   }, [])
 
+  const addCurrentPosition = useCallback(async () => {
+    const { x, y } = await window.api.getMousePosition()
+    const pos: ClickPosition = { id: makeId('pos'), x, y, button: 'left', delayMs: null }
+    updateProfile((p) => ({ ...p, clickPositions: [...p.clickPositions, pos] }))
+  }, [updateProfile])
+
   const toggleRecording = useCallback(async () => {
     if (recording) {
       await window.api.recordStop()
@@ -178,7 +189,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     updateSettings,
     start,
     stop,
-    toggleRecording
+    toggleRecording,
+    addCurrentPosition
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

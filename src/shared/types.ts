@@ -19,6 +19,16 @@ export interface TextFunctionConfig {
   delayMs: number
 }
 
+/** A recorded screen location to click during spamming. */
+export interface ClickPosition {
+  id: string
+  x: number
+  y: number
+  button: 'left' | 'right'
+  /** Per-position delay in ms. `null` means "use the global default delay". */
+  delayMs: number | null
+}
+
 export type LoopMode = 'forever' | 'once' | 'count'
 
 export interface LoopConfig {
@@ -49,6 +59,7 @@ export interface Profile {
   entries: SpamEntry[]
   options: Options
   textFunction: TextFunctionConfig
+  clickPositions: ClickPosition[]
   loop: LoopConfig
   holdToSpam: HoldConfig
   focusHold: HoldConfig
@@ -59,6 +70,8 @@ export interface AppSettings {
   toggleHotkey: string
   /** Emergency stop accelerator, e.g. "Escape". */
   emergencyHotkey: string
+  /** Global hotkey to record the current mouse position, e.g. "F7". */
+  recordPositionHotkey: string
   activeProfileId: string
 }
 
@@ -83,7 +96,12 @@ export interface RecordedKey {
 }
 
 export interface HotkeyConflict {
-  field: 'toggleHotkey' | 'emergencyHotkey'
+  field: 'toggleHotkey' | 'emergencyHotkey' | 'recordPositionHotkey'
   accelerator: string
   message: string
+}
+
+export interface MousePoint {
+  x: number
+  y: number
 }

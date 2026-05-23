@@ -32,13 +32,17 @@ function migrate(data: PersistedData): PersistedData {
     return createDefaultData()
   }
   data.version = DATA_VERSION
+
+  const defaults = createDefaultData()
+  // Backfill fields added in newer versions so older saves stay valid.
+  data.settings = { ...defaults.settings, ...data.settings }
+  for (const p of data.profiles) {
+    if (!Array.isArray(p.clickPositions)) p.clickPositions = []
+  }
+
   // Ensure the active profile id points at something real.
-  if (!data.profiles.some((p) => p.id === data.settings?.activeProfileId)) {
-    data.settings = {
-      ...createDefaultData().settings,
-      ...data.settings,
-      activeProfileId: data.profiles[0].id
-    }
+  if (!data.profiles.some((p) => p.id === data.settings.activeProfileId)) {
+    data.settings.activeProfileId = data.profiles[0].id
   }
   return data
 }

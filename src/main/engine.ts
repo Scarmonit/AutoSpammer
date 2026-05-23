@@ -1,11 +1,14 @@
 import type { Profile, SpamMode, StatusPayload, ActionKind, LoopConfig } from '@shared/types'
-import { pressKey, typeText, clickMouse, clearSynthetic } from './input'
+import { pressKey, typeText, clickMouse, clickAt, clearSynthetic } from './input'
 
 interface Fireable {
-  kind: ActionKind | 'text'
+  kind: ActionKind | 'text' | 'pos-click'
   key: string
   text: string
   delayMs: number
+  x?: number
+  y?: number
+  button?: 'left' | 'right'
 }
 
 interface EngineCallbacks {
@@ -136,6 +139,9 @@ export class SpamEngine {
       case 'text':
         await typeText(f.text)
         break
+      case 'pos-click':
+        await clickAt(f.x ?? 0, f.y ?? 0, f.button ?? 'left')
+        break
     }
   }
 
@@ -197,6 +203,18 @@ function buildFireables(profile: Profile, overrideDelayMs?: number): Fireable[] 
   if (profile.options.spacebar) out.push({ kind: 'key', key: 'space', text: '', delayMs: def })
   if (profile.options.leftClick) out.push({ kind: 'mouse-left', key: '', text: '', delayMs: def })
   if (profile.options.rightClick) out.push({ kind: 'mouse-right', key: '', text: '', delayMs: def })
+
+  for (const p of profile.clickPositions ?? []) {
+    out.push({
+      kind: 'pos-click',
+      key: '',
+      text: '',
+      x: p.x,
+      y: p.y,
+      button: p.button,
+      delayMs: p.delayMs ?? def
+    })
+  }
 
   const tf = profile.textFunction
   if (tf.enabled && tf.text.length > 0) {

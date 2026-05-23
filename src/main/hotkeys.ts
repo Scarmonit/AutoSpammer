@@ -11,6 +11,7 @@ interface Deps {
   engine: SpamEngine
   onRecorded: (rk: RecordedKey) => void
   onConflict: (c: HotkeyConflict) => void
+  onRecordPosition: () => void
 }
 
 /**
@@ -46,7 +47,7 @@ export class GlobalInput {
       console.error('[hotkeys] failed to start uiohook:', err)
     }
 
-    this.scheduleRegisterToggle()
+    this.scheduleRegister()
   }
 
   dispose(): void {
@@ -61,58 +62,70 @@ export class GlobalInput {
   }
 
   // -------------------------------------------------------------------------
-  // Global accelerators (toggle + emergency)
+  // Global accelerators (toggle, record-position, emergency)
   // -------------------------------------------------------------------------
 
   /** Debounced so rapid hotkey edits don't thrash registration. */
   onSettingsChanged(): void {
-    this.scheduleRegisterToggle()
+    this.scheduleRegister()
   }
 
-  private scheduleRegisterToggle(): void {
+  private scheduleRegister(): void {
     if (this.registerTimer) clearTimeout(this.registerTimer)
     this.registerTimer = setTimeout(() => {
       this.registerTimer = null
-      this.registerToggle()
+      this.registerHotkeys()
     }, 300)
   }
 
-  private registerToggle(): void {
-    const { toggleHotkey, emergencyHotkey } = this.deps.getSettings()
+  /** Re-register the always-on accelerators; emergency is managed by setRunning(). */
+  private registerHotkeys(): void {
+    const { toggleHotkey, emergencyHotkey, recordPositionHotkey } = this.deps.getSettings()
 
-    // Re-register only the toggle key; emergency is managed by setRunning().
-    globalShortcut.unregister(this.lastToggle ?? toggleHotkey)
-    this.lastToggle = toggleHotkey
+    for (const accel of this.registered) globalShortcut.unregister(accel)
+    this.registered.clear()
 
-    if (toggleHotkey && toggleHotkey === emergencyHotkey) {
+    const taken = new Set<string>()
+    if (emergencyHotkey) taken.add(emergencyHotkey)
+
+    this.tryRegister('toggleHotkey', toggleHotkey, taken, () => this.toggle())
+    this.tryRegister('recordPositionHotkey', recordPositionHotkey, taken, () =>
+      this.deps.onRecordPosition()
+    )
+  }
+
+  private tryRegister(
+    field: HotkeyConflict['field'],
+    accel: string,
+    taken: Set<string>,
+    handler: () => void
+  ): void {
+    if (!accel) return
+    if (taken.has(accel)) {
       this.deps.onConflict({
-        field: 'toggleHotkey',
-        accelerator: toggleHotkey,
-        message: 'Toggle and emergency-stop hotkeys must be different.'
+        field,
+        accelerator: accel,
+        message: `"${accel}" is already assigned to another Auto Spammer hotkey.`
       })
       return
     }
-
-    if (!toggleHotkey) return
     try {
-      const ok = globalShortcut.register(toggleHotkey, () => this.toggle())
-      if (!ok) {
+      if (globalShortcut.register(accel, handler)) {
+        this.registered.add(accel)
+        taken.add(accel)
+      } else {
         this.deps.onConflict({
-          field: 'toggleHotkey',
-          accelerator: toggleHotkey,
-          message: `"${toggleHotkey}" is already in use by another application.`
+          field,
+          accelerator: accel,
+          message: `"${accel}" is already in use by another application.`
         })
       }
     } catch {
-      this.deps.onConflict({
-        field: 'toggleHotkey',
-        accelerator: toggleHotkey,
-        message: `"${toggleHotkey}" is not a valid hotkey.`
-      })
+      this.deps.onConflict({ field, accelerator: accel, message: `"${accel}" is not a valid hotkey.` })
     }
   }
 
-  private lastToggle: string | null = null
+  private registered = new Set<string>()
   private emergencyRegistered = false
 
   /**

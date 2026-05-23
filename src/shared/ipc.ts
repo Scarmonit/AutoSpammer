@@ -15,12 +15,14 @@ export const IPC = {
   GetStatus: 'engine:status',
   RecordStart: 'record:start',
   RecordStop: 'record:stop',
+  GetMousePosition: 'mouse:get-position',
 
   // main -> renderer (events)
   StatusChanged: 'event:status',
   KeyRecorded: 'event:key-recorded',
   ErrorEvent: 'event:error',
-  HotkeyConflict: 'event:hotkey-conflict'
+  HotkeyConflict: 'event:hotkey-conflict',
+  DataUpdated: 'event:data-updated'
 } as const
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]

@@ -11,7 +11,7 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 You do **not** need any programming tools. Just:
 
 1. Go to the **[Latest Release ➜](https://github.com/Scarmonit/AutoSpammer/releases/latest)** page.
-2. Under **Assets**, click **`AutoSpammer-Setup-1.0.0.exe`** to download it.
+2. Under **Assets**, click **`AutoSpammer-Setup-1.1.0.exe`** to download it.
 3. Double-click the downloaded file to install.
 4. Windows may show a blue **"Windows protected your PC"** box (this happens for
    apps that aren't code-signed). Click **More info → Run anyway**. *(The app is
@@ -20,7 +20,7 @@ You do **not** need any programming tools. Just:
    and in the Start menu. 🎉
 
 > 💡 **One-click download:**
-> [AutoSpammer-Setup-1.0.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.0.0.exe)
+> [AutoSpammer-Setup-1.1.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.1.0.exe)
 
 ---
 
@@ -39,6 +39,18 @@ You do **not** need any programming tools. Just:
    game is focused.
 6. To stop: press **F6** again, click **Stop Spam**, or hit **Esc** (emergency
    stop).
+
+### 🖱️ Click Positions (record-and-click specific spots)
+Want it to click exact places on screen (not just where your cursor is)?
+1. In the **Click Positions** panel, aim your mouse at a spot and press **F7** —
+   it records that screen location. Works even while a game is focused, so you can
+   record several spots without alt-tabbing.
+2. Each recorded spot shows its coordinates and an **L/R** button you can click to
+   switch between left/right click. Give it its own delay, or remove it with **×**.
+3. When you press **Start Spam**, Auto Spammer moves the cursor to each recorded
+   spot and clicks it, in order, every cycle.
+
+You can change the record hotkey from **F7** to anything else in that panel.
 
 ### Handy extras
 - **Spacebar / Left Click / Right Click** checkboxes — add those without typing.

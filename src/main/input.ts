@@ -1,5 +1,6 @@
-import { keyboard, mouse, Button } from '@nut-tree-fork/nut-js'
+import { keyboard, mouse, Button, Point } from '@nut-tree-fork/nut-js'
 import { nutKeyFor, keycodeForName } from './keymap'
+import type { MousePoint } from '@shared/types'
 
 // Fire as fast as the OS allows; we manage our own pacing in the engine.
 keyboard.config.autoDelayMs = 0
@@ -91,4 +92,23 @@ export async function clickMouse(button: 'left' | 'right'): Promise<void> {
     consumeSyntheticUp(token)
     throw err
   }
+}
+
+/** Move the cursor to a screen position and click there. */
+export async function clickAt(x: number, y: number, button: 'left' | 'right'): Promise<void> {
+  const token = `m:${button === 'left' ? 1 : 2}`
+  recordSyntheticUp(token)
+  try {
+    await mouse.setPosition(new Point(x, y))
+    await mouse.click(button === 'left' ? Button.LEFT : Button.RIGHT)
+  } catch (err) {
+    consumeSyntheticUp(token)
+    throw err
+  }
+}
+
+/** Current cursor position, used when recording a click spot. */
+export async function getMousePosition(): Promise<MousePoint> {
+  const p = await mouse.getPosition()
+  return { x: Math.round(p.x), y: Math.round(p.y) }
 }

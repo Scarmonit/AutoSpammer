@@ -17,6 +17,9 @@
     "text": "gg",
     "delayMs": 25
   },
+  "clickPositions": [
+    { "id": "pos_1", "x": 960, "y": 540, "button": "left", "delayMs": null }
+  ],
   "loop": {
     "mode": "forever",
     "count": 10
