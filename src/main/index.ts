@@ -72,7 +72,7 @@ function sanitizeProfile(p: Profile): Profile {
     ...p,
     options: {
       ...p.options,
-      defaultDelayMs: clampInt(p.options.defaultDelayMs, 0, 600000, 100)
+      defaultDelayMs: clampInt(p.options.defaultDelayMs, 0, 600000, 10)
     },
     entries: p.entries.map((e) => ({
       ...e,
@@ -80,14 +80,14 @@ function sanitizeProfile(p: Profile): Profile {
     })),
     textFunction: {
       ...p.textFunction,
-      delayMs: clampInt(p.textFunction.delayMs, 0, 600000, 250)
+      delayMs: clampInt(p.textFunction.delayMs, 0, 600000, 25)
     },
     loop: {
       ...p.loop,
       count: clampInt(p.loop.count, 1, 1000000, 1)
     },
-    holdToSpam: { ...p.holdToSpam, delayMs: clampInt(p.holdToSpam.delayMs, 1, 600000, 50) },
-    focusHold: { ...p.focusHold, delayMs: clampInt(p.focusHold.delayMs, 1, 600000, 50) }
+    holdToSpam: { ...p.holdToSpam, delayMs: clampInt(p.holdToSpam.delayMs, 1, 600000, 10) },
+    focusHold: { ...p.focusHold, delayMs: clampInt(p.focusHold.delayMs, 1, 600000, 10) }
   }
 }
 

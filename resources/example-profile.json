@@ -3,19 +3,19 @@
   "name": "Default",
   "entries": [
     { "id": "key_1", "kind": "key", "key": "space", "delayMs": null },
-    { "id": "key_2", "kind": "key", "key": "1", "delayMs": 50 }
+    { "id": "key_2", "kind": "key", "key": "1", "delayMs": null }
   ],
   "options": {
     "spacebar": false,
     "leftClick": false,
     "rightClick": false,
-    "defaultDelayMs": 100,
+    "defaultDelayMs": 10,
     "sequenceMode": false
   },
   "textFunction": {
     "enabled": false,
     "text": "gg",
-    "delayMs": 250
+    "delayMs": 25
   },
   "loop": {
     "mode": "forever",
@@ -24,11 +24,11 @@
   "holdToSpam": {
     "enabled": false,
     "key": "",
-    "delayMs": 50
+    "delayMs": 10
   },
   "focusHold": {
     "enabled": false,
     "key": "",
-    "delayMs": 50
+    "delayMs": 10
   }
 }

@@ -15,19 +15,19 @@ export function createDefaultProfile(name = 'Default'): Profile {
     name,
     entries: [
       { id: makeId('key'), kind: 'key', key: 'space', delayMs: null },
-      { id: makeId('key'), kind: 'key', key: '1', delayMs: 50 }
+      { id: makeId('key'), kind: 'key', key: '1', delayMs: null }
     ],
     options: {
       spacebar: false,
       leftClick: false,
       rightClick: false,
-      defaultDelayMs: 100,
+      defaultDelayMs: 10,
       sequenceMode: false
     },
     textFunction: {
       enabled: false,
       text: 'gg',
-      delayMs: 250
+      delayMs: 25
     },
     loop: {
       mode: 'forever',
@@ -36,12 +36,12 @@ export function createDefaultProfile(name = 'Default'): Profile {
     holdToSpam: {
       enabled: false,
       key: '',
-      delayMs: 50
+      delayMs: 10
     },
     focusHold: {
       enabled: false,
       key: '',
-      delayMs: 50
+      delayMs: 10
     }
   }
 }
