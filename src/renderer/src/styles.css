@@ -241,6 +241,32 @@ body {
   gap: 8px;
 }
 
+.keylist__summary {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--text-dim);
+}
+
+.keylist__summary-label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+.chip {
+  display: inline-block;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 7px;
+  margin: 0 4px 4px 0;
+  color: var(--text);
+  font-size: 11px;
+}
+
 /* ---------- Inputs ---------- */
 input,
 textarea,
@@ -255,11 +281,29 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text);
+  /* Pin the painted text + caret color — without this, text inputs in this
+     dark theme accept input but render the text invisibly in Chromium. */
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
   padding: 6px 8px;
   font-size: 12px;
   font-family: inherit;
   outline: none;
   width: 100%;
+}
+
+.input::placeholder {
+  color: var(--muted);
+  -webkit-text-fill-color: var(--muted);
+}
+
+/* Stop Chromium autofill from washing out / hiding text in dark inputs. */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px #1c1f25 inset;
+  caret-color: var(--text);
 }
 
 .input:focus {

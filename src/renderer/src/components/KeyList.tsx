@@ -4,6 +4,7 @@ import { makeId } from '@shared/defaults'
 import { useStore } from '../store'
 import { Section } from './Section'
 import { KeyRow } from './KeyRow'
+import { prettyName } from '../keycapture'
 
 export function KeyList(): JSX.Element {
   const { activeProfile, updateProfile, recording, toggleRecording } = useStore()
@@ -32,6 +33,19 @@ export function KeyList(): JSX.Element {
     next.splice(to, 0, moved)
     setEntries(next)
   }
+
+  // Always-visible, human-readable summary of everything that will be spammed.
+  const o = activeProfile.options
+  const tf = activeProfile.textFunction
+  const summary: string[] = [
+    ...entries.map((e) =>
+      e.kind === 'key' ? (e.key ? prettyName(e.key) : '(empty)') : prettyName(e.kind)
+    ),
+    ...(o.spacebar ? ['Spacebar'] : []),
+    ...(o.leftClick ? ['Left Click'] : []),
+    ...(o.rightClick ? ['Right Click'] : []),
+    ...(tf.enabled && tf.text ? [`"${tf.text}"`] : [])
+  ]
 
   return (
     <Section title="Keys to Spam">
@@ -62,6 +76,19 @@ export function KeyList(): JSX.Element {
         >
           {recording ? '● Stop Recording' : 'Record'}
         </button>
+      </div>
+
+      <div className="keylist__summary">
+        <span className="keylist__summary-label">Will spam:</span>{' '}
+        {summary.length > 0 ? (
+          summary.map((s, i) => (
+            <span key={i} className="chip">
+              {s}
+            </span>
+          ))
+        ) : (
+          <span className="muted">nothing yet</span>
+        )}
       </div>
     </Section>
   )

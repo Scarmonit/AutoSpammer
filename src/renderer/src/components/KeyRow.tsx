@@ -45,8 +45,10 @@ export function KeyRow({
         <input
           className="input keyrow__key"
           value={entry.key}
-          placeholder="key"
+          placeholder="key (e.g. a, space, f6)"
           spellCheck={false}
+          autoComplete="off"
+          autoCorrect="off"
           onChange={(e) => onChange({ key: e.target.value })}
         />
       )}
