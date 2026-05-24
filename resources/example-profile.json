@@ -40,5 +40,10 @@
     "enabled": false,
     "key": "",
     "delayMs": 10
+  },
+  "rightClickHold": {
+    "enabled": false,
+    "key": "",
+    "delayMs": 10
   }
 }

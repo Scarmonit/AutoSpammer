@@ -4,7 +4,8 @@ import { useStore } from '../store'
 const MODE_LABEL: Record<string, string> = {
   manual: 'Running',
   hold: 'Hold-to-Spam',
-  'focus-hold': 'Focus Hold'
+  'focus-hold': 'Focus Hold',
+  'right-click-hold': 'Right-Click Hold'
 }
 
 export function StatusIndicator(): JSX.Element {

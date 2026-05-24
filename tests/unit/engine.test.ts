@@ -137,6 +137,25 @@ describe('SpamEngine — options, positions, text', () => {
   })
 })
 
+describe('SpamEngine — right-click hold', () => {
+  it('fires ONLY right-clicks, repeatedly, until stopped', async () => {
+    const p = profile((p) => {
+      p.entries = [key('x')] // ignored in right-click-hold mode
+      p.rightClickHold = { enabled: true, key: 'mouse-left', delayMs: 5 }
+    })
+    const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
+    engine.start(p, 'right-click-hold')
+    await new Promise((r) => setTimeout(r, 40))
+    engine.stop()
+    await new Promise((r) => setTimeout(r, 20))
+
+    expect(clickMouse.mock.calls.length).toBeGreaterThan(1)
+    expect(clickMouse.mock.calls.every((c) => c[0] === 'right')).toBe(true)
+    expect(pressKey).not.toHaveBeenCalled()
+    expect(engine.isRunning()).toBe(false)
+  })
+})
+
 describe('SpamEngine — focus hold', () => {
   it('fires ONLY the focus key, repeatedly, until stopped', async () => {
     const p = profile((p) => {

@@ -145,7 +145,11 @@ function sanitizeProfile(p: Profile): Profile {
       count: clampInt(p.loop.count, 1, 1000000, 1)
     },
     holdToSpam: { ...p.holdToSpam, delayMs: clampInt(p.holdToSpam.delayMs, 1, 600000, 10) },
-    focusHold: { ...p.focusHold, delayMs: clampInt(p.focusHold.delayMs, 1, 600000, 10) }
+    focusHold: { ...p.focusHold, delayMs: clampInt(p.focusHold.delayMs, 1, 600000, 10) },
+    rightClickHold: {
+      ...p.rightClickHold,
+      delayMs: clampInt(p.rightClickHold?.delayMs, 1, 600000, 10)
+    }
   }
 }
 

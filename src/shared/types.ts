@@ -76,6 +76,8 @@ export interface Profile {
   loop: LoopConfig
   holdToSpam: HoldConfig
   focusHold: HoldConfig
+  /** Hold a chosen key/button to auto right-click while it's held down. */
+  rightClickHold: HoldConfig
 }
 
 export interface AppSettings {
@@ -99,7 +101,7 @@ export interface PersistedData {
 }
 
 export type EngineStatus = 'idle' | 'running'
-export type SpamMode = 'manual' | 'hold' | 'focus-hold'
+export type SpamMode = 'manual' | 'hold' | 'focus-hold' | 'right-click-hold'
 
 export interface StatusPayload {
   status: EngineStatus

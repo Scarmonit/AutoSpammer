@@ -41,6 +41,7 @@ function migrate(data: PersistedData): PersistedData {
     if (!Array.isArray(p.clickPositions)) p.clickPositions = []
     if (!p.holdKeys || !Array.isArray(p.holdKeys.keys)) p.holdKeys = { keys: [] }
     if (!p.periodicKey) p.periodicKey = { ...defaultProfile.periodicKey }
+    if (!p.rightClickHold) p.rightClickHold = { ...defaultProfile.rightClickHold }
   }
 
   // Ensure the active profile id points at something real.

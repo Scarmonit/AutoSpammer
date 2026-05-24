@@ -52,10 +52,15 @@ export class SpamEngine {
 
     let fireables: Fireable[]
     try {
-      fireables =
-        mode === 'focus-hold'
-          ? buildFocusFireable(focusKey ?? profile.focusHold.key, profile.focusHold.delayMs)
-          : buildFireables(profile, overrideDelayMs)
+      if (mode === 'focus-hold') {
+        fireables = buildFocusFireable(focusKey ?? profile.focusHold.key, profile.focusHold.delayMs)
+      } else if (mode === 'right-click-hold') {
+        fireables = [
+          { kind: 'mouse-right', key: '', text: '', delayMs: profile.rightClickHold.delayMs }
+        ]
+      } else {
+        fireables = buildFireables(profile, overrideDelayMs)
+      }
     } catch (err) {
       this.cb.onError(err instanceof Error ? err.message : String(err))
       return

@@ -21,11 +21,11 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.3.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.3.1.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.4.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.4.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.3.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.3.1.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.4.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.4.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -73,6 +73,13 @@ button or **F8**. Press again (or **Esc**) to release.
 ### ⏱️ Periodic Key
 Press one chosen key on a timer — e.g. press **F** every 5 seconds. Set the key
 and interval in the **Periodic Key** panel, then toggle with the button or **F9**.
+
+### 🖱️ Hold for Right-Click
+Want to **auto right-click while holding a button**? In the **Hold for Right-Click**
+panel, enable it and **Set Key** to any keyboard key or mouse button. While you
+physically hold that trigger, Auto Spammer rapidly **right-clicks**; release to
+stop. (Set the speed with its delay field.) Handy for games where you spam
+right-click while a key is held.
 
 ### 🔻 System tray
 Auto Spammer lives in the **system tray** so it stays out of your way while you

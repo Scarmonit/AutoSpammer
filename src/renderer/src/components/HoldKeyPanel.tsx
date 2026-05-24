@@ -6,7 +6,7 @@ import { CaptureButton } from './CaptureButton'
 import { prettyName } from '../keycapture'
 
 interface Props {
-  field: 'holdToSpam' | 'focusHold'
+  field: 'holdToSpam' | 'focusHold' | 'rightClickHold'
   title: string
   helper: string
 }

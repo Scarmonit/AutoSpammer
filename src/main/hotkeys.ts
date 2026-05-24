@@ -221,6 +221,13 @@ export class GlobalInput {
       return
     }
 
+    if (profile.rightClickHold.enabled && tokenFor(profile.rightClickHold.key) === token) {
+      this.heldToken = token
+      this.heldMode = 'right-click-hold'
+      engine.start(profile, 'right-click-hold')
+      return
+    }
+
     if (profile.holdToSpam.enabled && tokenFor(profile.holdToSpam.key) === token) {
       this.heldToken = token
       this.heldMode = 'hold'

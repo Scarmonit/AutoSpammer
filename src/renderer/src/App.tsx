@@ -67,6 +67,11 @@ export function App(): JSX.Element {
             title="Focus Hold Key"
             helper="Hold to rapidly fire ONLY this key/button itself."
           />
+          <HoldKeyPanel
+            field="rightClickHold"
+            title="Hold for Right-Click"
+            helper="Hold the set key/button to rapidly RIGHT-CLICK; release to stop."
+          />
           <PeriodicKeyPanel />
         </div>
       </main>
