@@ -3,8 +3,7 @@ import { UiohookKey } from 'uiohook-napi'
 
 // ---------------------------------------------------------------------------
 // Simulation side (nut-js): logical key name -> nut-js Key enum member.
-// Single printable characters that are not listed here are typed literally,
-// so the table only needs to cover named / non-printable keys.
+// Single printable characters not listed here are typed literally.
 // ---------------------------------------------------------------------------
 const NUT_SPECIAL: Record<string, keyof typeof Key> = {
   space: 'Space',
@@ -35,11 +34,53 @@ const NUT_SPECIAL: Record<string, keyof typeof Key> = {
 function buildFunctionKeys(): Record<string, keyof typeof Key> {
   const out: Record<string, keyof typeof Key> = {}
   for (let i = 1; i <= 24; i++) {
-    const name = `f${i}` as const
     const member = `F${i}` as keyof typeof Key
-    if (member in Key) out[name] = member
+    if (member in Key) out[`f${i}`] = member
   }
   return out
+}
+
+// ---------------------------------------------------------------------------
+// Punctuation + numpad: logical name -> nut-js Key name + uiohook key name.
+// Their names differ between the two libraries, so this is the single source
+// of truth that keeps simulation, hold detection, and recording consistent.
+// Logical names are the literal characters (e.g. "-", "=") and "numpadN".
+// ---------------------------------------------------------------------------
+const EXTRA_KEYS: Record<string, { nut: string; uio: string }> = {
+  '-': { nut: 'Minus', uio: 'Minus' },
+  '=': { nut: 'Equal', uio: 'Equal' },
+  '[': { nut: 'LeftBracket', uio: 'BracketLeft' },
+  ']': { nut: 'RightBracket', uio: 'BracketRight' },
+  '\\': { nut: 'Backslash', uio: 'Backslash' },
+  ';': { nut: 'Semicolon', uio: 'Semicolon' },
+  "'": { nut: 'Quote', uio: 'Quote' },
+  '`': { nut: 'Grave', uio: 'Backquote' },
+  ',': { nut: 'Comma', uio: 'Comma' },
+  '.': { nut: 'Period', uio: 'Period' },
+  '/': { nut: 'Slash', uio: 'Slash' },
+  numpad0: { nut: 'NumPad0', uio: 'Numpad0' },
+  numpad1: { nut: 'NumPad1', uio: 'Numpad1' },
+  numpad2: { nut: 'NumPad2', uio: 'Numpad2' },
+  numpad3: { nut: 'NumPad3', uio: 'Numpad3' },
+  numpad4: { nut: 'NumPad4', uio: 'Numpad4' },
+  numpad5: { nut: 'NumPad5', uio: 'Numpad5' },
+  numpad6: { nut: 'NumPad6', uio: 'Numpad6' },
+  numpad7: { nut: 'NumPad7', uio: 'Numpad7' },
+  numpad8: { nut: 'NumPad8', uio: 'Numpad8' },
+  numpad9: { nut: 'NumPad9', uio: 'Numpad9' },
+  numpadadd: { nut: 'Add', uio: 'NumpadAdd' },
+  numpadsubtract: { nut: 'Subtract', uio: 'NumpadSubtract' },
+  numpadmultiply: { nut: 'Multiply', uio: 'NumpadMultiply' },
+  numpaddivide: { nut: 'Divide', uio: 'NumpadDivide' },
+  numpaddecimal: { nut: 'Decimal', uio: 'NumpadDecimal' }
+}
+
+const KEY_TABLE = Key as unknown as Record<string, number>
+const UIO_TABLE = UiohookKey as unknown as Record<string, number>
+
+function extraFor(name: string): { nut: string; uio: string } | undefined {
+  const raw = name.trim()
+  return EXTRA_KEYS[raw] ?? EXTRA_KEYS[raw.toLowerCase()]
 }
 
 /** Resolve a logical key name to a nut-js Key, or null to type it literally. */
@@ -47,26 +88,28 @@ export function nutKeyFor(name: string): Key | null {
   const lower = name.trim().toLowerCase()
   const special = NUT_SPECIAL[lower]
   if (special && special in Key) return Key[special] as unknown as Key
+  const extra = extraFor(name)
+  if (extra && extra.nut in KEY_TABLE) return KEY_TABLE[extra.nut] as unknown as Key
   return null
 }
 
 /**
  * Resolve a key name to a nut-js Key for press-and-HOLD use, where literal
- * typing isn't an option. Covers specials, letters, and digits; returns null
- * for keys that can't be held (e.g. punctuation that only types literally).
+ * typing isn't an option. Covers specials, letters, digits, punctuation, and
+ * numpad keys; returns null only for keys nut-js can't hold.
  */
 export function nutHoldKey(name: string): Key | null {
   const lower = name.trim().toLowerCase()
   const special = NUT_SPECIAL[lower]
   if (special && special in Key) return Key[special] as unknown as Key
-  if (/^[a-z]$/.test(lower)) {
-    const m = lower.toUpperCase() as keyof typeof Key
-    if (m in Key) return Key[m] as unknown as Key
+  if (/^[a-z]$/.test(lower) && lower.toUpperCase() in KEY_TABLE) {
+    return KEY_TABLE[lower.toUpperCase()] as unknown as Key
   }
-  if (/^[0-9]$/.test(lower)) {
-    const m = `Num${lower}` as keyof typeof Key
-    if (m in Key) return Key[m] as unknown as Key
+  if (/^[0-9]$/.test(lower) && `Num${lower}` in KEY_TABLE) {
+    return KEY_TABLE[`Num${lower}`] as unknown as Key
   }
+  const extra = extraFor(name)
+  if (extra && extra.nut in KEY_TABLE) return KEY_TABLE[extra.nut] as unknown as Key
   return null
 }
 
@@ -76,35 +119,26 @@ export function nutHoldKey(name: string): Key | null {
 const codeToName: Record<number, string> = (() => {
   const map: Record<number, string> = {}
   for (const [rawName, code] of Object.entries(UiohookKey)) {
-    if (typeof code !== 'number') continue
-    map[code] = normalizeUiohookName(rawName)
+    if (typeof code === 'number') map[code] = normalizeUiohookName(rawName)
+  }
+  // Overlay our canonical logical names so punctuation/numpad codes always map
+  // back to the exact names EXTRA_KEYS understands (regardless of iteration).
+  for (const [logical, { uio }] of Object.entries(EXTRA_KEYS)) {
+    const code = UIO_TABLE[uio]
+    if (typeof code === 'number') map[code] = logical
   }
   return map
 })()
 
 function normalizeUiohookName(raw: string): string {
-  // Single letters -> lowercase (e.g. "A" -> "a").
-  if (/^[A-Z]$/.test(raw)) return raw.toLowerCase()
-  // Number row "0".."9" stay as-is; numpad variants prefixed.
-  if (/^[0-9]$/.test(raw)) return raw
+  if (/^[A-Z]$/.test(raw)) return raw.toLowerCase() // letters
+  if (/^[0-9]$/.test(raw)) return raw // number row
   const lower = raw.toLowerCase()
   const aliases: Record<string, string> = {
     arrowup: 'up',
     arrowdown: 'down',
     arrowleft: 'left',
-    arrowright: 'right',
-    // Punctuation -> literal character, so it types correctly when simulated.
-    semicolon: ';',
-    equal: '=',
-    comma: ',',
-    minus: '-',
-    period: '.',
-    slash: '/',
-    backquote: '`',
-    bracketleft: '[',
-    backslash: '\\',
-    bracketright: ']',
-    quote: "'"
+    arrowright: 'right'
   }
   return aliases[lower] ?? lower
 }
@@ -116,9 +150,12 @@ export function nameForKeycode(code: number): string {
 
 /**
  * uiohook keycode for a logical key name (used for hold detection).
- * Tries a few sensible variants so "f6", "space", "a", "1" all resolve.
+ * Handles letters, digits, function keys, named keys, punctuation, and numpad.
  */
 export function keycodeForName(name: string): number | null {
+  const extra = extraFor(name)
+  if (extra && typeof UIO_TABLE[extra.uio] === 'number') return UIO_TABLE[extra.uio]
+
   const lower = name.trim().toLowerCase()
   const variants = [
     name,
@@ -130,8 +167,7 @@ export function keycodeForName(name: string): number | null {
   ].filter(Boolean) as string[]
 
   for (const v of variants) {
-    const code = (UiohookKey as Record<string, number>)[v]
-    if (typeof code === 'number') return code
+    if (typeof UIO_TABLE[v] === 'number') return UIO_TABLE[v]
   }
   return null
 }

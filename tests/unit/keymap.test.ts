@@ -21,6 +21,15 @@ describe('keymap — simulation (nut-js)', () => {
     expect(nutHoldKey('space')).toBe(Key.Space)
     expect(nutHoldKey('shift')).toBe(Key.LeftShift)
   })
+
+  it('maps punctuation keys (the reported "-" / "=" case) and numpad', () => {
+    expect(nutKeyFor('-')).toBe(Key.Minus)
+    expect(nutKeyFor('=')).toBe(Key.Equal)
+    expect(nutKeyFor('/')).toBe(Key.Slash)
+    expect(nutHoldKey('-')).toBe(Key.Minus)
+    expect(nutHoldKey('=')).toBe(Key.Equal)
+    expect(nutKeyFor('numpad5')).toBe(Key.NumPad5)
+  })
 })
 
 describe('keymap — listening (uiohook)', () => {
@@ -41,5 +50,17 @@ describe('keymap — listening (uiohook)', () => {
 
   it('maps the space keycode back to "space"', () => {
     expect(nameForKeycode(UiohookKey.Space)).toBe('space')
+  })
+
+  it('resolves and round-trips punctuation for hold detection', () => {
+    expect(keycodeForName('-')).toBe(UiohookKey.Minus)
+    expect(keycodeForName('=')).toBe(UiohookKey.Equal)
+    expect(nameForKeycode(UiohookKey.Minus)).toBe('-')
+    expect(nameForKeycode(UiohookKey.Equal)).toBe('=')
+    for (const ch of ['-', '=', '[', ']', ';', "'", ',', '.', '/']) {
+      const code = keycodeForName(ch)
+      expect(code).not.toBeNull()
+      expect(nameForKeycode(code as number)).toBe(ch)
+    }
   })
 })

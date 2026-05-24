@@ -21,11 +21,11 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.4.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.4.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.4.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.4.1.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.4.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.4.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.4.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.4.1.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -40,9 +40,9 @@ and grab either file under **Assets**.)*
 ## 🎮 How to use it
 
 1. **Open Auto Spammer** from the Desktop/Start-menu shortcut.
-2. In **Keys to Spam** (left side), type the key you want repeated — for example
-   `a`, `space`, `1`, or `f6`. Click **+ Add Key** for more, or click **Record**
-   and press keys to capture them automatically.
+2. In **Keys to Spam** (left side), type the key you want repeated — any key works,
+   e.g. `a`, `space`, `1`, `f6`, `-`, `=`, `/`, or `numpad5`. Click **+ Add Key**
+   for more, or click **Record** and press keys to capture them automatically.
    - The **"Will spam:"** line shows exactly what will be pressed.
 3. (Optional) Set how fast under **Default Delay** — lower number = faster
    (10 ms ≈ very fast). Each key can have its own delay too.
