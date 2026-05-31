@@ -1,4 +1,8 @@
-# 🎯 Auto Spammer
+<p align="center">
+  <img src="docs/icon.png" alt="Auto Spammer icon" width="128" height="128" />
+</p>
+
+<h1 align="center">Auto Spammer</h1>
 
 A simple, dark-themed **auto key-presser / clicker** for Windows. Pick the keys
 you want repeated, choose how fast, and press **Start** — Auto Spammer presses
@@ -21,11 +25,11 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.9.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.9.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.10.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.10.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.9.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.9.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.10.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.10.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -287,6 +291,25 @@ release it. The app records every synthetic key-up it emits and matches them off
 as the global hook reports them, so an *unaccounted* key-up is unambiguously your
 real release. This is what makes Hold-to-Spam and Focus Hold stop reliably even
 while spamming the same key.
+
+## 🎨 Branding / icon
+
+<img src="docs/icon.png" alt="Auto Spammer icon" width="96" align="right" />
+
+Auto Spammer ships with a custom app icon — a click cursor inside a blue arc on a
+dark rounded panel. The artwork lives in [`build/icon-source.png`](build/icon-source.png);
+`npm run icons` regenerates every derived size from it (no image tools required):
+
+- **`build/icon.ico`** (16–256 px) — used for the Windows **.exe**, the **installer**,
+  and the window **title bar** (via electron-builder's `win.icon` / `nsis.installerIcon`).
+- **`build/icon.png`** (512 px) and **`docs/icon.png`** (256 px, this README's logo).
+- The **system-tray** + window icons are embedded as data URLs in
+  `src/main/trayicon.ts`, so they render crisply with no runtime path concerns.
+
+> 🖼️ **Maintainer tip:** to set this as the repository avatar on GitHub, open
+> **Settings → General**, scroll to the repo image / social-preview area, and upload
+> `docs/icon.png` (GitHub repos don't have a true "avatar", but the owner's profile
+> picture and the **Social preview** image both accept this file).
 
 ## License
 

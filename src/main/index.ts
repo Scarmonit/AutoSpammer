@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, Notification, screen } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, Notification, screen, nativeImage } from 'electron'
 import { join } from 'path'
 import type {
   PersistedData,
@@ -20,6 +20,7 @@ import { pointInRect } from './geometry'
 import { parseAccelerator } from './keymap'
 import { MacroRecorder, MacroPlayer } from './macro'
 import { createTray, type TrayHandle } from './tray'
+import { WINDOW_ICON_DATA_URL } from './trayicon'
 
 let mainWindow: BrowserWindow | null = null
 let data: PersistedData
@@ -54,6 +55,7 @@ function createWindow(): void {
     minWidth: 680,
     minHeight: 600,
     title: 'Auto Spammer',
+    icon: nativeImage.createFromDataURL(WINDOW_ICON_DATA_URL),
     backgroundColor: '#1b1d22',
     autoHideMenuBar: true,
     show: false,

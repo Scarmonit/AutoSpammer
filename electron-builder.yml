@@ -16,6 +16,8 @@ asarUnpack:
   - "**/node_modules/uiohook-napi/**"
   - "**/node_modules/@nut-tree-fork/**"
 win:
+  # Generated from build/icon-source.png by `npm run icons`. Drives the .exe and
+  # window title-bar icon; the installer uses it via nsis.installerIcon below.
   icon: build/icon.ico
   target:
     # Installer (Start-menu + desktop shortcuts) ...
