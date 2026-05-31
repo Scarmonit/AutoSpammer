@@ -1,22 +1,81 @@
 <p align="center">
-  <img src="docs/icon.png" alt="Auto Spammer icon" width="128" height="128" />
+  <img src="docs/icon.png" alt="Auto Spammer" width="120" height="120" />
 </p>
 
 <h1 align="center">Auto Spammer</h1>
 
-A simple, dark-themed **auto key-presser / clicker** for Windows. Pick the keys
-you want repeated, choose how fast, and press **Start** — Auto Spammer presses
-them for you. Great for games and apps that involve a lot of repeated tapping.
+<p align="center">
+  A fast, dark-themed <strong>auto key-presser, clicker &amp; macro recorder</strong> for Windows.<br/>
+  Pick what to repeat and how fast, then press <strong>Start</strong> — or record a full
+  keyboard&nbsp;+&nbsp;mouse macro and play it back on a loop.
+</p>
 
-[![Download latest](https://img.shields.io/github/v/release/Scarmonit/AutoSpammer?label=Download&sort=semver&style=for-the-badge&color=3b82f6)](https://github.com/Scarmonit/AutoSpammer/releases/latest)
-&nbsp;
-[![Total downloads](https://img.shields.io/github/downloads/Scarmonit/AutoSpammer/total?style=for-the-badge&color=2f6fe0)](https://github.com/Scarmonit/AutoSpammer/releases)
-&nbsp;
-![Windows 10/11](https://img.shields.io/badge/Windows-10%20%7C%2011-0a7bbb?style=for-the-badge)
-&nbsp;
-[![MIT](https://img.shields.io/badge/license-MIT-3ddc84?style=for-the-badge)](LICENSE)
+<p align="center">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest"><img alt="Download latest" src="https://img.shields.io/github/v/release/Scarmonit/AutoSpammer?label=Download&sort=semver&style=for-the-badge&color=3b82f6" /></a>
+  &nbsp;
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases"><img alt="Total downloads" src="https://img.shields.io/github/downloads/Scarmonit/AutoSpammer/total?style=for-the-badge&color=2f6fe0" /></a>
+  &nbsp;
+  <img alt="Windows 10/11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0a7bbb?style=for-the-badge" />
+  &nbsp;
+  <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-3ddc84?style=for-the-badge" /></a>
+</p>
 
-![Auto Spammer](docs/screenshot.png)
+<p align="center">
+  <img src="docs/showcase-1.png" alt="Auto Spammer main window" width="900" />
+</p>
+
+---
+
+## ✨ Features
+
+**Latest additions**
+
+- 🎬 **Full Macro recording &amp; playback** — capture *everything* (keys, clicks, and
+  mouse movement) with the exact timing between events, edit any delay, then replay it
+  on a loop via **Start Spam** / **F6**.
+- ↕️ **Resizable sections** — drag the splitter between any two panels to resize them;
+  double-click to reset. Layout is saved per profile.
+- 👁️ **Click to hide / show sections** — collapse any panel to just its title bar with
+  the header chevron; remembered per profile.
+- 🔀 **Independent enabling** of **Keys to Spam**, **Click Positions**, and **Macro** —
+  each has its own *Enabled* switch (Macro is mutually exclusive with the other two).
+- 🔒 **Hotkey conflict prevention** — a key or mouse button can only drive one action;
+  duplicate bindings are rejected with a clear message at the top of the window.
+- 🔴 **Improved Record** — record keys *and* mouse clicks straight into your lists;
+  clicks on the Auto Spammer window (and the key used to stop) are never captured.
+
+**Core**
+
+- ⌨️ **Spam any keys** — letters, digits, function keys, punctuation, numpad — each with
+  its own delay, in parallel or one-at-a-time **Sequence Mode**.
+- 🖱️ **Click positions** — move to and click exact screen spots (left/right) every cycle.
+- 🔁 **Loop** forever, once, or a set number of times.
+- ✊ **Hold-to-Spam**, **Focus Hold**, and **Hold for Right-Click** — spam only while you
+  physically hold a chosen key/button.
+- ⬇️ **Hold Keys Down** and ⏱️ **Periodic Key** for walk-keys and timed presses.
+- 🗂️ **Profiles** — save and switch between different setups; everything is remembered.
+- 🎯 **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
+- 🔻 **System tray** — runs in the background with close-to-tray.
+- 🛡️ Hardened Electron build (sandbox, context isolation, fuses) — open source, no telemetry.
+
+---
+
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/showcase-1.png" alt="Main overview" /><br/>
+      <sub><b>Main window</b> — Keys to Spam with live “Will spam” preview, Options,
+      Click Positions, Profiles, Loop, and rebindable hotkeys.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/showcase-2.png" alt="Macro section and triggers" /><br/>
+      <sub><b>Macro + triggers</b> — full recording with editable per-event delays and a
+      live event list, alongside Focus Hold and Hold-for-Right-Click.</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -224,6 +283,7 @@ npm install          # download dependencies
 
 npm run dev          # run the app in development (hot reload)
 npm run build:win    # build the installer -> release/AutoSpammer-Setup-<version>.exe
+npm run icons        # regenerate icons from build/icon-source.png
 ```
 
 ### Testing
@@ -233,14 +293,16 @@ Automated tests follow Electron's
 
 ```bash
 npm run typecheck    # TypeScript, no emit
-npm test             # Vitest unit tests (engine logic, keymap, defaults)
+npm test             # Vitest unit tests (engine, macro, bindings, keymap, defaults)
 npm run test:e2e     # builds, then Playwright drives the real Electron app
 npm run test:all     # typecheck + unit + e2e
 ```
 
 - **Unit tests** (`tests/unit/`, Vitest) cover the pure logic — the spam engine
-  (loop modes, sequence mode, options/positions/text, focus-hold) with the native
-  input layer mocked, plus the key-name mappings and default data.
+  (loop modes, sequence mode, options/positions/text, focus-hold, **macro playback**),
+  the **macro recorder/player**, **binding-conflict** detection, the key-name
+  mappings, the rounded-icon geometry, and the default data — all with the native
+  input layer mocked.
 - **End-to-end tests** (`tests/e2e/`, Playwright) launch the built app via
   `_electron.launch` and assert the UI, IPC, and persistence wiring.
 - CI runs all of the above on every push (`.github/workflows/test.yml`), using
@@ -260,15 +322,16 @@ Electron + React + TypeScript (via `electron-vite`).
 
 ```
 src/
-  shared/    types, IPC channel names, default profile
+  shared/    types, IPC channel names, default profile, binding-conflict rules
   main/      Electron main process: window, IPC, input validation
-    engine.ts      cancellable spam loop (runs off the UI thread)
+    engine.ts      cancellable spam + macro loop (runs off the UI thread)
+    macro.ts       macro recorder + player (timing, exclusions, playback)
     hotkeys.ts     global hotkeys + uiohook (record / hold detection)
     input.ts       nut-js input simulation + synthetic-event accounting
     keymap.ts      logical key name <-> nut-js / uiohook codes
     persistence.ts profiles saved as JSON in %APPDATA%\auto-spammer
   preload/   secure contextBridge (window.api)
-  renderer/  React UI (one component per panel)
+  renderer/  React UI (one component per panel, resizable + collapsible sections)
 ```
 
 - **Input simulation:** [`@nut-tree-fork/nut-js`](https://github.com/nut-tree/nut.js)
