@@ -82,6 +82,11 @@ export interface Profile {
   focusHold: HoldConfig
   /** Hold a chosen key/button to auto right-click while it's held down. */
   rightClickHold: HoldConfig
+  /**
+   * Per-section pixel heights for the resizable layout, keyed by section id
+   * (e.g. "keys", "clickPositions"). A missing id means "use the natural height".
+   */
+  sectionHeights: Record<string, number>
 }
 
 export interface AppSettings {

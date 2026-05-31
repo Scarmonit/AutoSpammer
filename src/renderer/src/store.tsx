@@ -26,6 +26,10 @@ interface Store {
 
   updateProfile: (updater: (p: Profile) => Profile) => void
   patchOptions: (patch: Partial<Options>) => void
+  /** Persist a resizable-section pixel height (per profile). */
+  setSectionHeight: (id: string, height: number) => void
+  /** Clear a section's stored height so it returns to its natural size. */
+  resetSectionHeight: (id: string) => void
 
   createProfile: (name: string) => Promise<void>
   renameProfile: (id: string, name: string) => Promise<void>
@@ -134,6 +138,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     [updateProfile]
   )
 
+  const setSectionHeight = useCallback(
+    (id: string, height: number) => {
+      updateProfile((p) => ({
+        ...p,
+        sectionHeights: { ...(p.sectionHeights ?? {}), [id]: Math.round(height) }
+      }))
+    },
+    [updateProfile]
+  )
+
+  const resetSectionHeight = useCallback(
+    (id: string) => {
+      updateProfile((p) => {
+        const next = { ...(p.sectionHeights ?? {}) }
+        delete next[id]
+        return { ...p, sectionHeights: next }
+      })
+    },
+    [updateProfile]
+  )
+
   const createProfile = useCallback(async (name: string) => setData(await window.api.createProfile(name)), [])
   const renameProfile = useCallback(
     async (id: string, name: string) => setData(await window.api.renameProfile(id, name)),
@@ -217,6 +242,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     dismissMessage: () => setMessage(null),
     updateProfile,
     patchOptions,
+    setSectionHeight,
+    resetSectionHeight,
     createProfile,
     renameProfile,
     deleteProfile,

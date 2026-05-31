@@ -162,8 +162,64 @@ body {
 .column {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /* Spacing between sections is provided by the draggable splitters. */
+  gap: 0;
   min-width: 0;
+}
+
+/* ---------- Resizable panes + splitters ---------- */
+.rs-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 64px;
+}
+/* Inside a pane the section fills the available height and its body scrolls,
+   so shrinking a section never clips the header or controls. */
+.rs-pane > .section {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.rs-pane > .section > .section__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.rs-splitter {
+  position: relative;
+  flex: none;
+  height: 12px;
+  cursor: ns-resize;
+  touch-action: none;
+}
+/* A subtle line that highlights on hover / while dragging. */
+.rs-splitter::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  background: transparent;
+  transition: background 0.12s ease;
+}
+.rs-splitter:hover::after {
+  background: var(--border);
+}
+.rs-splitter:active::after,
+body.is-resizing .rs-splitter:hover::after {
+  background: var(--blue);
+}
+
+/* Keep the resize cursor everywhere and suppress selection while dragging. */
+body.is-resizing,
+body.is-resizing * {
+  cursor: ns-resize !important;
+  user-select: none;
 }
 
 /* ---------- Section panel ---------- */

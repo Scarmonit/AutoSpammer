@@ -171,8 +171,20 @@ function sanitizeProfile(p: Profile): Profile {
     rightClickHold: {
       ...p.rightClickHold,
       delayMs: clampInt(p.rightClickHold?.delayMs, 1, 600000, 10)
-    }
+    },
+    sectionHeights: sanitizeSectionHeights(p.sectionHeights)
   }
+}
+
+/** Keep only finite, sanely-clamped pixel heights keyed by a section id. */
+function sanitizeSectionHeights(raw: unknown): Record<string, number> {
+  if (!raw || typeof raw !== 'object') return {}
+  const out: Record<string, number> = {}
+  for (const [id, value] of Object.entries(raw as Record<string, unknown>)) {
+    const n = Number(value)
+    if (Number.isFinite(n)) out[String(id)] = clampInt(n, 64, 2000, 64)
+  }
+  return out
 }
 
 // ---------------------------------------------------------------------------

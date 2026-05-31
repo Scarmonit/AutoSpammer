@@ -79,6 +79,14 @@ test('Click Positions exposes the Record Clicks button', async () => {
   await expect(positions.getByRole('button', { name: '● Record Clicks' })).toBeVisible()
 })
 
+test('renders draggable splitters between sections', async () => {
+  // Two columns of 5 and 7 sections -> 4 + 6 = 10 splitters (last pane per column
+  // has none).
+  const splitters = win.locator('.rs-splitter')
+  await expect(splitters).toHaveCount(10)
+  await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
+})
+
 test('loop mode radios are interactive', async () => {
   const once = section('Loop').locator('label.radio', { hasText: 'Play Once' }).locator('input')
   await once.check()

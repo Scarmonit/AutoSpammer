@@ -12,6 +12,7 @@ import { HoldKeysPanel } from './components/HoldKeysPanel'
 import { PeriodicKeyPanel } from './components/PeriodicKeyPanel'
 import { StatusIndicator } from './components/StatusIndicator'
 import { BottomBar } from './components/BottomBar'
+import { ResizablePane } from './components/ResizablePane'
 
 export function App(): JSX.Element {
   const { loaded, message, dismissMessage } = useStore()
@@ -47,32 +48,56 @@ export function App(): JSX.Element {
 
       <main className="columns">
         <div className="column">
-          <KeyList />
-          <OptionsPanel />
-          <ClickPositionsPanel />
-          <TextFunctionPanel />
-          <HoldKeysPanel />
+          <ResizablePane id="keys">
+            <KeyList />
+          </ResizablePane>
+          <ResizablePane id="options">
+            <OptionsPanel />
+          </ResizablePane>
+          <ResizablePane id="clickPositions">
+            <ClickPositionsPanel />
+          </ResizablePane>
+          <ResizablePane id="textFunction">
+            <TextFunctionPanel />
+          </ResizablePane>
+          <ResizablePane id="holdKeys" last>
+            <HoldKeysPanel />
+          </ResizablePane>
         </div>
         <div className="column">
-          <ProfilesPanel />
-          <LoopPanel />
-          <HotkeyPanel />
-          <HoldKeyPanel
-            field="holdToSpam"
-            title="Hold-to-Spam Key"
-            helper="Hold the key to spam your list, release to stop."
-          />
-          <HoldKeyPanel
-            field="focusHold"
-            title="Focus Hold Key"
-            helper="Hold to rapidly fire ONLY this key/button itself."
-          />
-          <HoldKeyPanel
-            field="rightClickHold"
-            title="Hold for Right-Click"
-            helper="Hold the set key/button to rapidly RIGHT-CLICK; release to stop."
-          />
-          <PeriodicKeyPanel />
+          <ResizablePane id="profiles">
+            <ProfilesPanel />
+          </ResizablePane>
+          <ResizablePane id="loop">
+            <LoopPanel />
+          </ResizablePane>
+          <ResizablePane id="hotkeys">
+            <HotkeyPanel />
+          </ResizablePane>
+          <ResizablePane id="holdToSpam">
+            <HoldKeyPanel
+              field="holdToSpam"
+              title="Hold-to-Spam Key"
+              helper="Hold the key to spam your list, release to stop."
+            />
+          </ResizablePane>
+          <ResizablePane id="focusHold">
+            <HoldKeyPanel
+              field="focusHold"
+              title="Focus Hold Key"
+              helper="Hold to rapidly fire ONLY this key/button itself."
+            />
+          </ResizablePane>
+          <ResizablePane id="rightClickHold">
+            <HoldKeyPanel
+              field="rightClickHold"
+              title="Hold for Right-Click"
+              helper="Hold the set key/button to rapidly RIGHT-CLICK; release to stop."
+            />
+          </ResizablePane>
+          <ResizablePane id="periodicKey" last>
+            <PeriodicKeyPanel />
+          </ResizablePane>
         </div>
       </main>
 

@@ -47,6 +47,8 @@ function migrate(data: PersistedData): PersistedData {
     // their existing keys/positions keep spamming exactly as before.
     if (typeof p.options.enableKeys !== 'boolean') p.options.enableKeys = true
     if (typeof p.options.enableClickPositions !== 'boolean') p.options.enableClickPositions = true
+    // Resizable-layout heights were added later; older saves start unsized.
+    if (!p.sectionHeights || typeof p.sectionHeights !== 'object') p.sectionHeights = {}
   }
 
   // Ensure the active profile id points at something real.
