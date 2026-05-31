@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, Notification } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, Notification, screen } from 'electron'
 import { join } from 'path'
 import type {
   PersistedData,
@@ -16,6 +16,7 @@ import { SpamEngine } from './engine'
 import { GlobalInput } from './hotkeys'
 import { AuxController } from './auxmodes'
 import { getMousePosition } from './input'
+import { pointInRect } from './geometry'
 import { createTray, type TrayHandle } from './tray'
 
 let mainWindow: BrowserWindow | null = null
@@ -99,6 +100,24 @@ function createWindow(): void {
 
 function send(channel: string, payload: unknown): void {
   mainWindow?.webContents.send(channel, payload)
+}
+
+/** Is the main window the OS-focused window right now? */
+function isMainWindowFocused(): boolean {
+  return mainWindow?.isFocused() ?? false
+}
+
+/**
+ * Does a screen point (in physical pixels, as reported by the global mouse hook)
+ * fall inside the visible Auto Spammer window? Window bounds are DIP, so convert
+ * them to physical pixels first to stay correct under display scaling. Used to
+ * drop clicks on our own UI while recording (e.g. the "Stop Recording" button).
+ */
+function isPointInMainWindow(x: number, y: number): boolean {
+  const win = mainWindow
+  if (!win || win.isDestroyed() || !win.isVisible() || win.isMinimized()) return false
+  const rect = screen.dipToScreenRect(win, win.getBounds())
+  return pointInRect(x, y, rect)
 }
 
 // ---------------------------------------------------------------------------
@@ -335,7 +354,9 @@ if (!gotLock) {
       onEmergencyStop: () => {
         engine.stop()
         aux.stopAll()
-      }
+      },
+      isAppFocused: () => isMainWindowFocused(),
+      isPointInAppWindow: (x, y) => isPointInMainWindow(x, y)
     })
 
     registerIpc()

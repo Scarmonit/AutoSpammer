@@ -17,6 +17,10 @@ interface Deps {
   onToggleHold: () => void
   onTogglePeriodic: () => void
   onEmergencyStop: () => void
+  /** Is the Auto Spammer window the focused window right now? */
+  isAppFocused: () => boolean
+  /** Does the given screen point fall inside the (visible) Auto Spammer window? */
+  isPointInAppWindow: (x: number, y: number) => boolean
 }
 
 /**
@@ -189,6 +193,10 @@ export class GlobalInput {
   private onKeyDown(e: UiohookKeyboardEvent): void {
     const token = `k:${e.keycode}`
     if (this.recording) {
+      // Ignore keys typed into our own window (e.g. tabbing around the UI or
+      // hitting Space/Enter on the "Stop Recording" button) — only capture keys
+      // pressed while another app/game is focused.
+      if (this.deps.isAppFocused()) return
       this.deps.onRecorded({ kind: 'key', key: nameForKeycode(e.keycode) })
       return
     }
@@ -205,13 +213,18 @@ export class GlobalInput {
 
   private onMouseDown(e: UiohookMouseEvent): void {
     const token = `m:${e.button}`
-    if (this.recording) {
-      this.deps.onRecorded({ kind: e.button === 2 ? 'mouse-right' : 'mouse-left', key: '' })
-      return
-    }
-    if (this.recordingPositions) {
-      // Only left (1) / right (2) clicks become positions; ignore middle etc.
-      if (e.button === 1 || e.button === 2) {
+    if (this.recording || this.recordingPositions) {
+      // Ignore clicks that land inside our own window — most importantly the
+      // "Stop Recording" button. A coordinate (not focus) test is used because
+      // the click that switches focus back to Auto Spammer fires through the
+      // global hook *before* the window is marked focused. Only clicks in other
+      // windows/games get recorded.
+      if (this.deps.isPointInAppWindow(e.x, e.y)) return
+
+      if (this.recording) {
+        this.deps.onRecorded({ kind: e.button === 2 ? 'mouse-right' : 'mouse-left', key: '' })
+      } else if (e.button === 1 || e.button === 2) {
+        // Only left (1) / right (2) clicks become positions; ignore middle etc.
         this.deps.onRecordPositionAt(e.x, e.y, e.button === 2 ? 'right' : 'left')
       }
       return

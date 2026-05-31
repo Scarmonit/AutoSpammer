@@ -21,11 +21,11 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.6.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.6.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.6.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.6.1.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.6.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.6.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.6.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.6.1.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -43,6 +43,8 @@ and grab either file under **Assets**.)*
 2. In **Keys to Spam** (left side), type the key you want repeated — any key works,
    e.g. `a`, `space`, `1`, `f6`, `-`, `=`, `/`, or `numpad5`. Click **+ Add Key**
    for more, or click **Record** and press keys to capture them automatically.
+   While recording, focus the game/app you're capturing for — keys and clicks
+   inside the Auto Spammer window (like the Stop button) are ignored.
    - The **"Will spam:"** line shows exactly what will be pressed.
 3. (Optional) Set how fast under **Default Delay** — lower number = faster
    (10 ms ≈ very fast). Each key can have its own delay too.
@@ -83,7 +85,8 @@ three ways to add spots:
    turns red and pulses; now *every* left or right click you make anywhere on screen
    is saved automatically as a new position, with the correct mouse button. This also
    works while a game is focused (global mouse hook). Click **■ Stop Recording** when
-   you're done.
+   you're done — clicks on the Auto Spammer window itself (including the Stop button)
+   are ignored, so only your in-game clicks get recorded.
 3. Each recorded spot shows its coordinates and an **L/R** button you can click to
    switch between left/right click. Give it its own delay, or remove it with **×**.
 
