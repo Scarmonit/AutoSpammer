@@ -33,7 +33,7 @@ export function MacroPanel(): JSX.Element {
     data,
     activeProfile,
     status,
-    updateSettings,
+    assignBinding,
     macroRecording,
     macroPlaying,
     toggleMacroRecording,
@@ -84,7 +84,7 @@ export function MacroPanel(): JSX.Element {
           label={`Set Record Hotkey (${recordHotkey || 'unset'})`}
           mode="accelerator"
           className="btn--ghost"
-          onCapture={(accel) => void updateSettings({ macroRecordHotkey: accel })}
+          onCapture={(accel) => void assignBinding('macroRecordHotkey', accel)}
         />
       </div>
 

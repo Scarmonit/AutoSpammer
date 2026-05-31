@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function HoldKeyPanel({ field, title, helper }: Props): JSX.Element {
-  const { activeProfile, updateProfile } = useStore()
+  const { activeProfile, updateProfile, assignBinding } = useStore()
   if (!activeProfile) return <></>
   const cfg: HoldConfig = activeProfile[field]
 
@@ -36,7 +36,7 @@ export function HoldKeyPanel({ field, title, helper }: Props): JSX.Element {
         mode="name"
         allowMouse
         className="btn--ghost"
-        onCapture={(name) => patch({ key: name })}
+        onCapture={(name) => void assignBinding(field, name)}
       />
 
       <div className="field" style={{ marginTop: 8 }}>

@@ -25,11 +25,11 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.11.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.11.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.12.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.12.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.11.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.11.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.12.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.12.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -179,6 +179,12 @@ exactly the layout you left.
 | **F9** | Toggle Periodic Key |
 | **F10** | Start / stop macro recording |
 | **Esc** | Emergency stop (stops everything, releases held keys) |
+
+> 🔒 **No double-binding:** every hotkey and hold-trigger key shares one pool, so a
+> key (or mouse button) can only drive one action. If you try to assign a key that's
+> already in use, the change is rejected and a red banner appears at the top —
+> e.g. *"The key F is already bound to Focus Hold Key"*. Keyboard keys **and** mouse
+> buttons are both checked.
 
 ---
 

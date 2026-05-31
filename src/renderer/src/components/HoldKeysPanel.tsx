@@ -4,7 +4,7 @@ import { Section } from './Section'
 import { CaptureButton } from './CaptureButton'
 
 export function HoldKeysPanel(): JSX.Element {
-  const { data, activeProfile, aux, updateProfile, updateSettings, toggleHold } = useStore()
+  const { data, activeProfile, aux, updateProfile, assignBinding, toggleHold } = useStore()
   if (!data || !activeProfile) return <></>
 
   const keys = activeProfile.holdKeys.keys
@@ -64,7 +64,7 @@ export function HoldKeysPanel(): JSX.Element {
           label={`Change (${hotkey || 'unset'})`}
           mode="accelerator"
           className="btn--ghost"
-          onCapture={(accel) => void updateSettings({ holdKeysHotkey: accel })}
+          onCapture={(accel) => void assignBinding('holdKeysHotkey', accel)}
         />
       </div>
     </Section>

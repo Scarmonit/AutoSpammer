@@ -4,7 +4,7 @@ import { Section } from './Section'
 import { CaptureButton } from './CaptureButton'
 
 export function PeriodicKeyPanel(): JSX.Element {
-  const { data, activeProfile, aux, updateProfile, updateSettings, togglePeriodic } = useStore()
+  const { data, activeProfile, aux, updateProfile, assignBinding, togglePeriodic } = useStore()
   if (!data || !activeProfile) return <></>
 
   const pk = activeProfile.periodicKey
@@ -62,7 +62,7 @@ export function PeriodicKeyPanel(): JSX.Element {
           label={`Change (${hotkey || 'unset'})`}
           mode="accelerator"
           className="btn--ghost"
-          onCapture={(accel) => void updateSettings({ periodicKeyHotkey: accel })}
+          onCapture={(accel) => void assignBinding('periodicKeyHotkey', accel)}
         />
       </div>
     </Section>

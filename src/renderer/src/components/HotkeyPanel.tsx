@@ -4,7 +4,7 @@ import { Section } from './Section'
 import { CaptureButton } from './CaptureButton'
 
 export function HotkeyPanel(): JSX.Element {
-  const { data, updateSettings } = useStore()
+  const { data, assignBinding } = useStore()
   if (!data) return <></>
 
   return (
@@ -17,7 +17,7 @@ export function HotkeyPanel(): JSX.Element {
         label="Change Key"
         mode="accelerator"
         className="btn--ghost"
-        onCapture={(accel) => void updateSettings({ toggleHotkey: accel })}
+        onCapture={(accel) => void assignBinding('toggleHotkey', accel)}
       />
       <p className="helper">Starts / stops spamming even when this window is unfocused.</p>
 
@@ -29,7 +29,7 @@ export function HotkeyPanel(): JSX.Element {
         label="Change Emergency Key"
         mode="accelerator"
         className="btn--ghost"
-        onCapture={(accel) => void updateSettings({ emergencyHotkey: accel })}
+        onCapture={(accel) => void assignBinding('emergencyHotkey', accel)}
       />
       <p className="helper">Instantly stops spamming while it is running.</p>
     </Section>

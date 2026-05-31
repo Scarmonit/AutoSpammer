@@ -10,7 +10,7 @@ export function ClickPositionsPanel(): JSX.Element {
     data,
     activeProfile,
     updateProfile,
-    updateSettings,
+    assignBinding,
     patchOptions,
     addCurrentPosition,
     recordingPositions,
@@ -54,7 +54,7 @@ export function ClickPositionsPanel(): JSX.Element {
           label={`Change (${recordHotkey || 'unset'})`}
           mode="accelerator"
           className="btn--ghost"
-          onCapture={(accel) => void updateSettings({ recordPositionHotkey: accel })}
+          onCapture={(accel) => void assignBinding('recordPositionHotkey', accel)}
         />
       </div>
 

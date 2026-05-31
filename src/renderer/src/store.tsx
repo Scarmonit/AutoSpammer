@@ -10,6 +10,13 @@ import type {
   AuxStatus
 } from '@shared/types'
 import { makeId } from '@shared/defaults'
+import {
+  collectBindings,
+  findBindingConflict,
+  conflictMessage,
+  isHoldField,
+  type BindingField
+} from '@shared/bindings'
 
 type Message = { kind: 'error' | 'info'; text: string } | null
 
@@ -41,6 +48,11 @@ interface Store {
   setActiveProfile: (id: string) => Promise<void>
   saveNow: () => Promise<void>
   updateSettings: (patch: Partial<AppSettings>) => Promise<void>
+  /**
+   * Assign a hotkey / hold-trigger binding after checking it isn't already in
+   * use. On conflict the binding is rejected and an error toast is shown.
+   */
+  assignBinding: (field: BindingField, value: string) => Promise<void>
 
   start: () => Promise<void>
   stop: () => Promise<void>
@@ -222,6 +234,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     []
   )
 
+  const assignBinding = useCallback(
+    async (field: BindingField, value: string) => {
+      const current = dataRef.current
+      const profile = current?.profiles.find((p) => p.id === current.settings.activeProfileId)
+      if (!current || !profile) return
+
+      const conflict = findBindingConflict(
+        collectBindings(current.settings, profile),
+        field,
+        value
+      )
+      if (conflict) {
+        setMessage({ kind: 'error', text: conflictMessage(value, conflict.feature) })
+        return
+      }
+
+      if (isHoldField(field)) {
+        updateProfile((p) => ({ ...p, [field]: { ...p[field], key: value } }))
+      } else {
+        await updateSettings({ [field]: value })
+      }
+    },
+    [updateProfile, updateSettings]
+  )
+
   const saveNow = useCallback(async () => {
     const current = dataRef.current
     const prof = current?.profiles.find((p) => p.id === current.settings.activeProfileId)
@@ -359,6 +396,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     setActiveProfile,
     saveNow,
     updateSettings,
+    assignBinding,
     start,
     stop,
     toggleRecording,
