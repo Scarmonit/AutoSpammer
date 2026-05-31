@@ -113,6 +113,43 @@ export async function getMousePosition(): Promise<MousePoint> {
   return { x: Math.round(p.x), y: Math.round(p.y) }
 }
 
+// ---------------------------------------------------------------------------
+// Low-level primitives for macro playback. These reproduce individual recorded
+// events (separate down/up, raw moves) rather than complete press/click cycles.
+// Macro playback runs with the global hook suppressed, so no synthetic-up
+// accounting is needed here.
+// ---------------------------------------------------------------------------
+function nutButton(button: 'left' | 'right' | 'middle'): Button {
+  if (button === 'right') return Button.RIGHT
+  if (button === 'middle') return Button.MIDDLE
+  return Button.LEFT
+}
+
+/** Move the cursor to an absolute screen position (no click). */
+export async function mouseMove(x: number, y: number): Promise<void> {
+  await mouse.setPosition(new Point(Math.round(x), Math.round(y)))
+}
+
+export async function mouseButtonDown(button: 'left' | 'right' | 'middle'): Promise<void> {
+  await mouse.pressButton(nutButton(button))
+}
+
+export async function mouseButtonUp(button: 'left' | 'right' | 'middle'): Promise<void> {
+  await mouse.releaseButton(nutButton(button))
+}
+
+/** Press a single key DOWN (no release). No-op for keys nut-js can't hold. */
+export async function keyDownName(name: string): Promise<void> {
+  const key = nutHoldKey(name)
+  if (key !== null) await keyboard.pressKey(key)
+}
+
+/** Release a single key. No-op for keys nut-js can't hold. */
+export async function keyUpName(name: string): Promise<void> {
+  const key = nutHoldKey(name)
+  if (key !== null) await keyboard.releaseKey(key)
+}
+
 /** Press a key DOWN and keep it held. Returns false if the key can't be held. */
 export async function holdKeyDown(name: string): Promise<boolean> {
   const key = nutHoldKey(name)

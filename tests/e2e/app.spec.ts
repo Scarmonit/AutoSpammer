@@ -12,8 +12,9 @@ import { join } from 'path'
 let app: ElectronApplication
 let win: Page
 
-/** A panel scoped by its heading (class names repeat across panels). */
-const section = (heading: string): Locator => win.locator('.section', { hasText: heading })
+/** A panel scoped by its exact heading (matching body text must not interfere). */
+const section = (heading: string): Locator =>
+  win.locator('.section').filter({ has: win.getByRole('heading', { name: heading, exact: true }) })
 
 test.beforeAll(async () => {
   const userDataDir = mkdtempSync(join(tmpdir(), 'autospammer-e2e-'))
@@ -44,6 +45,7 @@ test('renders all the core panels', async () => {
     'Options',
     'Click Positions',
     'Hold Keys Down',
+    'Macro',
     'Profiles',
     'Loop',
     'Periodic Key'
@@ -80,16 +82,41 @@ test('Click Positions exposes the Record Clicks button', async () => {
 })
 
 test('renders draggable splitters between sections', async () => {
-  // Two columns of 5 and 7 sections -> 4 + 6 = 10 splitters (last pane per column
+  // Two columns of 6 and 7 sections -> 5 + 6 = 11 splitters (last pane per column
   // has none).
   const splitters = win.locator('.rs-splitter')
-  await expect(splitters).toHaveCount(10)
+  await expect(splitters).toHaveCount(11)
   await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
 })
 
+test('Macro section exposes record + set-hotkey controls', async () => {
+  const macro = section('Macro')
+  await expect(macro.getByRole('button', { name: '● Record' })).toBeVisible()
+  await expect(macro.getByRole('button', { name: /Set Record Hotkey/ })).toBeVisible()
+  await expect(macro.getByRole('button', { name: '▶ Play' })).toBeVisible()
+})
+
+test('enabling Macro disables Keys to Spam and Click Positions', async () => {
+  const macro = section('Macro')
+  const keysToggle = section('Keys to Spam').locator('.section__toggle input')
+  const posToggle = section('Click Positions').locator('.section__toggle input')
+
+  // Make sure the spam sources start enabled.
+  if (!(await keysToggle.isChecked())) await keysToggle.check()
+  if (!(await posToggle.isChecked())) await posToggle.check()
+
+  await macro.locator('.section__toggle input').check()
+  await expect(keysToggle).not.toBeChecked()
+  await expect(posToggle).not.toBeChecked()
+
+  // Re-enabling a spam source turns Macro back off.
+  await keysToggle.check()
+  await expect(macro.locator('.section__toggle input')).not.toBeChecked()
+})
+
 test('every section can be hidden/shown via its header toggle', async () => {
-  // 5 sections (left) + 7 sections (right) = 12 collapse buttons.
-  await expect(win.locator('.section__collapse')).toHaveCount(12)
+  // 6 sections (left) + 7 sections (right) = 13 collapse buttons.
+  await expect(win.locator('.section__collapse')).toHaveCount(13)
 
   const keys = section('Keys to Spam')
   await expect(keys.locator('.section__body')).toBeVisible()

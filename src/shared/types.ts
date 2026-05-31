@@ -68,6 +68,30 @@ export interface PeriodicKeyConfig {
   intervalSec: number
 }
 
+/** One recorded input event in a macro. */
+export type MacroEventType = 'key-down' | 'key-up' | 'mouse-down' | 'mouse-up' | 'mouse-move'
+
+export interface MacroEvent {
+  id: string
+  type: MacroEventType
+  /** Milliseconds to wait BEFORE firing this event (relative to the previous one). Editable. */
+  delayMs: number
+  /** Logical key name for key events (e.g. "a", "shift", "f5"). */
+  key?: string
+  /** Mouse button for mouse-down / mouse-up events. */
+  button?: 'left' | 'right' | 'middle'
+  /** Absolute screen coordinates for mouse events. */
+  x?: number
+  y?: number
+}
+
+/** A full keyboard + mouse recording that can be replayed. */
+export interface MacroConfig {
+  /** When on, Keys to Spam and Click Positions are forced off (mutually exclusive). */
+  enabled: boolean
+  events: MacroEvent[]
+}
+
 export interface Profile {
   id: string
   name: string
@@ -92,6 +116,8 @@ export interface Profile {
    * `true` = collapsed; a missing id means the section is expanded.
    */
   collapsedSections: Record<string, boolean>
+  /** Full keyboard + mouse macro recording for this profile. */
+  macro: MacroConfig
 }
 
 export interface AppSettings {
@@ -105,6 +131,8 @@ export interface AppSettings {
   holdKeysHotkey: string
   /** Global hotkey to toggle the periodic key press, e.g. "F9". */
   periodicKeyHotkey: string
+  /** Global hotkey to start/stop macro recording, e.g. "F10". */
+  macroRecordHotkey: string
   activeProfileId: string
 }
 

@@ -3,7 +3,14 @@ import { uIOhook, type UiohookKeyboardEvent, type UiohookMouseEvent } from 'uioh
 import type { Profile, AppSettings, RecordedKey, HotkeyConflict, SpamMode } from '@shared/types'
 import type { SpamEngine } from './engine'
 import { consumeSyntheticUp } from './input'
-import { nameForKeycode, keycodeForName } from './keymap'
+import { nameForKeycode, keycodeForName, parseAccelerator, type ParsedAccelerator } from './keymap'
+
+type MouseButton = 'left' | 'right' | 'middle'
+
+/** Map a uiohook mouse button number to our logical button name. */
+function mouseButtonName(button: unknown): MouseButton {
+  return button === 2 ? 'right' : button === 3 ? 'middle' : 'left'
+}
 
 interface Deps {
   getProfile: () => Profile
@@ -21,6 +28,14 @@ interface Deps {
   isAppFocused: () => boolean
   /** Does the given screen point fall inside the (visible) Auto Spammer window? */
   isPointInAppWindow: (x: number, y: number) => boolean
+  /** The macro record hotkey was pressed — toggle recording in the main process. */
+  onMacroToggleHotkey: () => void
+  /** Forward a captured key event while a macro is recording. */
+  onMacroKey: (type: 'down' | 'up', name: string) => void
+  /** Forward a captured mouse button event while a macro is recording. */
+  onMacroMouse: (type: 'down' | 'up', button: MouseButton, x: number, y: number) => void
+  /** Forward a captured mouse movement while a macro is recording. */
+  onMacroMove: (x: number, y: number) => void
 }
 
 /**
@@ -32,6 +47,11 @@ export class GlobalInput {
   private started = false
   private recording = false
   private recordingPositions = false
+  private macroRecording = false
+  private macroPlaying = false
+  private macroHotkey: ParsedAccelerator | null = null
+  // Keycodes whose next key-up should be swallowed (the macro hotkey's own key).
+  private suppressUpCodes = new Set<number>()
   private registerTimer: NodeJS.Timeout | null = null
 
   // Token of the physical key currently driving a hold-mode run, plus which
@@ -49,6 +69,7 @@ export class GlobalInput {
     uIOhook.on('keyup', (e) => this.onKeyUp(e))
     uIOhook.on('mousedown', (e) => this.onMouseDown(e))
     uIOhook.on('mouseup', (e) => this.onMouseUp(e))
+    uIOhook.on('mousemove', (e) => this.onMouseMove(e))
 
     try {
       uIOhook.start()
@@ -91,6 +112,10 @@ export class GlobalInput {
   /** Re-register the always-on accelerators; emergency is managed by setEmergencyArmed(). */
   private registerHotkeys(): void {
     const s = this.deps.getSettings()
+
+    // The macro record hotkey is detected via the raw uiohook stream (not a
+    // globalShortcut) so we can exclude its own key press from the recording.
+    this.macroHotkey = parseAccelerator(s.macroRecordHotkey)
 
     for (const accel of this.registered) globalShortcut.unregister(accel)
     this.registered.clear()
@@ -187,11 +212,47 @@ export class GlobalInput {
     this.recordingPositions = on
   }
 
+  /** Toggle full macro recording — routes raw input to the macro recorder. */
+  setMacroRecording(on: boolean): void {
+    this.macroRecording = on
+  }
+
+  /** Suppress all global-hook handling while a macro is playing back. */
+  setMacroPlaying(on: boolean): void {
+    this.macroPlaying = on
+  }
+
+  private matchesMacroHotkey(e: UiohookKeyboardEvent): boolean {
+    const m = this.macroHotkey
+    return (
+      m !== null &&
+      e.keycode === m.code &&
+      e.ctrlKey === m.ctrl &&
+      e.altKey === m.alt &&
+      e.shiftKey === m.shift &&
+      e.metaKey === m.meta
+    )
+  }
+
   // -------------------------------------------------------------------------
   // Physical hold detection
   // -------------------------------------------------------------------------
   private onKeyDown(e: UiohookKeyboardEvent): void {
-    const token = `k:${e.keycode}`
+    // The macro hotkey toggles recording and is never itself recorded. We also
+    // swallow its key-up (start or stop) so it can't leak into the macro.
+    if (this.matchesMacroHotkey(e)) {
+      this.suppressUpCodes.add(e.keycode)
+      this.deps.onMacroToggleHotkey()
+      return
+    }
+    if (this.macroPlaying) return
+
+    if (this.macroRecording) {
+      // Skip input aimed at our own window (e.g. clicking around the UI).
+      if (!this.deps.isAppFocused()) this.deps.onMacroKey('down', nameForKeycode(e.keycode))
+      return
+    }
+
     if (this.recording) {
       // Ignore keys typed into our own window (e.g. tabbing around the UI or
       // hitting Space/Enter on the "Stop Recording" button) — only capture keys
@@ -202,17 +263,33 @@ export class GlobalInput {
     }
     // Down events need no synthetic filtering: while a run is active the
     // start guard ignores them, and while idle no synthetic input exists.
-    this.handleHoldDown(token)
+    this.handleHoldDown(`k:${e.keycode}`)
   }
 
   private onKeyUp(e: UiohookKeyboardEvent): void {
+    if (this.suppressUpCodes.delete(e.keycode)) return // the macro hotkey's own key-up
+    if (this.macroPlaying) return
+
+    if (this.macroRecording) {
+      if (!this.deps.isAppFocused()) this.deps.onMacroKey('up', nameForKeycode(e.keycode))
+      return
+    }
+
     const token = `k:${e.keycode}`
     if (consumeSyntheticUp(token)) return // our own simulated key-up
     this.handleHoldUp(token)
   }
 
   private onMouseDown(e: UiohookMouseEvent): void {
-    const token = `m:${e.button}`
+    if (this.macroPlaying) return
+
+    if (this.macroRecording) {
+      if (!this.deps.isPointInAppWindow(e.x, e.y)) {
+        this.deps.onMacroMouse('down', mouseButtonName(e.button), e.x, e.y)
+      }
+      return
+    }
+
     if (this.recording || this.recordingPositions) {
       // Ignore clicks that land inside our own window — most importantly the
       // "Stop Recording" button. A coordinate (not focus) test is used because
@@ -229,13 +306,28 @@ export class GlobalInput {
       }
       return
     }
-    this.handleHoldDown(token)
+    this.handleHoldDown(`m:${e.button}`)
   }
 
   private onMouseUp(e: UiohookMouseEvent): void {
+    if (this.macroPlaying) return
+
+    if (this.macroRecording) {
+      if (!this.deps.isPointInAppWindow(e.x, e.y)) {
+        this.deps.onMacroMouse('up', mouseButtonName(e.button), e.x, e.y)
+      }
+      return
+    }
+
     const token = `m:${e.button}`
     if (consumeSyntheticUp(token)) return // our own simulated mouse-up
     this.handleHoldUp(token)
+  }
+
+  private onMouseMove(e: UiohookMouseEvent): void {
+    if (this.macroPlaying || !this.macroRecording) return
+    if (this.deps.isPointInAppWindow(e.x, e.y)) return
+    this.deps.onMacroMove(e.x, e.y)
   }
 
   private handleHoldDown(token: string): void {

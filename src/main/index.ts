@@ -8,7 +8,7 @@ import type {
   RecordedKey,
   HotkeyConflict
 } from '@shared/types'
-import type { ClickPosition, AuxStatus } from '@shared/types'
+import type { ClickPosition, AuxStatus, MacroConfig, MacroEvent } from '@shared/types'
 import { IPC } from '@shared/ipc'
 import { createDefaultProfile, makeId } from '@shared/defaults'
 import { loadData, saveData, flushDataSync, activeProfile } from './persistence'
@@ -17,6 +17,8 @@ import { GlobalInput } from './hotkeys'
 import { AuxController } from './auxmodes'
 import { getMousePosition } from './input'
 import { pointInRect } from './geometry'
+import { parseAccelerator } from './keymap'
+import { MacroRecorder, MacroPlayer } from './macro'
 import { createTray, type TrayHandle } from './tray'
 
 let mainWindow: BrowserWindow | null = null
@@ -24,6 +26,8 @@ let data: PersistedData
 let engine: SpamEngine
 let globalInput: GlobalInput
 let aux: AuxController
+let macroRecorder: MacroRecorder
+let macroPlayer: MacroPlayer
 let trayHandle: TrayHandle | null = null
 let isQuitting = false
 let trayHintShown = false
@@ -173,8 +177,50 @@ function sanitizeProfile(p: Profile): Profile {
       delayMs: clampInt(p.rightClickHold?.delayMs, 1, 600000, 10)
     },
     sectionHeights: sanitizeSectionHeights(p.sectionHeights),
-    collapsedSections: sanitizeCollapsedSections(p.collapsedSections)
+    collapsedSections: sanitizeCollapsedSections(p.collapsedSections),
+    macro: sanitizeMacro(p.macro)
   }
+}
+
+const MACRO_EVENT_TYPES = new Set<MacroEvent['type']>([
+  'key-down',
+  'key-up',
+  'mouse-down',
+  'mouse-up',
+  'mouse-move'
+])
+
+/** Validate a persisted/edited macro: known event types, clamped delays/coords. */
+function sanitizeMacro(raw: unknown): MacroConfig {
+  const r = (raw ?? {}) as Partial<MacroConfig>
+  const events = Array.isArray(r.events) ? r.events : []
+  return {
+    enabled: r.enabled === true,
+    events: events
+      .slice(0, 50000)
+      .map(sanitizeMacroEvent)
+      .filter((e): e is MacroEvent => e !== null)
+  }
+}
+
+function sanitizeMacroEvent(raw: unknown): MacroEvent | null {
+  const e = (raw ?? {}) as Partial<MacroEvent>
+  if (!e.type || !MACRO_EVENT_TYPES.has(e.type)) return null
+  const ev: MacroEvent = {
+    id: typeof e.id === 'string' ? e.id : makeId('mev'),
+    type: e.type,
+    delayMs: clampInt(e.delayMs, 0, 600000, 0)
+  }
+  if (e.type === 'key-down' || e.type === 'key-up') {
+    ev.key = String(e.key ?? '')
+  } else {
+    ev.x = clampInt(e.x, -100000, 100000, 0)
+    ev.y = clampInt(e.y, -100000, 100000, 0)
+    if (e.type !== 'mouse-move') {
+      ev.button = e.button === 'right' ? 'right' : e.button === 'middle' ? 'middle' : 'left'
+    }
+  }
+  return ev
 }
 
 /** Keep only finite, sanely-clamped pixel heights keyed by a section id. */
@@ -295,6 +341,16 @@ function registerIpc(): void {
   })
 
   ipcMain.handle(IPC.GetAuxStatus, () => aux.getStatus())
+
+  ipcMain.handle(IPC.MacroRecordStart, () => startMacroRecording())
+  ipcMain.handle(IPC.MacroRecordStop, () => stopMacroRecording())
+
+  ipcMain.handle(IPC.MacroPlay, (_e, events: MacroEvent[]) => {
+    if (macroPlayer.isPlaying() || macroRecorder.isRecording()) return
+    void macroPlayer.play(Array.isArray(events) ? events : [])
+  })
+
+  ipcMain.handle(IPC.MacroStopPlay, () => macroPlayer.stop())
 }
 
 /**
@@ -324,6 +380,36 @@ function appendClickPosition(x: number, y: number, button: 'left' | 'right'): vo
 async function recordCurrentPosition(): Promise<void> {
   const { x, y } = await getMousePosition()
   appendClickPosition(x, y, 'left')
+}
+
+// ---------------------------------------------------------------------------
+// Macro recording / playback
+// ---------------------------------------------------------------------------
+function startMacroRecording(): void {
+  if (macroRecorder.isRecording()) return
+  macroRecorder.start()
+  globalInput.setMacroRecording(true)
+  send(IPC.MacroRecording, true)
+}
+
+function stopMacroRecording(): void {
+  if (!macroRecorder.isRecording()) return
+  // The hotkey that stopped us (and its modifiers) must not pollute the macro.
+  const combo = parseAccelerator(data.settings.macroRecordHotkey)
+  const events = macroRecorder.stop(
+    combo ? { ctrl: combo.ctrl, alt: combo.alt, shift: combo.shift, meta: combo.meta } : undefined
+  )
+  globalInput.setMacroRecording(false)
+  const profile = activeProfile(data)
+  profile.macro = { ...profile.macro, events }
+  saveData(data)
+  send(IPC.MacroRecording, false)
+  send(IPC.DataUpdated, data) // push the freshly recorded events to the renderer
+}
+
+function toggleMacroRecording(): void {
+  if (macroRecorder.isRecording()) stopMacroRecording()
+  else startMacroRecording()
 }
 
 // ---------------------------------------------------------------------------
@@ -379,7 +465,26 @@ if (!gotLock) {
         aux.stopAll()
       },
       isAppFocused: () => isMainWindowFocused(),
-      isPointInAppWindow: (x, y) => isPointInMainWindow(x, y)
+      isPointInAppWindow: (x, y) => isPointInMainWindow(x, y),
+      onMacroToggleHotkey: () => toggleMacroRecording(),
+      onMacroKey: (type, name) =>
+        type === 'down' ? macroRecorder.keyDown(name) : macroRecorder.keyUp(name),
+      onMacroMouse: (type, button, x, y) =>
+        type === 'down' ? macroRecorder.mouseDown(button, x, y) : macroRecorder.mouseUp(button, x, y),
+      onMacroMove: (x, y) => macroRecorder.mouseMove(x, y)
+    })
+
+    macroRecorder = new MacroRecorder()
+    macroPlayer = new MacroPlayer({
+      onStart: () => {
+        globalInput.setMacroPlaying(true)
+        send(IPC.MacroPlaying, true)
+      },
+      onStop: () => {
+        globalInput.setMacroPlaying(false)
+        send(IPC.MacroPlaying, false)
+      },
+      onError: (message: string) => send(IPC.ErrorEvent, message)
     })
 
     registerIpc()
@@ -428,6 +533,11 @@ if (!gotLock) {
     }
     try {
       aux?.stopAll() // release any held keys / stop the periodic timer
+    } catch {
+      /* ignore */
+    }
+    try {
+      macroPlayer?.stop() // cancel any in-flight macro playback
     } catch {
       /* ignore */
     }

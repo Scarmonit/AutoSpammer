@@ -21,6 +21,8 @@ interface Store {
   aux: AuxStatus
   recording: boolean
   recordingPositions: boolean
+  macroRecording: boolean
+  macroPlaying: boolean
   message: Message
   dismissMessage: () => void
 
@@ -47,6 +49,15 @@ interface Store {
   addCurrentPosition: () => Promise<void>
   toggleHold: () => Promise<void>
   togglePeriodic: () => Promise<void>
+
+  /** Enable/disable the macro (mutually exclusive with Keys to Spam / Click Positions). */
+  setMacroEnabled: (enabled: boolean) => void
+  toggleMacroRecording: () => Promise<void>
+  playMacro: () => Promise<void>
+  stopMacro: () => Promise<void>
+  clearMacro: () => void
+  /** Edit the delay (ms) before a given recorded event. */
+  setMacroEventDelay: (id: string, delayMs: number) => void
 }
 
 const Ctx = createContext<Store | null>(null)
@@ -59,6 +70,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
   const [aux, setAux] = useState<AuxStatus>({ holdActive: false, periodicActive: false })
   const [recording, setRecording] = useState(false)
   const [recordingPositions, setRecordingPositions] = useState(false)
+  const [macroRecording, setMacroRecording] = useState(false)
+  const [macroPlaying, setMacroPlaying] = useState(false)
   const [message, setMessage] = useState<Message>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const dataRef = useRef<PersistedData | null>(null)
@@ -92,6 +105,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
       }
       updateProfileRef.current((p) => ({ ...p, entries: [...p.entries, entry] }))
     })
+    // Macro recording can be toggled by its global hotkey, so mirror main's state.
+    const offMacroRec = window.api.onMacroRecording((rec) => {
+      setMacroRecording(rec)
+      if (rec) {
+        setMessage({
+          kind: 'info',
+          text: 'Recording macro… do anything, then press the record hotkey (or Stop) to finish.'
+        })
+      } else {
+        setMessage(null)
+      }
+    })
+    const offMacroPlay = window.api.onMacroPlaying(setMacroPlaying)
 
     return () => {
       offStatus()
@@ -100,6 +126,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
       offData()
       offAux()
       offRecorded()
+      offMacroRec()
+      offMacroPlay()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -135,7 +163,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
 
   const patchOptions = useCallback(
     (patch: Partial<Options>) => {
-      updateProfile((p) => ({ ...p, options: { ...p.options, ...patch } }))
+      updateProfile((p) => {
+        const options = { ...p.options, ...patch }
+        // Mutual exclusivity: turning on a spam source switches the macro off.
+        const turningOnSpam = patch.enableKeys === true || patch.enableClickPositions === true
+        const macro = turningOnSpam && p.macro.enabled ? { ...p.macro, enabled: false } : p.macro
+        return { ...p, options, macro }
+      })
     },
     [updateProfile]
   )
@@ -244,6 +278,56 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     }
   }, [recordingPositions])
 
+  // Mutual exclusivity: enabling the macro forces the spam sources off.
+  const setMacroEnabled = useCallback(
+    (enabled: boolean) => {
+      updateProfile((p) => ({
+        ...p,
+        macro: { ...p.macro, enabled },
+        options: enabled
+          ? { ...p.options, enableKeys: false, enableClickPositions: false }
+          : p.options
+      }))
+    },
+    [updateProfile]
+  )
+
+  const toggleMacroRecording = useCallback(async () => {
+    // The actual recording flag is owned by the main process; we just ask it to
+    // toggle and let the onMacroRecording event update our state + message.
+    if (macroRecording) await window.api.macroRecordStop()
+    else await window.api.macroRecordStart()
+  }, [macroRecording])
+
+  const playMacro = useCallback(async () => {
+    const events = dataRef.current?.profiles.find(
+      (p) => p.id === dataRef.current?.settings.activeProfileId
+    )?.macro.events
+    await window.api.macroPlay(events ?? [])
+  }, [])
+
+  const stopMacro = useCallback(async () => {
+    await window.api.macroStopPlay()
+  }, [])
+
+  const clearMacro = useCallback(() => {
+    updateProfile((p) => ({ ...p, macro: { ...p.macro, events: [] } }))
+  }, [updateProfile])
+
+  const setMacroEventDelay = useCallback(
+    (id: string, delayMs: number) => {
+      const clamped = Math.max(0, Math.round(delayMs) || 0)
+      updateProfile((p) => ({
+        ...p,
+        macro: {
+          ...p.macro,
+          events: p.macro.events.map((e) => (e.id === id ? { ...e, delayMs: clamped } : e))
+        }
+      }))
+    },
+    [updateProfile]
+  )
+
   const value: Store = {
     loaded: data !== null,
     data,
@@ -252,6 +336,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     aux,
     recording,
     recordingPositions,
+    macroRecording,
+    macroPlaying,
     message,
     dismissMessage: () => setMessage(null),
     updateProfile,
@@ -271,7 +357,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     toggleRecordingPositions,
     addCurrentPosition,
     toggleHold,
-    togglePeriodic
+    togglePeriodic,
+    setMacroEnabled,
+    toggleMacroRecording,
+    playMacro,
+    stopMacro,
+    clearMacro,
+    setMacroEventDelay
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

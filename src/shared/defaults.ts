@@ -59,7 +59,11 @@ export function createDefaultProfile(name = 'Default'): Profile {
       delayMs: 10
     },
     sectionHeights: {},
-    collapsedSections: {}
+    collapsedSections: {},
+    macro: {
+      enabled: false,
+      events: []
+    }
   }
 }
 
@@ -70,6 +74,7 @@ export function createDefaultSettings(activeProfileId: string): AppSettings {
     recordPositionHotkey: 'F7',
     holdKeysHotkey: 'F8',
     periodicKeyHotkey: 'F9',
+    macroRecordHotkey: 'F10',
     activeProfileId
   }
 }

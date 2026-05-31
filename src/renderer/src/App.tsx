@@ -10,6 +10,7 @@ import { HotkeyPanel } from './components/HotkeyPanel'
 import { HoldKeyPanel } from './components/HoldKeyPanel'
 import { HoldKeysPanel } from './components/HoldKeysPanel'
 import { PeriodicKeyPanel } from './components/PeriodicKeyPanel'
+import { MacroPanel } from './components/MacroPanel'
 import { StatusIndicator } from './components/StatusIndicator'
 import { BottomBar } from './components/BottomBar'
 import { ResizablePane } from './components/ResizablePane'
@@ -60,8 +61,11 @@ export function App(): JSX.Element {
           <ResizablePane id="textFunction">
             <TextFunctionPanel />
           </ResizablePane>
-          <ResizablePane id="holdKeys" last>
+          <ResizablePane id="holdKeys">
             <HoldKeysPanel />
+          </ResizablePane>
+          <ResizablePane id="macro" last>
+            <MacroPanel />
           </ResizablePane>
         </div>
         <div className="column">

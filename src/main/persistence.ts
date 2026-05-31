@@ -51,6 +51,9 @@ function migrate(data: PersistedData): PersistedData {
     if (!p.sectionHeights || typeof p.sectionHeights !== 'object') p.sectionHeights = {}
     // Collapsed-section state was added later; older saves start all-expanded.
     if (!p.collapsedSections || typeof p.collapsedSections !== 'object') p.collapsedSections = {}
+    // The macro recorder was added later; older saves start with an empty macro.
+    if (!p.macro || typeof p.macro !== 'object') p.macro = { enabled: false, events: [] }
+    if (!Array.isArray(p.macro.events)) p.macro.events = []
   }
 
   // Ensure the active profile id points at something real.

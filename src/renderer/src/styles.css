@@ -408,6 +408,45 @@ body.is-resizing * {
   flex-wrap: wrap;
 }
 
+/* ---------- Macro ---------- */
+.macro__list {
+  max-height: 220px;
+}
+.macrorow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+.macrorow__wait {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-dim);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.macrorow__delay {
+  width: 64px;
+  padding: 2px 6px;
+}
+.macrorow__desc {
+  margin-left: auto;
+  font-family: 'Cascadia Code', Consolas, monospace;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.macro__count {
+  font-size: 11px;
+  margin: 0;
+}
+
 /* ---------- Click positions ---------- */
 .poslist {
   display: flex;

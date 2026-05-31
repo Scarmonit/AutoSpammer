@@ -24,9 +24,17 @@ const NUT_SPECIAL: Record<string, keyof typeof Key> = {
   left: 'Left',
   right: 'Right',
   shift: 'LeftShift',
+  shiftright: 'RightShift',
   ctrl: 'LeftControl',
+  ctrlright: 'RightControl',
   control: 'LeftControl',
+  controlright: 'RightControl',
   alt: 'LeftAlt',
+  altright: 'RightAlt',
+  meta: 'LeftSuper',
+  metaleft: 'LeftSuper',
+  metaright: 'RightSuper',
+  win: 'LeftSuper',
   capslock: 'CapsLock',
   ...buildFunctionKeys()
 }
@@ -184,4 +192,80 @@ function arrowVariant(lower: string): string | null {
     right: 'ArrowRight'
   }
   return arrows[lower] ?? null
+}
+
+// ---------------------------------------------------------------------------
+// Electron-accelerator parsing (used to detect the macro record hotkey from raw
+// uiohook events, so the hotkey itself can be excluded from the recording).
+// ---------------------------------------------------------------------------
+export interface ParsedAccelerator {
+  ctrl: boolean
+  alt: boolean
+  shift: boolean
+  meta: boolean
+  /** uiohook keycode of the base (non-modifier) key. */
+  code: number
+}
+
+/** Map an accelerator's base token (e.g. "F10", "A", "num5", "Space") to a logical name. */
+function accelBaseToName(tok: string): string {
+  if (/^[A-Za-z]$/.test(tok)) return tok.toLowerCase()
+  if (/^[0-9]$/.test(tok)) return tok
+  if (/^f[0-9]{1,2}$/i.test(tok)) return tok.toLowerCase()
+  const rev: Record<string, string> = {
+    Space: 'space',
+    Return: 'enter',
+    Tab: 'tab',
+    Escape: 'escape',
+    Backspace: 'backspace',
+    Delete: 'delete',
+    Insert: 'insert',
+    Home: 'home',
+    End: 'end',
+    PageUp: 'pageup',
+    PageDown: 'pagedown',
+    Up: 'up',
+    Down: 'down',
+    Left: 'left',
+    Right: 'right',
+    num0: 'numpad0',
+    num1: 'numpad1',
+    num2: 'numpad2',
+    num3: 'numpad3',
+    num4: 'numpad4',
+    num5: 'numpad5',
+    num6: 'numpad6',
+    num7: 'numpad7',
+    num8: 'numpad8',
+    num9: 'numpad9',
+    numadd: 'numpadadd',
+    numsub: 'numpadsubtract',
+    nummult: 'numpadmultiply',
+    numdiv: 'numpaddivide',
+    numdec: 'numpaddecimal'
+  }
+  return rev[tok] ?? tok
+}
+
+/** Parse an Electron accelerator into modifier flags + base uiohook keycode. */
+export function parseAccelerator(accel: string): ParsedAccelerator | null {
+  if (!accel) return null
+  const parts = accel
+    .split('+')
+    .map((p) => p.trim())
+    .filter(Boolean)
+  if (parts.length === 0) return null
+
+  const base = parts[parts.length - 1]
+  const mods = parts.slice(0, -1).map((m) => m.toLowerCase())
+  const code = keycodeForName(accelBaseToName(base))
+  if (code === null) return null
+
+  return {
+    ctrl: mods.some((m) => ['control', 'ctrl', 'commandorcontrol', 'cmdorctrl', 'command', 'cmd'].includes(m)),
+    alt: mods.some((m) => ['alt', 'option'].includes(m)),
+    shift: mods.includes('shift'),
+    meta: mods.some((m) => ['super', 'meta', 'win'].includes(m)),
+    code
+  }
 }
