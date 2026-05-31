@@ -172,7 +172,8 @@ function sanitizeProfile(p: Profile): Profile {
       ...p.rightClickHold,
       delayMs: clampInt(p.rightClickHold?.delayMs, 1, 600000, 10)
     },
-    sectionHeights: sanitizeSectionHeights(p.sectionHeights)
+    sectionHeights: sanitizeSectionHeights(p.sectionHeights),
+    collapsedSections: sanitizeCollapsedSections(p.collapsedSections)
   }
 }
 
@@ -183,6 +184,16 @@ function sanitizeSectionHeights(raw: unknown): Record<string, number> {
   for (const [id, value] of Object.entries(raw as Record<string, unknown>)) {
     const n = Number(value)
     if (Number.isFinite(n)) out[String(id)] = clampInt(n, 64, 2000, 64)
+  }
+  return out
+}
+
+/** Keep only the truly-collapsed section ids (drops anything not === true). */
+function sanitizeCollapsedSections(raw: unknown): Record<string, boolean> {
+  if (!raw || typeof raw !== 'object') return {}
+  const out: Record<string, boolean> = {}
+  for (const [id, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (value === true) out[String(id)] = true
   }
   return out
 }

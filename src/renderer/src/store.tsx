@@ -30,6 +30,8 @@ interface Store {
   setSectionHeight: (id: string, height: number) => void
   /** Clear a section's stored height so it returns to its natural size. */
   resetSectionHeight: (id: string) => void
+  /** Collapse/expand a section (header-only), persisted per profile. */
+  toggleSectionCollapsed: (id: string) => void
 
   createProfile: (name: string) => Promise<void>
   renameProfile: (id: string, name: string) => Promise<void>
@@ -159,6 +161,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     [updateProfile]
   )
 
+  const toggleSectionCollapsed = useCallback(
+    (id: string) => {
+      updateProfile((p) => {
+        const next = { ...(p.collapsedSections ?? {}) }
+        if (next[id]) delete next[id]
+        else next[id] = true
+        return { ...p, collapsedSections: next }
+      })
+    },
+    [updateProfile]
+  )
+
   const createProfile = useCallback(async (name: string) => setData(await window.api.createProfile(name)), [])
   const renameProfile = useCallback(
     async (id: string, name: string) => setData(await window.api.renameProfile(id, name)),
@@ -244,6 +258,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     patchOptions,
     setSectionHeight,
     resetSectionHeight,
+    toggleSectionCollapsed,
     createProfile,
     renameProfile,
     deleteProfile,

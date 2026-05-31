@@ -173,6 +173,10 @@ body {
   flex-direction: column;
   min-height: 64px;
 }
+/* A collapsed pane is just its header — let it shrink below the resize minimum. */
+.rs-pane--collapsed {
+  min-height: 0;
+}
 /* Inside a pane the section fills the available height and its body scrolls,
    so shrinking a section never clips the header or controls. */
 .rs-pane > .section {
@@ -215,6 +219,14 @@ body.is-resizing .rs-splitter:hover::after {
   background: var(--blue);
 }
 
+/* Splitter below a collapsed section: a plain spacer, not a drag handle. */
+.rs-splitter--disabled {
+  cursor: default;
+}
+.rs-splitter--disabled::after {
+  display: none;
+}
+
 /* Keep the resize cursor everywhere and suppress selection while dragging. */
 body.is-resizing,
 body.is-resizing * {
@@ -244,6 +256,47 @@ body.is-resizing * {
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: var(--text-dim);
+}
+
+/* Right-hand cluster in a section header: optional control(s) + collapse toggle. */
+.section__head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Small chevron button to hide/show a section. */
+.section__collapse {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+.section__collapse:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+.section__chevron {
+  transition: transform 0.15s ease;
+}
+/* Collapsed: point the chevron right and hide the body. */
+.section--collapsed .section__chevron {
+  transform: rotate(-90deg);
+}
+.section--collapsed .section__head {
+  border-bottom: none;
+}
+.section--collapsed .section__body {
+  display: none;
 }
 
 /* Compact on/off switch that lives in a section header. */

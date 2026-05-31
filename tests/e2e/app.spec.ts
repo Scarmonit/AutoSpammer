@@ -87,6 +87,21 @@ test('renders draggable splitters between sections', async () => {
   await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
 })
 
+test('every section can be hidden/shown via its header toggle', async () => {
+  // 5 sections (left) + 7 sections (right) = 12 collapse buttons.
+  await expect(win.locator('.section__collapse')).toHaveCount(12)
+
+  const keys = section('Keys to Spam')
+  await expect(keys.locator('.section__body')).toBeVisible()
+
+  await keys.locator('.section__collapse').click()
+  await expect(keys).toHaveClass(/section--collapsed/)
+  await expect(keys.locator('.section__body')).toBeHidden()
+
+  await keys.locator('.section__collapse').click()
+  await expect(keys.locator('.section__body')).toBeVisible()
+})
+
 test('loop mode radios are interactive', async () => {
   const once = section('Loop').locator('label.radio', { hasText: 'Play Once' }).locator('input')
   await once.check()

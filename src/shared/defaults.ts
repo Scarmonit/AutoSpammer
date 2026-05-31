@@ -58,7 +58,8 @@ export function createDefaultProfile(name = 'Default'): Profile {
       key: '',
       delayMs: 10
     },
-    sectionHeights: {}
+    sectionHeights: {},
+    collapsedSections: {}
   }
 }
 

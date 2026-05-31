@@ -49,6 +49,8 @@ function migrate(data: PersistedData): PersistedData {
     if (typeof p.options.enableClickPositions !== 'boolean') p.options.enableClickPositions = true
     // Resizable-layout heights were added later; older saves start unsized.
     if (!p.sectionHeights || typeof p.sectionHeights !== 'object') p.sectionHeights = {}
+    // Collapsed-section state was added later; older saves start all-expanded.
+    if (!p.collapsedSections || typeof p.collapsedSections !== 'object') p.collapsedSections = {}
   }
 
   // Ensure the active profile id points at something real.

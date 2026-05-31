@@ -1,5 +1,6 @@
 import React, { useRef } from 'react'
 import { useStore } from '../store'
+import { SectionIdContext } from './sectionContext'
 
 /** Clamp range for a draggable section, in pixels. */
 const MIN_HEIGHT = 64
@@ -27,7 +28,9 @@ export function ResizablePane({ id, last = false, children }: Props): JSX.Elemen
   const paneRef = useRef<HTMLDivElement>(null)
   const drag = useRef<{ startY: number; startH: number } | null>(null)
 
-  const storedHeight = activeProfile?.sectionHeights?.[id]
+  const collapsed = !!activeProfile?.collapsedSections?.[id]
+  // A collapsed section is header-only, so ignore any saved height while hidden.
+  const storedHeight = collapsed ? undefined : activeProfile?.sectionHeights?.[id]
 
   const onMouseMove = (e: MouseEvent): void => {
     const d = drag.current
@@ -61,20 +64,21 @@ export function ResizablePane({ id, last = false, children }: Props): JSX.Elemen
   return (
     <>
       <div
-        className="rs-pane"
+        className={`rs-pane${collapsed ? ' rs-pane--collapsed' : ''}`}
         ref={paneRef}
         style={storedHeight ? { height: storedHeight } : undefined}
       >
-        {children}
+        <SectionIdContext.Provider value={id}>{children}</SectionIdContext.Provider>
       </div>
       {!last && (
         <div
-          className="rs-splitter"
+          className={`rs-splitter${collapsed ? ' rs-splitter--disabled' : ''}`}
           role="separator"
           aria-orientation="horizontal"
-          title="Drag to resize · double-click to reset"
-          onMouseDown={startDrag}
-          onDoubleClick={() => resetSectionHeight(id)}
+          // A collapsed section can't be resized; the splitter is just a spacer.
+          title={collapsed ? undefined : 'Drag to resize · double-click to reset'}
+          onMouseDown={collapsed ? undefined : startDrag}
+          onDoubleClick={collapsed ? undefined : () => resetSectionHeight(id)}
         />
       )}
     </>

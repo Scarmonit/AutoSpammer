@@ -87,6 +87,11 @@ export interface Profile {
    * (e.g. "keys", "clickPositions"). A missing id means "use the natural height".
    */
   sectionHeights: Record<string, number>
+  /**
+   * Sections the user has collapsed (header-only), keyed by section id.
+   * `true` = collapsed; a missing id means the section is expanded.
+   */
+  collapsedSections: Record<string, boolean>
 }
 
 export interface AppSettings {

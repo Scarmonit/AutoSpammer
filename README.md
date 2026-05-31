@@ -21,11 +21,11 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.7.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.7.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.8.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.8.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.7.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.7.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.8.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.8.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -124,6 +124,12 @@ becomes a ↕ and a subtle line lights up — then drag up or down to make the s
 above it taller or shorter. **Double-click** the splitter to snap that section back
 to its natural size. Your layout is saved with the current profile, so each profile
 remembers its own section sizes.
+
+### 👁️ Hide / show sections
+Don't use a section? Click the small **chevron** (˅) in its header to collapse it to
+just the title bar; click again to bring it back. Every section can be hidden this
+way, and which ones are collapsed is saved **per profile**, so the app reopens with
+exactly the layout you left.
 
 ### Handy extras
 - **Spacebar / Left Click / Right Click** checkboxes — add those without typing.
