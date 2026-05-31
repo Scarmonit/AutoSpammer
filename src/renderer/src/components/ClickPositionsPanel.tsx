@@ -5,7 +5,15 @@ import { Section } from './Section'
 import { CaptureButton } from './CaptureButton'
 
 export function ClickPositionsPanel(): JSX.Element {
-  const { data, activeProfile, updateProfile, updateSettings, addCurrentPosition } = useStore()
+  const {
+    data,
+    activeProfile,
+    updateProfile,
+    updateSettings,
+    addCurrentPosition,
+    recordingPositions,
+    toggleRecordingPositions
+  } = useStore()
   if (!data || !activeProfile) return <></>
 
   const positions = activeProfile.clickPositions
@@ -23,7 +31,8 @@ export function ClickPositionsPanel(): JSX.Element {
     <Section title="Click Positions">
       <p className="helper">
         Aim your mouse at a spot and press <code className="keycap keycap--inline">{recordHotkey || '—'}</code>{' '}
-        to record it — works even while a game is focused. Recorded spots are clicked while spamming.
+        to record it — works even while a game is focused. Or hit <strong>Record Clicks</strong> and every
+        left/right click you make is saved automatically. Recorded spots are clicked while spamming.
       </p>
 
       <div className="field">
@@ -77,8 +86,21 @@ export function ClickPositionsPanel(): JSX.Element {
       </div>
 
       <div className="keylist__actions">
-        <button type="button" className="btn btn--ghost" onClick={() => void addCurrentPosition()}>
+        <button
+          type="button"
+          className="btn btn--ghost"
+          disabled={recordingPositions}
+          onClick={() => void addCurrentPosition()}
+        >
           + Add Current Mouse Position
+        </button>
+        <button
+          type="button"
+          className={`btn ${recordingPositions ? 'btn--danger btn--recording' : 'btn--ghost'}`}
+          title="Record every left/right click as a new position"
+          onClick={() => void toggleRecordingPositions()}
+        >
+          {recordingPositions ? '■ Stop Recording' : '● Record Clicks'}
         </button>
         <button
           type="button"

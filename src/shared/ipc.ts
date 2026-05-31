@@ -15,6 +15,8 @@ export const IPC = {
   GetStatus: 'engine:status',
   RecordStart: 'record:start',
   RecordStop: 'record:stop',
+  RecordPositionsStart: 'record-positions:start',
+  RecordPositionsStop: 'record-positions:stop',
   GetMousePosition: 'mouse:get-position',
   ToggleHold: 'aux:toggle-hold',
   TogglePeriodic: 'aux:toggle-periodic',

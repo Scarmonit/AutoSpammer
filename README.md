@@ -21,11 +21,11 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.4.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.4.1.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.5.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.5.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.4.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.4.1.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.5.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.5.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -54,16 +54,23 @@ and grab either file under **Assets**.)*
    stop).
 
 ### 🖱️ Click Positions (record-and-click specific spots)
-Want it to click exact places on screen (not just where your cursor is)?
-1. In the **Click Positions** panel, aim your mouse at a spot and press **F7** —
-   it records that screen location. Works even while a game is focused, so you can
-   record several spots without alt-tabbing.
-2. Each recorded spot shows its coordinates and an **L/R** button you can click to
+Want it to click exact places on screen (not just where your cursor is)? There are
+three ways to add spots:
+1. **One at a time** — aim your mouse at a spot and press **F7** (or click
+   **+ Add Current Mouse Position**). It records that screen location. Works even
+   while a game is focused, so you can record several spots without alt-tabbing.
+2. **Record Clicks (capture as you go)** — click **● Record Clicks**. The button
+   turns red and pulses; now *every* left or right click you make anywhere on screen
+   is saved automatically as a new position, with the correct mouse button. This also
+   works while a game is focused (global mouse hook). Click **■ Stop Recording** when
+   you're done.
+3. Each recorded spot shows its coordinates and an **L/R** button you can click to
    switch between left/right click. Give it its own delay, or remove it with **×**.
-3. When you press **Start Spam**, Auto Spammer moves the cursor to each recorded
-   spot and clicks it, in order, every cycle.
 
-You can change the record hotkey from **F7** to anything else in that panel.
+When you press **Start Spam**, Auto Spammer moves the cursor to each recorded spot
+and clicks it, in order, every cycle.
+
+You can change the single-spot record hotkey from **F7** to anything else in that panel.
 
 ### ⌨️ Hold Keys Down
 Hold any keys *down* continuously (not tapped) — e.g. hold **W** to keep walking

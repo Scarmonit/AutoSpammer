@@ -20,6 +20,7 @@ interface Store {
   status: StatusPayload
   aux: AuxStatus
   recording: boolean
+  recordingPositions: boolean
   message: Message
   dismissMessage: () => void
 
@@ -36,6 +37,7 @@ interface Store {
   start: () => Promise<void>
   stop: () => Promise<void>
   toggleRecording: () => Promise<void>
+  toggleRecordingPositions: () => Promise<void>
   addCurrentPosition: () => Promise<void>
   toggleHold: () => Promise<void>
   togglePeriodic: () => Promise<void>
@@ -50,6 +52,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
   const [status, setStatus] = useState<StatusPayload>(IDLE)
   const [aux, setAux] = useState<AuxStatus>({ holdActive: false, periodicActive: false })
   const [recording, setRecording] = useState(false)
+  const [recordingPositions, setRecordingPositions] = useState(false)
   const [message, setMessage] = useState<Message>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const dataRef = useRef<PersistedData | null>(null)
@@ -187,6 +190,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     }
   }, [recording])
 
+  const toggleRecordingPositions = useCallback(async () => {
+    if (recordingPositions) {
+      await window.api.recordPositionsStop()
+      setRecordingPositions(false)
+      setMessage(null)
+    } else {
+      await window.api.recordPositionsStart()
+      setRecordingPositions(true)
+      setMessage({
+        kind: 'info',
+        text: 'Recording clicks… every left/right click is saved as a position. Click Stop when done.'
+      })
+    }
+  }, [recordingPositions])
+
   const value: Store = {
     loaded: data !== null,
     data,
@@ -194,6 +212,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     status,
     aux,
     recording,
+    recordingPositions,
     message,
     dismissMessage: () => setMessage(null),
     updateProfile,
@@ -207,6 +226,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     start,
     stop,
     toggleRecording,
+    toggleRecordingPositions,
     addCurrentPosition,
     toggleHold,
     togglePeriodic

@@ -73,6 +73,12 @@ test('can add and edit a key row (reflected in the summary)', async () => {
   await expect(keys.locator('.chip', { hasText: 'R' })).toBeVisible()
 })
 
+test('Click Positions exposes the Record Clicks button', async () => {
+  const positions = section('Click Positions')
+  await expect(positions.getByRole('button', { name: '+ Add Current Mouse Position' })).toBeVisible()
+  await expect(positions.getByRole('button', { name: '● Record Clicks' })).toBeVisible()
+})
+
 test('loop mode radios are interactive', async () => {
   const once = section('Loop').locator('label.radio', { hasText: 'Play Once' }).locator('input')
   await once.check()

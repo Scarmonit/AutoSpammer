@@ -38,6 +38,8 @@ const api = {
 
   recordStart: (): Promise<void> => ipcRenderer.invoke(IPC.RecordStart),
   recordStop: (): Promise<void> => ipcRenderer.invoke(IPC.RecordStop),
+  recordPositionsStart: (): Promise<void> => ipcRenderer.invoke(IPC.RecordPositionsStart),
+  recordPositionsStop: (): Promise<void> => ipcRenderer.invoke(IPC.RecordPositionsStop),
   getMousePosition: (): Promise<MousePoint> => ipcRenderer.invoke(IPC.GetMousePosition),
   toggleHold: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.ToggleHold),
   togglePeriodic: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.TogglePeriodic),

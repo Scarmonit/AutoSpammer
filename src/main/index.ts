@@ -229,6 +229,14 @@ function registerIpc(): void {
     globalInput.setRecording(false)
   })
 
+  ipcMain.handle(IPC.RecordPositionsStart, () => {
+    globalInput.setRecordingPositions(true)
+  })
+
+  ipcMain.handle(IPC.RecordPositionsStop, () => {
+    globalInput.setRecordingPositions(false)
+  })
+
   ipcMain.handle(IPC.GetMousePosition, () => getMousePosition())
 
   ipcMain.handle(IPC.ToggleHold, () => {
@@ -245,17 +253,32 @@ function registerIpc(): void {
 }
 
 /**
+ * Append a click position to the active profile and push the new data back to
+ * the renderer. Shared by the global record-position hotkey, the live
+ * click-recording mode, and any other in-main mutation, so they never drift.
+ */
+function appendClickPosition(x: number, y: number, button: 'left' | 'right'): void {
+  const profile = activeProfile(data)
+  const pos: ClickPosition = {
+    id: makeId('pos'),
+    x: Math.round(x),
+    y: Math.round(y),
+    button,
+    delayMs: null
+  }
+  profile.clickPositions = [...(profile.clickPositions ?? []), pos]
+  saveData(data)
+  send(IPC.DataUpdated, data)
+}
+
+/**
  * Capture the cursor's current position and append it to the active profile's
  * click list. Triggered by the global record-position hotkey (works in-game),
  * so it owns the data mutation and pushes the result back to the renderer.
  */
 async function recordCurrentPosition(): Promise<void> {
-  const profile = activeProfile(data)
   const { x, y } = await getMousePosition()
-  const pos: ClickPosition = { id: makeId('pos'), x, y, button: 'left', delayMs: null }
-  profile.clickPositions = [...(profile.clickPositions ?? []), pos]
-  saveData(data)
-  send(IPC.DataUpdated, data)
+  appendClickPosition(x, y, 'left')
 }
 
 // ---------------------------------------------------------------------------
@@ -303,6 +326,7 @@ if (!gotLock) {
       onRecordPosition: () => {
         void recordCurrentPosition()
       },
+      onRecordPositionAt: (x, y, button) => appendClickPosition(x, y, button),
       onToggleHold: () => aux.toggleHold(),
       onTogglePeriodic: () => aux.togglePeriodic(),
       onEmergencyStop: () => {

@@ -12,6 +12,8 @@ interface Deps {
   onRecorded: (rk: RecordedKey) => void
   onConflict: (c: HotkeyConflict) => void
   onRecordPosition: () => void
+  /** A live click captured while click-recording mode is on. */
+  onRecordPositionAt: (x: number, y: number, button: 'left' | 'right') => void
   onToggleHold: () => void
   onTogglePeriodic: () => void
   onEmergencyStop: () => void
@@ -25,6 +27,7 @@ interface Deps {
 export class GlobalInput {
   private started = false
   private recording = false
+  private recordingPositions = false
   private registerTimer: NodeJS.Timeout | null = null
 
   // Token of the physical key currently driving a hold-mode run, plus which
@@ -172,6 +175,14 @@ export class GlobalInput {
     this.recording = on
   }
 
+  /**
+   * Continuous click-recording mode: while on, every physical left/right click
+   * is saved as a new click position (works even while a game is focused).
+   */
+  setRecordingPositions(on: boolean): void {
+    this.recordingPositions = on
+  }
+
   // -------------------------------------------------------------------------
   // Physical hold detection
   // -------------------------------------------------------------------------
@@ -196,6 +207,13 @@ export class GlobalInput {
     const token = `m:${e.button}`
     if (this.recording) {
       this.deps.onRecorded({ kind: e.button === 2 ? 'mouse-right' : 'mouse-left', key: '' })
+      return
+    }
+    if (this.recordingPositions) {
+      // Only left (1) / right (2) clicks become positions; ignore middle etc.
+      if (e.button === 1 || e.button === 2) {
+        this.deps.onRecordPositionAt(e.x, e.y, e.button === 2 ? 'right' : 'left')
+      }
       return
     }
     this.handleHoldDown(token)
