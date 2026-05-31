@@ -11,9 +11,15 @@ interface Props {
   className?: string
 }
 
+// Only ONE CaptureButton may listen at a time. Starting a capture cancels any
+// other in-progress one, so a single key press can never bind to two fields.
+let cancelActiveCapture: (() => void) | null = null
+
 /**
  * A button that, when clicked, listens for the next key press (and optionally a
  * mouse click) and reports it back as either a logical name or an accelerator.
+ * Click it again — or start another capture — to cancel. Escape (and modified
+ * combos like Ctrl+Shift+K) bind normally.
  */
 export function CaptureButton({
   label,
@@ -23,10 +29,18 @@ export function CaptureButton({
   className
 }: Props): JSX.Element {
   const [listening, setListening] = useState(false)
-  const armedAt = useRef(0)
+
+  // Stable identity so the shared capture slot can be cleared by this instance.
+  const selfCancel = useRef<() => void>()
+  if (!selfCancel.current) selfCancel.current = (): void => setListening(false)
 
   useEffect(() => {
     if (!listening) return
+    const self = selfCancel.current as () => void
+
+    // Claim the single capture slot, cancelling whoever currently holds it.
+    if (cancelActiveCapture && cancelActiveCapture !== self) cancelActiveCapture()
+    cancelActiveCapture = self
 
     const finish = (value: string | null): void => {
       setListening(false)
@@ -36,13 +50,21 @@ export function CaptureButton({
     const onKey = (e: KeyboardEvent): void => {
       e.preventDefault()
       e.stopPropagation()
-      if (e.key === 'Escape') return finish(null)
+      // For accelerators, a lone modifier isn't a binding — keep waiting so combos
+      // like Ctrl+Shift+K work. (For 'name' mode, Shift/Ctrl/Alt are valid keys.)
+      if (
+        mode === 'accelerator' &&
+        (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta')
+      ) {
+        return
+      }
       finish(mode === 'accelerator' ? toAccelerator(e) : toName(e))
     }
 
     const onMouse = (e: MouseEvent): void => {
-      // Ignore the click that started capture.
-      if (Date.now() - armedAt.current < 220) return
+      // Clicks on any "Set Key" button are for starting/cancelling capture, not
+      // for binding a mouse button — let that button's own onClick handle it.
+      if (e.target instanceof Element && e.target.closest('[data-capture-button]')) return
       if (!allowMouse) return
       e.preventDefault()
       e.stopPropagation()
@@ -57,17 +79,16 @@ export function CaptureButton({
       window.removeEventListener('keydown', onKey, true)
       window.removeEventListener('mousedown', onMouse, true)
       window.removeEventListener('contextmenu', preventContext, true)
+      if (cancelActiveCapture === self) cancelActiveCapture = null
     }
   }, [listening, mode, allowMouse, onCapture])
 
   return (
     <button
       type="button"
+      data-capture-button="true"
       className={`btn ${className ?? ''} ${listening ? 'btn--listening' : ''}`}
-      onClick={() => {
-        armedAt.current = Date.now()
-        setListening(true)
-      }}
+      onClick={() => setListening((v) => !v)}
     >
       {listening ? 'Press a key…' : label}
     </button>

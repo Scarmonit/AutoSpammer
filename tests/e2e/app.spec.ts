@@ -126,6 +126,35 @@ test('the main Start button reflects Macro mode', async () => {
   await expect(startBtn).toHaveText('Start Spam')
 })
 
+test('only one Set Key listener is active at a time', async () => {
+  const hk = section('Toggle Hotkey')
+  await hk.getByRole('button', { name: 'Change Key' }).click()
+  await expect(hk.locator('.btn--listening')).toHaveCount(1)
+
+  // Starting the Emergency capture must cancel the first one (not bind to both).
+  await hk.getByRole('button', { name: 'Change Emergency Key' }).click()
+  await expect(hk.locator('.btn--listening')).toHaveCount(1)
+
+  // Clicking the active button again cancels capture.
+  await hk.locator('.btn--listening').click()
+  await expect(hk.locator('.btn--listening')).toHaveCount(0)
+})
+
+test('the Escape key can be bound to a hotkey', async () => {
+  const hk = section('Toggle Hotkey')
+  const caps = hk.locator('.keycap') // [0] = toggle current, [1] = emergency current
+
+  // Move Emergency off Escape (to F1) so Escape is free to assign.
+  await hk.getByRole('button', { name: 'Change Emergency Key' }).click()
+  await win.keyboard.press('F1')
+  await expect(caps.nth(1)).toHaveText('F1')
+
+  // Escape now binds normally instead of cancelling the capture.
+  await hk.getByRole('button', { name: 'Change Key' }).click()
+  await win.keyboard.press('Escape')
+  await expect(caps.nth(0)).toHaveText('Escape')
+})
+
 test('every section can be hidden/shown via its header toggle', async () => {
   // 6 sections (left) + 7 sections (right) = 13 collapse buttons.
   await expect(win.locator('.section__collapse')).toHaveCount(13)
