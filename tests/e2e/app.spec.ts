@@ -93,7 +93,7 @@ test('Macro section exposes record + set-hotkey controls', async () => {
   const macro = section('Macro')
   await expect(macro.getByRole('button', { name: '● Record' })).toBeVisible()
   await expect(macro.getByRole('button', { name: /Set Record Hotkey/ })).toBeVisible()
-  await expect(macro.getByRole('button', { name: '▶ Play' })).toBeVisible()
+  await expect(macro.getByRole('button', { name: '▶ Play once' })).toBeVisible()
 })
 
 test('enabling Macro disables Keys to Spam and Click Positions', async () => {
@@ -112,6 +112,18 @@ test('enabling Macro disables Keys to Spam and Click Positions', async () => {
   // Re-enabling a spam source turns Macro back off.
   await keysToggle.check()
   await expect(macro.locator('.section__toggle input')).not.toBeChecked()
+})
+
+test('the main Start button reflects Macro mode', async () => {
+  const startBtn = win.locator('.startbtn')
+  await expect(startBtn).toHaveText('Start Spam')
+
+  await section('Macro').locator('.section__toggle input').check()
+  await expect(startBtn).toHaveText('Start Macro')
+
+  // Restore: re-enabling a spam source turns Macro off again.
+  await section('Keys to Spam').locator('.section__toggle input').check()
+  await expect(startBtn).toHaveText('Start Spam')
 })
 
 test('every section can be hidden/shown via its header toggle', async () => {

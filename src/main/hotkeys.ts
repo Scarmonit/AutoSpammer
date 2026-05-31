@@ -190,6 +190,8 @@ export class GlobalInput {
   }
 
   private toggle(): void {
+    // Don't fight a one-shot macro preview running from the panel.
+    if (this.macroPlaying) return
     if (this.deps.engine.isRunning()) {
       this.deps.engine.stop()
     } else {

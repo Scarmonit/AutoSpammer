@@ -25,11 +25,11 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.10.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.10.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.11.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.11.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.10.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.10.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.11.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.11.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -126,13 +126,16 @@ the mouse path — with the exact timing between each event, then plays it all b
    in the recording, and clicks on the Auto Spammer window itself are ignored.
 3. The captured events are listed with the **delay before each one**. Edit any
    delay to speed a step up or slow it down (e.g. change `1000` ms to `250`).
-4. Hit **▶ Play** to replay the macro with your timings; **■ Stop** cancels mid-run.
-   **Clear** wipes it and **Save** writes it to the current profile.
+4. **Run it like any other spam:** flip the section's **Enabled** switch, then press
+   the big **Start Spam** button (now labelled **Start Macro**) or the toggle hotkey
+   **F6** — the macro plays back with your exact timings and **repeats according to
+   the Loop panel** (forever, once, or X times). **Stop Spam** / F6 stops it.
+5. The panel's **▶ Play once** button is a quick one-shot preview; **■ Stop** cancels
+   it, **Clear** wipes the recording, and **Save** writes it to the current profile.
 
-Toggle the section's **Enabled** switch to use the macro. Macro is **mutually
-exclusive** with Keys to Spam and Click Positions: enabling Macro turns those two
-off, and turning either of them back on turns Macro off. The whole recording is
-saved with the profile, so it's there next time you open the app.
+Macro is **mutually exclusive** with Keys to Spam and Click Positions: enabling Macro
+turns those two off, and turning either of them back on turns Macro off. The whole
+recording is saved with the profile, so it's there next time you open the app.
 
 > 💡 Pick a record hotkey you don't otherwise use in your game (F10 by default) —
 > it's detected globally, so it also reaches the focused app.

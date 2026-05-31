@@ -232,6 +232,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
   }, [])
 
   const start = useCallback(async () => {
+    // Flush any pending debounced profile save first, so the main process runs
+    // the latest profile (e.g. freshly recorded/edited macro events).
+    const current = dataRef.current
+    const prof = current?.profiles.find((p) => p.id === current.settings.activeProfileId)
+    if (prof) {
+      if (saveTimer.current) clearTimeout(saveTimer.current)
+      await window.api.saveProfile(prof)
+    }
     setStatus(await window.api.start())
   }, [])
   const stop = useCallback(async () => {

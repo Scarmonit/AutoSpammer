@@ -303,7 +303,8 @@ function registerIpc(): void {
   })
 
   ipcMain.handle(IPC.Start, () => {
-    engine.start(activeProfile(data), 'manual')
+    // A one-shot macro preview from the panel owns playback while it runs.
+    if (!macroPlayer.isPlaying()) engine.start(activeProfile(data), 'manual')
     return engine.getStatus()
   })
 
@@ -348,7 +349,8 @@ function registerIpc(): void {
   ipcMain.handle(IPC.MacroRecordStop, () => stopMacroRecording())
 
   ipcMain.handle(IPC.MacroPlay, (_e, events: MacroEvent[]) => {
-    if (macroPlayer.isPlaying() || macroRecorder.isRecording()) return
+    // The panel's one-shot preview yields to the main spam engine and recording.
+    if (macroPlayer.isPlaying() || macroRecorder.isRecording() || engine.isRunning()) return
     void macroPlayer.play(Array.isArray(events) ? events : [])
   })
 

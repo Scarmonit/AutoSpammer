@@ -9,7 +9,13 @@ vi.mock('../../src/main/input', () => ({
   typeText: vi.fn(() => Promise.resolve()),
   clickMouse: vi.fn(() => Promise.resolve()),
   clickAt: vi.fn(() => Promise.resolve()),
-  clearSynthetic: vi.fn()
+  clearSynthetic: vi.fn(),
+  // Macro playback primitives (used via ./macro -> playMacroEvent).
+  keyDownName: vi.fn(() => Promise.resolve()),
+  keyUpName: vi.fn(() => Promise.resolve()),
+  mouseMove: vi.fn(() => Promise.resolve()),
+  mouseButtonDown: vi.fn(() => Promise.resolve()),
+  mouseButtonUp: vi.fn(() => Promise.resolve())
 }))
 
 import { SpamEngine } from '../../src/main/engine'
@@ -196,6 +202,83 @@ describe('SpamEngine — enable/disable Keys vs Click Positions', () => {
     expect(errors[0]).toMatch(/both/i)
     expect(pressKey).not.toHaveBeenCalled()
     expect(clickAt).not.toHaveBeenCalled()
+    expect(engine.isRunning()).toBe(false)
+  })
+})
+
+describe('SpamEngine — macro playback', () => {
+  const keyDownName = vi.mocked(input.keyDownName)
+  const keyUpName = vi.mocked(input.keyUpName)
+
+  it('plays the macro events in order when enabled (loop once)', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')] // ignored: macro takes over a manual run
+      p.macro = {
+        enabled: true,
+        events: [
+          { id: '1', type: 'key-down', delayMs: 0, key: 'b' },
+          { id: '2', type: 'key-up', delayMs: 0, key: 'b' }
+        ]
+      }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    const { engine } = await runToIdle(p)
+    expect(pressKey).not.toHaveBeenCalled() // not the keys-to-spam path
+    expect(keyDownName.mock.calls.map((c) => c[0])).toEqual(['b'])
+    expect(keyUpName.mock.calls.map((c) => c[0])).toEqual(['b'])
+    expect(engine.getStatus().cyclesDone).toBe(1)
+  })
+
+  it('loops the macro N times for "loop count"', async () => {
+    const p = profile((p) => {
+      p.macro = {
+        enabled: true,
+        events: [
+          { id: '1', type: 'key-down', delayMs: 0, key: 'b' },
+          { id: '2', type: 'key-up', delayMs: 0, key: 'b' }
+        ]
+      }
+      p.loop = { mode: 'count', count: 3 }
+    })
+    const { engine } = await runToIdle(p)
+    expect(keyDownName.mock.calls.length).toBe(3)
+    expect(engine.getStatus().cyclesDone).toBe(3)
+  })
+
+  it('errors when the macro is enabled but empty', () => {
+    const errors: string[] = []
+    const engine = new SpamEngine({ onStatus: () => {}, onError: (m) => errors.push(m) })
+    engine.start(
+      profile((p) => {
+        p.macro = { enabled: true, events: [] }
+      }),
+      'manual'
+    )
+    expect(errors.length).toBe(1)
+    expect(errors[0]).toMatch(/macro/i)
+    expect(engine.isRunning()).toBe(false)
+  })
+
+  it('releases a still-held key when stopped mid-press (no stuck keys)', async () => {
+    const p = profile((p) => {
+      p.macro = {
+        enabled: true,
+        events: [
+          { id: '1', type: 'key-down', delayMs: 0, key: 'w' },
+          { id: '2', type: 'key-up', delayMs: 5000, key: 'w' } // long gap we interrupt
+        ]
+      }
+      p.loop = { mode: 'forever', count: 1 }
+    })
+    const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
+    engine.start(p, 'manual')
+    await new Promise((r) => setTimeout(r, 30)) // let key-down fire, then it waits
+    engine.stop()
+    await new Promise((r) => setTimeout(r, 20))
+
+    expect(keyDownName.mock.calls.map((c) => c[0])).toEqual(['w'])
+    // The scheduled key-up never fired, but the cleanup released 'w'.
+    expect(keyUpName.mock.calls.map((c) => c[0])).toEqual(['w'])
     expect(engine.isRunning()).toBe(false)
   })
 })

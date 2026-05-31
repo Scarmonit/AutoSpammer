@@ -169,6 +169,33 @@ export class MacroRecorder {
   }
 }
 
+/**
+ * Reproduce a single recorded event via the low-level input primitives. Shared
+ * by the panel's one-shot MacroPlayer and the SpamEngine's looped macro runs so
+ * the two can never drift. Mouse press/release move to the recorded point first.
+ */
+export async function playMacroEvent(ev: MacroEvent): Promise<void> {
+  switch (ev.type) {
+    case 'key-down':
+      if (ev.key) await keyDownName(ev.key)
+      break
+    case 'key-up':
+      if (ev.key) await keyUpName(ev.key)
+      break
+    case 'mouse-move':
+      await mouseMove(ev.x ?? 0, ev.y ?? 0)
+      break
+    case 'mouse-down':
+      if (ev.x != null && ev.y != null) await mouseMove(ev.x, ev.y)
+      await mouseButtonDown(ev.button ?? 'left')
+      break
+    case 'mouse-up':
+      if (ev.x != null && ev.y != null) await mouseMove(ev.x, ev.y)
+      await mouseButtonUp(ev.button ?? 'left')
+      break
+  }
+}
+
 interface PlayerCallbacks {
   onStart: () => void
   onStop: () => void
@@ -205,7 +232,7 @@ export class MacroPlayer {
         if (this.abort) break
         await this.sleep(ev.delayMs)
         if (this.abort) break
-        await this.fire(ev)
+        await playMacroEvent(ev)
       }
     } catch (err) {
       this.cb.onError(err instanceof Error ? err.message : String(err))
@@ -220,28 +247,6 @@ export class MacroPlayer {
     if (!this.playing) return
     this.abort = true
     this.wake?.()
-  }
-
-  private async fire(ev: MacroEvent): Promise<void> {
-    switch (ev.type) {
-      case 'key-down':
-        if (ev.key) await keyDownName(ev.key)
-        break
-      case 'key-up':
-        if (ev.key) await keyUpName(ev.key)
-        break
-      case 'mouse-move':
-        await mouseMove(ev.x ?? 0, ev.y ?? 0)
-        break
-      case 'mouse-down':
-        if (ev.x != null && ev.y != null) await mouseMove(ev.x, ev.y)
-        await mouseButtonDown(ev.button ?? 'left')
-        break
-      case 'mouse-up':
-        if (ev.x != null && ev.y != null) await mouseMove(ev.x, ev.y)
-        await mouseButtonUp(ev.button ?? 'left')
-        break
-    }
   }
 
   /** Interruptible sleep — stop() resolves it immediately. */

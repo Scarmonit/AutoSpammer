@@ -1,5 +1,6 @@
-import type { Profile, SpamMode, StatusPayload, ActionKind, LoopConfig } from '@shared/types'
-import { pressKey, typeText, clickMouse, clickAt, clearSynthetic } from './input'
+import type { Profile, SpamMode, StatusPayload, ActionKind, LoopConfig, MacroEvent } from '@shared/types'
+import { pressKey, typeText, clickMouse, clickAt, clearSynthetic, keyUpName, mouseButtonUp } from './input'
+import { playMacroEvent } from './macro'
 
 interface Fireable {
   kind: ActionKind | 'text' | 'pos-click'
@@ -49,6 +50,23 @@ export class SpamEngine {
    */
   start(profile: Profile, mode: SpamMode, overrideDelayMs?: number, focusKey?: string): void {
     if (this.running) return
+
+    // A manual run with the macro enabled replays the recording (looped per the
+    // Loop config) instead of the keys/positions spam.
+    if (mode === 'manual' && profile.macro?.enabled) {
+      const events = profile.macro.events ?? []
+      if (events.length === 0) {
+        this.cb.onError('Macro is enabled but empty — record something first.')
+        return
+      }
+      this.running = true
+      this.mode = mode
+      this.abort = false
+      this.cyclesDone = 0
+      this.emit(true)
+      void this.runMacroLoop(events, profile.loop)
+      return
+    }
 
     let fireables: Fireable[]
     try {
@@ -132,6 +150,57 @@ export class SpamEngine {
       this.mode = null
       this.wake = null
       clearSynthetic() // drop any outstanding synthetic-up accounting
+      this.emit(true)
+    }
+  }
+
+  /**
+   * Replay a macro with its recorded per-event delays, looping per the Loop
+   * config (a held key/button is tracked so an abort mid-press still releases
+   * it — no stuck inputs). Each event's delay is the wait BEFORE it fires.
+   */
+  private async runMacroLoop(events: MacroEvent[], loop: LoopConfig): Promise<void> {
+    const downKeys = new Set<string>()
+    const downButtons = new Set<'left' | 'right' | 'middle'>()
+    try {
+      while (!this.abort) {
+        for (const ev of events) {
+          if (this.abort) break
+          await this.sleep(ev.delayMs)
+          if (this.abort) break
+          await playMacroEvent(ev)
+          // Track held state so stop()/errors can release cleanly.
+          if (ev.type === 'key-down' && ev.key) downKeys.add(ev.key)
+          else if (ev.type === 'key-up' && ev.key) downKeys.delete(ev.key)
+          else if (ev.type === 'mouse-down' && ev.button) downButtons.add(ev.button)
+          else if (ev.type === 'mouse-up' && ev.button) downButtons.delete(ev.button)
+        }
+        if (this.abort) break
+        this.cyclesDone += 1
+        this.emit()
+        if (this.isDone('manual', loop)) break
+      }
+    } catch (err) {
+      this.cb.onError(err instanceof Error ? err.message : String(err))
+    } finally {
+      // Release anything still held (e.g. stopped mid-key-press).
+      for (const key of downKeys) {
+        try {
+          await keyUpName(key)
+        } catch {
+          /* ignore */
+        }
+      }
+      for (const button of downButtons) {
+        try {
+          await mouseButtonUp(button)
+        } catch {
+          /* ignore */
+        }
+      }
+      this.running = false
+      this.mode = null
+      this.wake = null
       this.emit(true)
     }
   }

@@ -32,6 +32,7 @@ export function MacroPanel(): JSX.Element {
   const {
     data,
     activeProfile,
+    status,
     updateSettings,
     macroRecording,
     macroPlaying,
@@ -49,6 +50,7 @@ export function MacroPanel(): JSX.Element {
   const macro = activeProfile.macro
   const events = macro.events
   const recordHotkey = data.settings.macroRecordHotkey
+  const spamming = status.status === 'running'
 
   return (
     <Section
@@ -64,7 +66,9 @@ export function MacroPanel(): JSX.Element {
     >
       <p className="helper">
         Records <strong>everything</strong> — keys, clicks, and mouse movement with exact timing — then
-        replays it. Enabling Macro turns off Keys to Spam and Click Positions (and vice-versa).
+        replays it. Enabling Macro turns off Keys to Spam and Click Positions (and vice-versa). When
+        enabled, the main <strong>Start Spam</strong> button and the toggle hotkey (F6) play it on a
+        loop per your <strong>Loop</strong> setting; <strong>Play</strong> below is a one-shot preview.
       </p>
 
       <div className="keylist__actions">
@@ -110,10 +114,11 @@ export function MacroPanel(): JSX.Element {
         <button
           type="button"
           className="btn btn--primary"
-          disabled={events.length === 0 || macroRecording || macroPlaying}
+          title="Play the macro once (preview). Use Start Spam / F6 to loop it."
+          disabled={events.length === 0 || macroRecording || macroPlaying || spamming}
           onClick={() => void playMacro()}
         >
-          ▶ Play
+          ▶ Play once
         </button>
         <button
           type="button"
