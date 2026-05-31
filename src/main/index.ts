@@ -115,7 +115,10 @@ function sanitizeProfile(p: Profile): Profile {
     ...p,
     options: {
       ...p.options,
-      defaultDelayMs: clampInt(p.options.defaultDelayMs, 0, 600000, 10)
+      defaultDelayMs: clampInt(p.options.defaultDelayMs, 0, 600000, 10),
+      // Default missing flags to "on" so older saves spam as before.
+      enableKeys: p.options.enableKeys !== false,
+      enableClickPositions: p.options.enableClickPositions !== false
     },
     entries: p.entries.map((e) => ({
       ...e,

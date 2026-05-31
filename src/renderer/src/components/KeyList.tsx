@@ -3,15 +3,17 @@ import type { SpamEntry } from '@shared/types'
 import { makeId } from '@shared/defaults'
 import { useStore } from '../store'
 import { Section } from './Section'
+import { SectionToggle } from './SectionToggle'
 import { KeyRow } from './KeyRow'
 import { prettyName } from '../keycapture'
 
 export function KeyList(): JSX.Element {
-  const { activeProfile, updateProfile, recording, toggleRecording } = useStore()
+  const { activeProfile, updateProfile, patchOptions, recording, toggleRecording } = useStore()
   const dragFrom = useRef<number | null>(null)
 
   if (!activeProfile) return <></>
   const entries = activeProfile.entries
+  const enabled = activeProfile.options.enableKeys
 
   const setEntries = (next: SpamEntry[]): void =>
     updateProfile((p) => ({ ...p, entries: next }))
@@ -38,17 +40,31 @@ export function KeyList(): JSX.Element {
   const o = activeProfile.options
   const tf = activeProfile.textFunction
   const summary: string[] = [
-    ...entries.map((e) =>
-      e.kind === 'key' ? (e.key ? prettyName(e.key) : '(empty)') : prettyName(e.kind)
-    ),
-    ...(o.spacebar ? ['Spacebar'] : []),
-    ...(o.leftClick ? ['Left Click'] : []),
-    ...(o.rightClick ? ['Right Click'] : []),
+    ...(enabled
+      ? [
+          ...entries.map((e) =>
+            e.kind === 'key' ? (e.key ? prettyName(e.key) : '(empty)') : prettyName(e.kind)
+          ),
+          ...(o.spacebar ? ['Spacebar'] : []),
+          ...(o.leftClick ? ['Left Click'] : []),
+          ...(o.rightClick ? ['Right Click'] : [])
+        ]
+      : []),
     ...(tf.enabled && tf.text ? [`"${tf.text}"`] : [])
   ]
 
   return (
-    <Section title="Keys to Spam">
+    <Section
+      title="Keys to Spam"
+      dim={!enabled}
+      right={
+        <SectionToggle
+          checked={enabled}
+          onChange={(v) => patchOptions({ enableKeys: v })}
+          title="Spam the keys in this list (and the Options spacebar/click toggles)"
+        />
+      }
+    >
       <div className="keylist">
         {entries.length === 0 && <p className="muted">No keys yet — add one or record.</p>}
         {entries.map((entry, i) => (

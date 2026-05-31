@@ -22,7 +22,9 @@ export function createDefaultProfile(name = 'Default'): Profile {
       leftClick: false,
       rightClick: false,
       defaultDelayMs: 10,
-      sequenceMode: false
+      sequenceMode: false,
+      enableKeys: true,
+      enableClickPositions: true
     },
     textFunction: {
       enabled: false,

@@ -2,6 +2,7 @@ import React from 'react'
 import type { ClickPosition } from '@shared/types'
 import { useStore } from '../store'
 import { Section } from './Section'
+import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
 
 export function ClickPositionsPanel(): JSX.Element {
@@ -10,6 +11,7 @@ export function ClickPositionsPanel(): JSX.Element {
     activeProfile,
     updateProfile,
     updateSettings,
+    patchOptions,
     addCurrentPosition,
     recordingPositions,
     toggleRecordingPositions
@@ -18,6 +20,7 @@ export function ClickPositionsPanel(): JSX.Element {
 
   const positions = activeProfile.clickPositions
   const recordHotkey = data.settings.recordPositionHotkey
+  const enabled = activeProfile.options.enableClickPositions
 
   const setPositions = (next: ClickPosition[]): void =>
     updateProfile((p) => ({ ...p, clickPositions: next }))
@@ -28,7 +31,17 @@ export function ClickPositionsPanel(): JSX.Element {
   const removeAt = (i: number): void => setPositions(positions.filter((_, idx) => idx !== i))
 
   return (
-    <Section title="Click Positions">
+    <Section
+      title="Click Positions"
+      dim={!enabled}
+      right={
+        <SectionToggle
+          checked={enabled}
+          onChange={(v) => patchOptions({ enableClickPositions: v })}
+          title="Click the recorded positions while spamming"
+        />
+      }
+    >
       <p className="helper">
         Aim your mouse at a spot and press <code className="keycap keycap--inline">{recordHotkey || '—'}</code>{' '}
         to record it — works even while a game is focused. Or hit <strong>Record Clicks</strong> and every

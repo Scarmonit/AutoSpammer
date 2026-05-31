@@ -67,7 +67,13 @@ export class SpamEngine {
     }
 
     if (fireables.length === 0) {
-      this.cb.onError('Nothing to spam — add a key or enable an option first.')
+      const bothOff =
+        mode === 'manual' && !profile.options.enableKeys && !profile.options.enableClickPositions
+      this.cb.onError(
+        bothOff
+          ? 'Both “Keys to Spam” and “Click Positions” are disabled — enable at least one to spam.'
+          : 'Nothing to spam — add a key or enable an option first.'
+      )
       return
     }
 
@@ -196,29 +202,35 @@ function buildFireables(profile: Profile, overrideDelayMs?: number): Fireable[] 
   const def = overrideDelayMs ?? profile.options.defaultDelayMs
   const out: Fireable[] = []
 
-  for (const e of profile.entries) {
-    out.push({
-      kind: e.kind,
-      key: e.key,
-      text: '',
-      delayMs: e.delayMs ?? def
-    })
+  // "Enable Keys to Spam" gates the key list plus the spacebar/click options,
+  // so disabling it leaves only the click positions (and vice-versa).
+  if (profile.options.enableKeys) {
+    for (const e of profile.entries) {
+      out.push({
+        kind: e.kind,
+        key: e.key,
+        text: '',
+        delayMs: e.delayMs ?? def
+      })
+    }
+
+    if (profile.options.spacebar) out.push({ kind: 'key', key: 'space', text: '', delayMs: def })
+    if (profile.options.leftClick) out.push({ kind: 'mouse-left', key: '', text: '', delayMs: def })
+    if (profile.options.rightClick) out.push({ kind: 'mouse-right', key: '', text: '', delayMs: def })
   }
 
-  if (profile.options.spacebar) out.push({ kind: 'key', key: 'space', text: '', delayMs: def })
-  if (profile.options.leftClick) out.push({ kind: 'mouse-left', key: '', text: '', delayMs: def })
-  if (profile.options.rightClick) out.push({ kind: 'mouse-right', key: '', text: '', delayMs: def })
-
-  for (const p of profile.clickPositions ?? []) {
-    out.push({
-      kind: 'pos-click',
-      key: '',
-      text: '',
-      x: p.x,
-      y: p.y,
-      button: p.button,
-      delayMs: p.delayMs ?? def
-    })
+  if (profile.options.enableClickPositions) {
+    for (const p of profile.clickPositions ?? []) {
+      out.push({
+        kind: 'pos-click',
+        key: '',
+        text: '',
+        x: p.x,
+        y: p.y,
+        button: p.button,
+        delayMs: p.delayMs ?? def
+      })
+    }
   }
 
   const tf = profile.textFunction

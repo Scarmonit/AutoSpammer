@@ -27,7 +27,15 @@ function profile(mut: (p: Profile) => void): Profile {
   const p = createDefaultProfile('test')
   p.entries = []
   p.clickPositions = []
-  p.options = { ...p.options, spacebar: false, leftClick: false, rightClick: false, defaultDelayMs: 0 }
+  p.options = {
+    ...p.options,
+    spacebar: false,
+    leftClick: false,
+    rightClick: false,
+    defaultDelayMs: 0,
+    enableKeys: true,
+    enableClickPositions: true
+  }
   p.textFunction = { enabled: false, text: '', delayMs: 0 }
   p.loop = { mode: 'once', count: 1 }
   mut(p)
@@ -133,6 +141,61 @@ describe('SpamEngine — options, positions, text', () => {
     )
     expect(errors.length).toBe(1)
     expect(pressKey).not.toHaveBeenCalled()
+    expect(engine.isRunning()).toBe(false)
+  })
+})
+
+describe('SpamEngine — enable/disable Keys vs Click Positions', () => {
+  it('fires only click positions when Keys are disabled', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.options.spacebar = true
+      p.options.enableKeys = false
+      p.clickPositions = [{ id: 'p1', x: 10, y: 20, button: 'left', delayMs: null }]
+    })
+    await runToIdle(p)
+    expect(pressKey).not.toHaveBeenCalled()
+    expect(clickMouse).not.toHaveBeenCalled()
+    expect(clickAt).toHaveBeenCalledWith(10, 20, 'left')
+  })
+
+  it('fires only keys when Click Positions are disabled', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.options.enableClickPositions = false
+      p.clickPositions = [{ id: 'p1', x: 10, y: 20, button: 'left', delayMs: null }]
+    })
+    await runToIdle(p)
+    expect(pressedKeys()).toEqual(['a'])
+    expect(clickAt).not.toHaveBeenCalled()
+  })
+
+  it('fires both when both are enabled', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.clickPositions = [{ id: 'p1', x: 10, y: 20, button: 'left', delayMs: null }]
+    })
+    await runToIdle(p)
+    expect(pressedKeys()).toEqual(['a'])
+    expect(clickAt).toHaveBeenCalledWith(10, 20, 'left')
+  })
+
+  it('does nothing and warns when both are disabled', () => {
+    const errors: string[] = []
+    const engine = new SpamEngine({ onStatus: () => {}, onError: (m) => errors.push(m) })
+    engine.start(
+      profile((p) => {
+        p.entries = [key('a')]
+        p.clickPositions = [{ id: 'p1', x: 10, y: 20, button: 'left', delayMs: null }]
+        p.options.enableKeys = false
+        p.options.enableClickPositions = false
+      }),
+      'manual'
+    )
+    expect(errors.length).toBe(1)
+    expect(errors[0]).toMatch(/both/i)
+    expect(pressKey).not.toHaveBeenCalled()
+    expect(clickAt).not.toHaveBeenCalled()
     expect(engine.isRunning()).toBe(false)
   })
 })

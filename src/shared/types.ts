@@ -51,6 +51,10 @@ export interface Options {
   rightClick: boolean
   defaultDelayMs: number
   sequenceMode: boolean
+  /** Master switch: include the "Keys to Spam" list (plus the spacebar/click options). */
+  enableKeys: boolean
+  /** Master switch: include the recorded Click Positions. */
+  enableClickPositions: boolean
 }
 
 /** Keys to physically hold DOWN continuously (not tapped) while active. */

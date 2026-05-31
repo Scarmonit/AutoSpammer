@@ -42,6 +42,11 @@ function migrate(data: PersistedData): PersistedData {
     if (!p.holdKeys || !Array.isArray(p.holdKeys.keys)) p.holdKeys = { keys: [] }
     if (!p.periodicKey) p.periodicKey = { ...defaultProfile.periodicKey }
     if (!p.rightClickHold) p.rightClickHold = { ...defaultProfile.rightClickHold }
+    if (!p.options) p.options = { ...defaultProfile.options }
+    // Section master switches were added later — default older saves to "on" so
+    // their existing keys/positions keep spamming exactly as before.
+    if (typeof p.options.enableKeys !== 'boolean') p.options.enableKeys = true
+    if (typeof p.options.enableClickPositions !== 'boolean') p.options.enableClickPositions = true
   }
 
   // Ensure the active profile id points at something real.

@@ -21,11 +21,11 @@ them for you. Great for games and apps that involve a lot of repeated tapping.
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.5.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.5.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.6.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.6.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.5.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.5.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.6.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.6.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -52,6 +52,26 @@ and grab either file under **Assets**.)*
    game is focused.
 6. To stop: press **F6** again, click **Stop Spam**, or hit **Esc** (emergency
    stop).
+
+### 🔀 Enable / disable Keys and Click Positions independently
+Each of the **Keys to Spam** and **Click Positions** sections has its own
+**Enabled** switch in the section header, so you can choose what a run actually does
+*without deleting anything*:
+
+- **Keys to Spam → Enabled** controls the key list (plus the Spacebar / Left Click /
+  Right Click options).
+- **Click Positions → Enabled** controls the recorded click spots.
+
+So you can:
+- Spam **only keys** — turn Keys on, Click Positions off.
+- Spam **only click positions** — turn Keys off, Click Positions on.
+- Spam **both** — leave both on (the default).
+- If you turn **both off**, Start Spam does nothing and shows a quick warning telling
+  you to enable at least one.
+
+A disabled section greys out and is skipped, but everything you added stays saved.
+These switches are stored **per profile**, so different profiles can do different
+things.
 
 ### 🖱️ Click Positions (record-and-click specific spots)
 Want it to click exact places on screen (not just where your cursor is)? There are
