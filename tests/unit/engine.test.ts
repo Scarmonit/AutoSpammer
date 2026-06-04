@@ -385,6 +385,56 @@ describe('SpamEngine — Periodic Key integration', () => {
   })
 })
 
+describe('SpamEngine — Hold-to-Spam (full spam while held)', () => {
+  const holdKeyDown = vi.mocked(input.holdKeyDown)
+  const releaseKey = vi.mocked(input.releaseKey)
+  const keyDownName = vi.mocked(input.keyDownName)
+
+  it('runs every enabled section (keys + hold keys + periodic) while held, looping until released', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.holdKeys = { enabled: true, keys: ['w'] }
+      p.periodicKey = { enabled: true, key: 'f', intervalSec: 0.1 } // 100 ms
+      p.loop = { mode: 'once', count: 1 } // hold ignores Loop — runs while held
+    })
+    const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
+    engine.start(p, 'hold', 5)
+    await new Promise((r) => setTimeout(r, 260))
+
+    expect(engine.isRunning()).toBe(true) // Loop "once" did NOT end it (still held)
+    expect(holdKeyDown).toHaveBeenCalledWith('w') // Hold Keys Down active
+    expect(pressKey.mock.calls.some((c) => c[0] === 'a')).toBe(true) // Keys to Spam
+    expect(pressKey.mock.calls.some((c) => c[0] === 'f')).toBe(true) // Periodic Key
+
+    engine.stop() // key released
+    await new Promise((r) => setTimeout(r, 30))
+    expect(releaseKey).toHaveBeenCalledWith('w') // released cleanly
+    expect(engine.isRunning()).toBe(false)
+  })
+
+  it('plays the Macro while held when Macro is enabled', async () => {
+    const p = profile((p) => {
+      p.macro = {
+        enabled: true,
+        events: [
+          { id: '1', type: 'key-down', delayMs: 5, key: 'b' },
+          { id: '2', type: 'key-up', delayMs: 5, key: 'b' }
+        ]
+      }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
+    engine.start(p, 'hold', 5)
+    await new Promise((r) => setTimeout(r, 60))
+
+    expect(keyDownName).toHaveBeenCalledWith('b')
+    expect(engine.isRunning()).toBe(true) // loops while held
+    engine.stop()
+    await new Promise((r) => setTimeout(r, 30))
+    expect(engine.isRunning()).toBe(false)
+  })
+})
+
 describe('SpamEngine — right-click hold', () => {
   it('fires ONLY right-clicks, repeatedly, until stopped', async () => {
     const p = profile((p) => {

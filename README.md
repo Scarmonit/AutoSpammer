@@ -84,11 +84,11 @@
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.14.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.14.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.14.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.14.1.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.14.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.14.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.14.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.14.1.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -230,7 +230,9 @@ exactly the layout you left.
 - **Spacebar / Left Click / Right Click** checkboxes — add those without typing.
 - **Sequence Mode** — fire your keys one at a time per cycle instead of all at once.
 - **Loop** — repeat forever, once, or a set number of times.
-- **Hold-to-Spam** — pick a key; it only spams *while you physically hold it*.
+- **Hold-to-Spam** — pick a key; while you physically hold it, it runs the **whole
+  spam system** (every enabled section — Keys to Spam, Click Positions, Hold Keys
+  Down, Periodic Key, Macro) just like Start Spam, and stops the moment you release.
 - **Focus Hold** — hold a key to rapidly fire *that same key* (e.g. hold `F` to
   machine-gun `F`).
 - **Profiles** — save different setups and switch between them. They're remembered

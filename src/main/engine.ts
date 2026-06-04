@@ -87,13 +87,18 @@ export class SpamEngine {
   start(profile: Profile, mode: SpamMode, overrideDelayMs?: number, focusKey?: string): void {
     if (this.running) return
 
-    // Hold Keys Down + Periodic Key ride along with a manual Start Spam run
-    // (alongside Keys to Spam or a Macro), and stop when the run stops.
-    const aug = mode === 'manual' ? buildAugment(profile) : NO_AUGMENT
+    // "manual" (Start Spam / F6) and "hold" (Hold-to-Spam key) are both the full
+    // spam system — every enabled section runs together. They differ only in how
+    // they end: manual obeys the Loop config; hold runs until the key is released.
+    const fullSpam = mode === 'manual' || mode === 'hold'
 
-    // A manual run with the macro enabled replays the recording (looped per the
-    // Loop config) instead of the keys/positions spam.
-    if (mode === 'manual' && profile.macro?.enabled) {
+    // Hold Keys Down + Periodic Key ride along with a full-spam run (alongside
+    // Keys to Spam or a Macro), and stop when the run stops.
+    const aug = fullSpam ? buildAugment(profile) : NO_AUGMENT
+
+    // A full-spam run with the macro enabled replays the recording (looped) in
+    // place of the keys/positions spam.
+    if (fullSpam && profile.macro?.enabled) {
       const events = profile.macro.events ?? []
       if (events.length === 0 && !hasAugment(aug)) {
         this.cb.onError('Macro is enabled but empty — record something first.')
@@ -101,7 +106,7 @@ export class SpamEngine {
       }
       this.begin(mode)
       if (events.length === 0) void this.runAugmentOnly(aug)
-      else void this.runMacroLoop(events, profile.loop, aug)
+      else void this.runMacroLoop(events, profile.loop, aug, mode)
       return
     }
 
@@ -114,6 +119,8 @@ export class SpamEngine {
           { kind: 'mouse-right', key: '', text: '', delayMs: profile.rightClickHold.delayMs }
         ]
       } else {
+        // manual or hold: the full keys/options/positions/text list (the
+        // Hold-to-Spam delay overrides the per-tap pacing for a held run).
         fireables = buildFireables(profile, overrideDelayMs)
       }
     } catch (err) {
@@ -123,7 +130,7 @@ export class SpamEngine {
 
     if (fireables.length === 0 && !hasAugment(aug)) {
       const bothOff =
-        mode === 'manual' && !profile.options.enableKeys && !profile.options.enableClickPositions
+        fullSpam && !profile.options.enableKeys && !profile.options.enableClickPositions
       this.cb.onError(
         bothOff
           ? 'Both “Keys to Spam” and “Click Positions” are disabled — enable at least one to spam.'
@@ -285,7 +292,8 @@ export class SpamEngine {
   private async runMacroLoop(
     events: MacroEvent[],
     loop: LoopConfig,
-    aug: RunAugment = NO_AUGMENT
+    aug: RunAugment = NO_AUGMENT,
+    mode: SpamMode = 'manual'
   ): Promise<void> {
     const state = await this.beginAugment(aug)
     const downKeys = new Set<string>()
@@ -306,7 +314,8 @@ export class SpamEngine {
         if (this.abort) break
         this.cyclesDone += 1
         this.emit()
-        if (this.isDone('manual', loop)) break
+        // manual obeys Loop; hold loops until released (isDone false for 'hold').
+        if (this.isDone(mode, loop)) break
       }
     } catch (err) {
       this.cb.onError(err instanceof Error ? err.message : String(err))
