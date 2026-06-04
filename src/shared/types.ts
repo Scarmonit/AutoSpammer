@@ -131,6 +131,14 @@ export interface Profile {
   macro: MacroConfig
 }
 
+/** Last saved main-window geometry, restored on the next launch. */
+export interface WindowBounds {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export interface AppSettings {
   /** Electron accelerator string, e.g. "F6", "CommandOrControl+Shift+S". */
   toggleHotkey: string
@@ -146,6 +154,8 @@ export interface AppSettings {
   macroRecordHotkey: string
   /** Whole-window UI scale (zoom factor), e.g. 1 = 100%, 1.5 = 150%. */
   uiScale: number
+  /** Last main-window size + position; restored on launch. Null = use defaults. */
+  windowBounds: WindowBounds | null
   activeProfileId: string
 }
 

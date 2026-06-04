@@ -8,7 +8,7 @@ import type {
   RecordedKey,
   HotkeyConflict
 } from '@shared/types'
-import type { ClickPosition, AuxStatus, MacroConfig, MacroEvent } from '@shared/types'
+import type { ClickPosition, AuxStatus, MacroConfig, MacroEvent, WindowBounds } from '@shared/types'
 import { IPC } from '@shared/ipc'
 import { createDefaultProfile, makeId } from '@shared/defaults'
 import { loadData, saveData, flushDataSync, activeProfile } from './persistence'
@@ -49,9 +49,15 @@ function updateEmergencyArmed(): void {
 // Window
 // ---------------------------------------------------------------------------
 function createWindow(): void {
+  // Restore the saved size/position when it's still (partly) on a connected
+  // display; otherwise fall back to the default centered window.
+  const saved = data.settings.windowBounds
+  const useSaved = saved !== null && isBoundsVisible(saved)
+
   mainWindow = new BrowserWindow({
-    width: 760,
-    height: 740,
+    width: useSaved ? saved!.width : 760,
+    height: useSaved ? saved!.height : 740,
+    ...(useSaved ? { x: saved!.x, y: saved!.y } : {}),
     minWidth: 680,
     minHeight: 600,
     title: 'Auto Spammer',
@@ -71,6 +77,11 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => mainWindow?.show())
 
+  // Remember size + position. resize/move fire often, but saveData is debounced;
+  // saving on close captures the final geometry even when minimizing to tray.
+  mainWindow.on('resize', saveWindowBounds)
+  mainWindow.on('move', saveWindowBounds)
+
   // Apply the saved UI scale before content paints, so there's no resize flash.
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow?.webContents.setZoomFactor(data.settings.uiScale ?? 1)
@@ -79,6 +90,7 @@ function createWindow(): void {
   // Close-to-tray: hide the window instead of quitting, so global hotkeys keep
   // working in the background. Real quit goes through the tray / before-quit.
   mainWindow.on('close', (e) => {
+    saveWindowBounds() // capture geometry before hiding/destroying
     if (isQuitting) return
     e.preventDefault()
     mainWindow?.hide()
@@ -111,6 +123,23 @@ function createWindow(): void {
 
 function send(channel: string, payload: unknown): void {
   mainWindow?.webContents.send(channel, payload)
+}
+
+/** True if the saved window rect still overlaps a connected display's work area. */
+function isBoundsVisible(b: WindowBounds): boolean {
+  return screen.getAllDisplays().some((d) => {
+    const a = d.workArea
+    return b.x < a.x + a.width && b.x + b.width > a.x && b.y < a.y + a.height && b.y + b.height > a.y
+  })
+}
+
+/** Persist the current window size + position (debounced via saveData). */
+function saveWindowBounds(): void {
+  const win = mainWindow
+  if (!win || win.isDestroyed() || win.isMinimized()) return
+  // getNormalBounds() ignores a maximized state, so we restore the real size.
+  data.settings.windowBounds = win.getNormalBounds()
+  saveData(data)
 }
 
 /** Is the main window the OS-focused window right now? */
@@ -542,6 +571,11 @@ if (!gotLock) {
     cleanedUp = true
     // Synchronous, best-effort cleanup so the app exits promptly (no
     // preventDefault, which can stall graceful shutdown / automated close).
+    try {
+      saveWindowBounds() // final geometry, flushed by flushDataSync below
+    } catch {
+      /* ignore */
+    }
     try {
       engine?.stop()
     } catch {

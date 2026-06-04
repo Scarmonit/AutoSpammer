@@ -100,16 +100,27 @@ body {
   font-weight: 700;
   line-height: 1;
 }
-.uiscale__slider {
-  width: 96px;
-  accent-color: var(--blue);
-  cursor: pointer;
-}
-.uiscale__label {
+.uiscale__select,
+.uiscale__input {
+  height: 26px;
+  padding: 2px 6px;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  min-width: 38px;
-  text-align: right;
+  background: #1c1f25;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.uiscale__select {
+  width: 72px;
+}
+.uiscale__input {
+  width: 64px;
+  cursor: text;
+}
+.uiscale__select:hover {
+  border-color: var(--blue);
 }
 
 /* ---------- Status ---------- */

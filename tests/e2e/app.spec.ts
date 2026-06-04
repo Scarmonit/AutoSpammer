@@ -208,12 +208,19 @@ test('every section can be hidden/shown via its header toggle', async () => {
   await expect(keys.locator('.section__body')).toBeVisible()
 })
 
-test('the top bar has a UI scale slider showing the current percentage', async () => {
-  const slider = win.locator('.uiscale__slider')
-  await expect(slider).toBeVisible()
-  await expect(slider).toHaveAttribute('min', '100')
-  await expect(slider).toHaveAttribute('max', '200')
-  await expect(win.locator('.uiscale__label')).toHaveText('100%')
+test('the top bar UI scale is a dropdown that double-clicks into a custom input', async () => {
+  const select = win.locator('.uiscale__select')
+  await expect(select).toBeVisible()
+  await expect(select).toHaveValue('100')
+  await expect(select.locator('option[value="150"]')).toHaveCount(1) // common increments
+
+  // Double-clicking the control switches to a custom number input (100–200).
+  await win.locator('.uiscale').dblclick()
+  const input = win.locator('.uiscale__input')
+  await expect(input).toBeVisible()
+  await expect(input).toHaveAttribute('max', '200')
+  await input.press('Escape') // cancel without changing the scale
+  await expect(win.locator('.uiscale__select')).toBeVisible()
 })
 
 test('loop mode radios are interactive', async () => {
