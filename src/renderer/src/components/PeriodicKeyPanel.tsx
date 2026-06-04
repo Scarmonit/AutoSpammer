@@ -3,6 +3,7 @@ import { useStore } from '../store'
 import { Section } from './Section'
 import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
+import { prettyBindingLabel } from '@shared/bindings'
 
 export function PeriodicKeyPanel(): JSX.Element {
   const { data, activeProfile, aux, updateProfile, assignBinding, togglePeriodic } = useStore()
@@ -29,7 +30,8 @@ export function PeriodicKeyPanel(): JSX.Element {
       <p className="helper">
         Presses one key on a timer (e.g. press F every few seconds). When <strong>Enabled</strong>, it
         runs alongside <strong>Start Spam</strong> / <strong>F6</strong>; you can also run it standalone
-        with the button or <code className="keycap keycap--inline">{hotkey || '—'}</code>.
+        with the button or{' '}
+        <code className="keycap keycap--inline">{hotkey ? prettyBindingLabel(hotkey) : '—'}</code>.
       </p>
 
       <div className="field">
@@ -71,7 +73,7 @@ export function PeriodicKeyPanel(): JSX.Element {
       <div className="field" style={{ marginTop: 8 }}>
         <label>Toggle hotkey</label>
         <CaptureButton
-          label={`Change (${hotkey || 'unset'})`}
+          label={`Change (${hotkey ? prettyBindingLabel(hotkey) : 'unset'})`}
           mode="accelerator"
           className="btn--ghost"
           onCapture={(accel) => void assignBinding('periodicKeyHotkey', accel)}

@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { toName, toAccelerator } from '../keycapture'
+import { toName, toAccelerator, toMouseName } from '../keycapture'
 
 interface Props {
   label: string
   /** 'name' captures a single logical key; 'accelerator' captures an Electron hotkey. */
   mode: 'name' | 'accelerator'
-  /** When true, a left/right mouse click is also accepted (hold-key fields). */
-  allowMouse?: boolean
   onCapture: (value: string) => void
   className?: string
 }
@@ -21,13 +19,7 @@ let cancelActiveCapture: (() => void) | null = null
  * Click it again — or start another capture — to cancel. Escape (and modified
  * combos like Ctrl+Shift+K) bind normally.
  */
-export function CaptureButton({
-  label,
-  mode,
-  allowMouse,
-  onCapture,
-  className
-}: Props): JSX.Element {
+export function CaptureButton({ label, mode, onCapture, className }: Props): JSX.Element {
   const [listening, setListening] = useState(false)
 
   // Stable identity so the shared capture slot can be cleared by this instance.
@@ -65,11 +57,11 @@ export function CaptureButton({
       // Clicks on any "Set Key" button are for starting/cancelling capture, not
       // for binding a mouse button — let that button's own onClick handle it.
       if (e.target instanceof Element && e.target.closest('[data-capture-button]')) return
-      if (!allowMouse) return
+      const name = toMouseName(e)
+      if (!name) return
       e.preventDefault()
       e.stopPropagation()
-      if (e.button === 0) finish('mouse-left')
-      else if (e.button === 2) finish('mouse-right')
+      finish(name) // mouse buttons bind for both 'name' and 'accelerator' fields
     }
 
     window.addEventListener('keydown', onKey, true)
@@ -81,7 +73,7 @@ export function CaptureButton({
       window.removeEventListener('contextmenu', preventContext, true)
       if (cancelActiveCapture === self) cancelActiveCapture = null
     }
-  }, [listening, mode, allowMouse, onCapture])
+  }, [listening, mode, onCapture])
 
   return (
     <button
@@ -90,7 +82,7 @@ export function CaptureButton({
       className={`btn ${className ?? ''} ${listening ? 'btn--listening' : ''}`}
       onClick={() => setListening((v) => !v)}
     >
-      {listening ? 'Press a key…' : label}
+      {listening ? 'Press a key or mouse button…' : label}
     </button>
   )
 }

@@ -3,7 +3,13 @@ import { uIOhook, type UiohookKeyboardEvent, type UiohookMouseEvent } from 'uioh
 import type { Profile, AppSettings, RecordedKey, HotkeyConflict, SpamMode } from '@shared/types'
 import type { SpamEngine } from './engine'
 import { consumeSyntheticUp } from './input'
-import { nameForKeycode, keycodeForName, parseAccelerator, type ParsedAccelerator } from './keymap'
+import {
+  nameForKeycode,
+  keycodeForName,
+  parseAccelerator,
+  mouseButtonNumber,
+  type ParsedAccelerator
+} from './keymap'
 
 type MouseButton = 'left' | 'right' | 'middle'
 
@@ -50,8 +56,17 @@ export class GlobalInput {
   private macroRecording = false
   private macroPlaying = false
   private macroHotkey: ParsedAccelerator | null = null
-  // Keycodes whose next key-up should be swallowed (the macro hotkey's own key).
+  /** Macro record hotkey when bound to a mouse button (uiohook button number). */
+  private macroHotkeyButton: number | null = null
+  // Keycodes / mouse buttons whose next up should be swallowed (the macro
+  // hotkey's own press, so it never leaks into a recording).
   private suppressUpCodes = new Set<number>()
+  private suppressUpButtons = new Set<number>()
+  /** Mouse-button hotkeys (toggle / record-position / hold-keys / periodic). */
+  private mouseHotkeys = new Map<number, () => void>()
+  /** Emergency hotkey when bound to a mouse button, plus whether it's armed. */
+  private emergencyButton: number | null = null
+  private emergencyArmed = false
   private registerTimer: NodeJS.Timeout | null = null
 
   // Token of the physical key currently driving a hold-mode run, plus which
@@ -109,28 +124,53 @@ export class GlobalInput {
     }, 300)
   }
 
-  /** Re-register the always-on accelerators; emergency is managed by setEmergencyArmed(). */
+  /**
+   * Re-register the trigger hotkeys. Keyboard bindings use globalShortcut;
+   * mouse-button bindings are detected from the raw uiohook stream (globalShortcut
+   * can't register mouse). Emergency is (re)applied via applyEmergency().
+   */
   private registerHotkeys(): void {
     const s = this.deps.getSettings()
 
     // The macro record hotkey is detected via the raw uiohook stream (not a
-    // globalShortcut) so we can exclude its own key press from the recording.
-    this.macroHotkey = parseAccelerator(s.macroRecordHotkey)
+    // globalShortcut) so we can exclude its own press from the recording.
+    this.macroHotkeyButton = mouseButtonNumber(s.macroRecordHotkey)
+    this.macroHotkey = this.macroHotkeyButton === null ? parseAccelerator(s.macroRecordHotkey) : null
 
     for (const accel of this.registered) globalShortcut.unregister(accel)
     this.registered.clear()
+    this.mouseHotkeys.clear()
 
     const taken = new Set<string>()
     if (s.emergencyHotkey) taken.add(s.emergencyHotkey)
 
-    this.tryRegister('toggleHotkey', s.toggleHotkey, taken, () => this.toggle())
-    this.tryRegister('recordPositionHotkey', s.recordPositionHotkey, taken, () =>
+    this.registerTrigger('toggleHotkey', s.toggleHotkey, taken, () => this.toggle())
+    this.registerTrigger('recordPositionHotkey', s.recordPositionHotkey, taken, () =>
       this.deps.onRecordPosition()
     )
-    this.tryRegister('holdKeysHotkey', s.holdKeysHotkey, taken, () => this.deps.onToggleHold())
-    this.tryRegister('periodicKeyHotkey', s.periodicKeyHotkey, taken, () =>
+    this.registerTrigger('holdKeysHotkey', s.holdKeysHotkey, taken, () => this.deps.onToggleHold())
+    this.registerTrigger('periodicKeyHotkey', s.periodicKeyHotkey, taken, () =>
       this.deps.onTogglePeriodic()
     )
+
+    this.applyEmergency()
+  }
+
+  /** Route a trigger to a mouse-button handler or a keyboard globalShortcut. */
+  private registerTrigger(
+    field: HotkeyConflict['field'],
+    value: string,
+    taken: Set<string>,
+    handler: () => void
+  ): void {
+    if (!value) return
+    const button = mouseButtonNumber(value)
+    if (button !== null) {
+      this.mouseHotkeys.set(button, handler)
+      taken.add(value)
+      return
+    }
+    this.tryRegister(field, value, taken, handler)
   }
 
   private tryRegister(
@@ -165,27 +205,50 @@ export class GlobalInput {
   }
 
   private registered = new Set<string>()
-  private emergencyRegistered = false
+  private emergencyRegisteredAccel: string | null = null
 
   /**
    * Emergency stop is only captured while something is active (spamming, holding
-   * keys, or periodic press), so we don't swallow the Escape key system-wide the
-   * rest of the time.
+   * keys, or periodic press), so we don't swallow it system-wide the rest of the
+   * time. Re-applied whenever the armed state or the binding changes.
    */
   setEmergencyArmed(armed: boolean): void {
+    this.emergencyArmed = armed
+    this.applyEmergency()
+  }
+
+  /** Reconcile the emergency binding (keyboard globalShortcut vs mouse) + armed. */
+  private applyEmergency(): void {
     const { emergencyHotkey } = this.deps.getSettings()
-    if (!emergencyHotkey) return
-    if (armed && !this.emergencyRegistered) {
-      try {
-        this.emergencyRegistered = globalShortcut.register(emergencyHotkey, () =>
-          this.deps.onEmergencyStop()
-        )
-      } catch {
-        this.emergencyRegistered = false
+    this.emergencyButton = emergencyHotkey ? mouseButtonNumber(emergencyHotkey) : null
+
+    // Mouse emergency is handled in onMouseDown (gated by this.emergencyArmed);
+    // keyboard emergency uses a globalShortcut registered only while armed.
+    const wantKeyboard = !!emergencyHotkey && this.emergencyButton === null && this.emergencyArmed
+    if (wantKeyboard) {
+      if (this.emergencyRegisteredAccel !== emergencyHotkey) {
+        this.clearKeyboardEmergency()
+        try {
+          if (globalShortcut.register(emergencyHotkey, () => this.deps.onEmergencyStop())) {
+            this.emergencyRegisteredAccel = emergencyHotkey
+          }
+        } catch {
+          /* ignore */
+        }
       }
-    } else if (!armed && this.emergencyRegistered) {
-      globalShortcut.unregister(emergencyHotkey)
-      this.emergencyRegistered = false
+    } else {
+      this.clearKeyboardEmergency()
+    }
+  }
+
+  private clearKeyboardEmergency(): void {
+    if (this.emergencyRegisteredAccel) {
+      try {
+        globalShortcut.unregister(this.emergencyRegisteredAccel)
+      } catch {
+        /* ignore */
+      }
+      this.emergencyRegisteredAccel = null
     }
   }
 
@@ -283,6 +346,15 @@ export class GlobalInput {
   }
 
   private onMouseDown(e: UiohookMouseEvent): void {
+    const button = Number(e.button)
+
+    // The macro record hotkey (mouse) toggles recording and is never recorded;
+    // swallow its mouse-up too so it can't leak into the macro. Checked first.
+    if (this.macroHotkeyButton !== null && button === this.macroHotkeyButton) {
+      this.suppressUpButtons.add(button)
+      this.deps.onMacroToggleHotkey()
+      return
+    }
     if (this.macroPlaying) return
 
     if (this.macroRecording) {
@@ -308,10 +380,25 @@ export class GlobalInput {
       }
       return
     }
-    this.handleHoldDown(`m:${e.button}`)
+
+    // Mouse-button emergency stop (only while something is running).
+    if (this.emergencyButton !== null && this.emergencyArmed && button === this.emergencyButton) {
+      this.deps.onEmergencyStop()
+      return
+    }
+
+    // Mouse-button hotkeys (toggle / record-position / hold-keys / periodic).
+    const hotkey = this.mouseHotkeys.get(button)
+    if (hotkey) {
+      hotkey()
+      return
+    }
+
+    this.handleHoldDown(`m:${button}`)
   }
 
   private onMouseUp(e: UiohookMouseEvent): void {
+    if (this.suppressUpButtons.delete(Number(e.button))) return // macro hotkey's own up
     if (this.macroPlaying) return
 
     if (this.macroRecording) {
@@ -369,11 +456,11 @@ export class GlobalInput {
   }
 }
 
-/** Map a configured hold-key string to the same token format as live events. */
+/** Map a configured hold-key/mouse string to the same token format as live events. */
 function tokenFor(key: string): string | null {
   if (!key) return null
-  if (key === 'mouse-left') return 'm:1'
-  if (key === 'mouse-right') return 'm:2'
+  const button = mouseButtonNumber(key)
+  if (button !== null) return `m:${button}`
   const code = keycodeForName(key)
   return code === null ? null : `k:${code}`
 }

@@ -116,11 +116,40 @@ export function toAccelerator(e: KeyboardEvent): string | null {
   return [...mods, main].join('+')
 }
 
-/** Human-friendly label for an entry/hold key name. */
+/**
+ * Logical mouse-button name for a browser MouseEvent, or null for buttons we
+ * don't support. Mirrors the names the main process matches against:
+ *   0 → mouse-left, 1 → mouse-middle, 2 → mouse-right, 3 → mouse-4, 4 → mouse-5
+ */
+export function toMouseName(e: MouseEvent): string | null {
+  switch (e.button) {
+    case 0:
+      return 'mouse-left'
+    case 1:
+      return 'mouse-middle'
+    case 2:
+      return 'mouse-right'
+    case 3:
+      return 'mouse-4'
+    case 4:
+      return 'mouse-5'
+    default:
+      return null
+  }
+}
+
+const MOUSE_LABELS: Record<string, string> = {
+  'mouse-left': 'LMB',
+  'mouse-right': 'RMB',
+  'mouse-middle': 'MMB',
+  'mouse-4': 'MB4',
+  'mouse-5': 'MB5'
+}
+
+/** Human-friendly label for an entry/hold key or mouse-button name. */
 export function prettyName(name: string): string {
   if (!name) return '—'
-  if (name === 'mouse-left') return 'Left Click'
-  if (name === 'mouse-right') return 'Right Click'
+  if (name in MOUSE_LABELS) return MOUSE_LABELS[name]
   if (name.startsWith('numpad')) return 'Numpad ' + name.slice(6)
   if (name.length === 1) return name.toUpperCase()
   return name.charAt(0).toUpperCase() + name.slice(1)

@@ -1,5 +1,6 @@
 import React from 'react'
 import type { MacroEvent } from '@shared/types'
+import { prettyBindingLabel } from '@shared/bindings'
 import { useStore } from '../store'
 import { Section } from './Section'
 import { SectionToggle } from './SectionToggle'
@@ -81,7 +82,7 @@ export function MacroPanel(): JSX.Element {
           {macroRecording ? '■ Stop Recording' : '● Record'}
         </button>
         <CaptureButton
-          label={`Set Record Hotkey (${recordHotkey || 'unset'})`}
+          label={`Set Record Hotkey (${recordHotkey ? prettyBindingLabel(recordHotkey) : 'unset'})`}
           mode="accelerator"
           className="btn--ghost"
           onCapture={(accel) => void assignBinding('macroRecordHotkey', accel)}

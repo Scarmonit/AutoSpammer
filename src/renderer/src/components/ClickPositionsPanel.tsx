@@ -1,5 +1,6 @@
 import React from 'react'
 import type { ClickPosition } from '@shared/types'
+import { prettyBindingLabel } from '@shared/bindings'
 import { useStore } from '../store'
 import { Section } from './Section'
 import { SectionToggle } from './SectionToggle'
@@ -43,7 +44,10 @@ export function ClickPositionsPanel(): JSX.Element {
       }
     >
       <p className="helper">
-        Aim your mouse at a spot and press <code className="keycap keycap--inline">{recordHotkey || '—'}</code>{' '}
+        Aim your mouse at a spot and press{' '}
+        <code className="keycap keycap--inline">
+          {recordHotkey ? prettyBindingLabel(recordHotkey) : '—'}
+        </code>{' '}
         to record it — works even while a game is focused. Or hit <strong>Record Clicks</strong> and every
         left/right click you make is saved automatically. Recorded spots are clicked while spamming.
       </p>
@@ -51,7 +55,7 @@ export function ClickPositionsPanel(): JSX.Element {
       <div className="field">
         <label>Record hotkey</label>
         <CaptureButton
-          label={`Change (${recordHotkey || 'unset'})`}
+          label={`Change (${recordHotkey ? prettyBindingLabel(recordHotkey) : 'unset'})`}
           mode="accelerator"
           className="btn--ghost"
           onCapture={(accel) => void assignBinding('recordPositionHotkey', accel)}

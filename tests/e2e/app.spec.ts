@@ -130,6 +130,8 @@ test('only one Set Key listener is active at a time', async () => {
   const hk = section('Toggle Hotkey')
   await hk.getByRole('button', { name: 'Change Key' }).click()
   await expect(hk.locator('.btn--listening')).toHaveCount(1)
+  // Listening state tells the user mouse buttons are accepted too.
+  await expect(hk.locator('.btn--listening')).toHaveText('Press a key or mouse button…')
 
   // Starting the Emergency capture must cancel the first one (not bind to both).
   await hk.getByRole('button', { name: 'Change Emergency Key' }).click()
@@ -176,7 +178,7 @@ test('Hold Keys Down can add a mouse button as a chip', async () => {
   const before = await rows.count()
   await hold.getByRole('button', { name: '+ Left Click' }).click()
   await expect(rows).toHaveCount(before + 1)
-  await expect(hold.locator('.keyrow__static', { hasText: 'Left Click' })).toBeVisible()
+  await expect(hold.locator('.keyrow__static', { hasText: 'LMB' })).toBeVisible()
 })
 
 test('Periodic Key has an Enabled toggle (integrates with Start Spam)', async () => {

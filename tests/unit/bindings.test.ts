@@ -23,7 +23,18 @@ describe('canonicalBinding', () => {
   it('maps mouse buttons and treats empty as no binding', () => {
     expect(canonicalBinding('mouse-left')).toBe('mouse:left')
     expect(canonicalBinding('mouse-right')).toBe('mouse:right')
+    expect(canonicalBinding('mouse-middle')).toBe('mouse:middle')
+    expect(canonicalBinding('mouse-4')).toBe('mouse:4')
+    expect(canonicalBinding('mouse-5')).toBe('mouse:5')
     expect(canonicalBinding('')).toBeNull()
+  })
+
+  it('detects conflicts between two mouse-button bindings', () => {
+    const settings = createDefaultSettings('p1')
+    const profile = createDefaultProfile('test')
+    profile.focusHold = { enabled: true, key: 'mouse-4', delayMs: 10 }
+    const c = findBindingConflict(collectBindings(settings, profile), 'holdToSpam', 'mouse-4')
+    expect(c?.feature).toBe('Focus Hold Key')
   })
 })
 
@@ -71,7 +82,10 @@ describe('conflictMessage', () => {
 
   it('adapts the wording for mouse buttons', () => {
     expect(conflictMessage('mouse-left', 'Hold-to-Spam Key')).toBe(
-      'Left Click is already bound to Hold-to-Spam Key'
+      'LMB is already bound to Hold-to-Spam Key'
+    )
+    expect(conflictMessage('mouse-4', 'Focus Hold Key')).toBe(
+      'MB4 is already bound to Focus Hold Key'
     )
   })
 })

@@ -111,8 +111,8 @@ function normalizeModifier(mod: string): string {
 export function canonicalBinding(value: string): string | null {
   const v = (value ?? '').trim()
   if (!v) return null
-  if (v === 'mouse-left') return 'mouse:left'
-  if (v === 'mouse-right') return 'mouse:right'
+  // Mouse buttons: mouse-left/right/middle/4/5 -> mouse:left/right/middle/4/5.
+  if (v.startsWith('mouse-')) return `mouse:${v.slice('mouse-'.length)}`
 
   const parts = v.split('+').filter(Boolean)
   if (parts.length > 1) {
@@ -148,10 +148,17 @@ export function findBindingConflict(
   return null
 }
 
-/** Friendly label for a binding value, used in the conflict message. */
+const MOUSE_LABELS: Record<string, string> = {
+  'mouse-left': 'LMB',
+  'mouse-right': 'RMB',
+  'mouse-middle': 'MMB',
+  'mouse-4': 'MB4',
+  'mouse-5': 'MB5'
+}
+
+/** Friendly label for a binding value, used in the UI and conflict message. */
 export function prettyBindingLabel(value: string): string {
-  if (value === 'mouse-left') return 'Left Click'
-  if (value === 'mouse-right') return 'Right Click'
+  if (value in MOUSE_LABELS) return MOUSE_LABELS[value]
   if (value.length === 1) return value.toUpperCase()
   if (value.startsWith('numpad')) return 'Numpad ' + value.slice(6)
   return value // accelerators (e.g. "F6", "Escape", "Control+Shift+K") read fine as-is
@@ -160,7 +167,7 @@ export function prettyBindingLabel(value: string): string {
 /** The error message shown when a binding is already in use. */
 export function conflictMessage(value: string, feature: string): string {
   const label = prettyBindingLabel(value)
-  const isMouse = value === 'mouse-left' || value === 'mouse-right'
+  const isMouse = value.startsWith('mouse-')
   return isMouse
     ? `${label} is already bound to ${feature}`
     : `The key ${label} is already bound to ${feature}`

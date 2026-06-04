@@ -1,4 +1,5 @@
 import React from 'react'
+import { prettyBindingLabel } from '@shared/bindings'
 import { useStore } from '../store'
 import { Section } from './Section'
 import { CaptureButton } from './CaptureButton'
@@ -11,7 +12,9 @@ export function HotkeyPanel(): JSX.Element {
     <Section title="Toggle Hotkey">
       <div className="field">
         <label>Current</label>
-        <code className="keycap">{data.settings.toggleHotkey || '—'}</code>
+        <code className="keycap">
+          {data.settings.toggleHotkey ? prettyBindingLabel(data.settings.toggleHotkey) : '—'}
+        </code>
       </div>
       <CaptureButton
         label="Change Key"
@@ -23,7 +26,9 @@ export function HotkeyPanel(): JSX.Element {
 
       <div className="field" style={{ marginTop: 8 }}>
         <label>Emergency</label>
-        <code className="keycap">{data.settings.emergencyHotkey || '—'}</code>
+        <code className="keycap">
+          {data.settings.emergencyHotkey ? prettyBindingLabel(data.settings.emergencyHotkey) : '—'}
+        </code>
       </div>
       <CaptureButton
         label="Change Emergency Key"

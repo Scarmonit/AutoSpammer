@@ -39,6 +39,9 @@
   the header chevron; remembered per profile.
 - 🔀 **Independent enabling** of **Keys to Spam**, **Click Positions**, and **Macro** —
   each has its own *Enabled* switch (Macro is mutually exclusive with the other two).
+- 🖱️ **Mouse buttons everywhere** — every "Set Key" / "Change Key" binds a keyboard key
+  **or** a mouse button (LMB, RMB, MMB, MB4, MB5). Click the field, then press a key or
+  a mouse button.
 - 🔒 **Hotkey conflict prevention** — a key or mouse button can only drive one action;
   duplicate bindings are rejected with a clear message at the top of the window.
 - 🔴 **Improved Record** — record keys *and* mouse clicks straight into your lists;
@@ -84,11 +87,11 @@
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.14.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.14.1.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.15.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.15.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.14.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.14.1.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.15.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.15.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**

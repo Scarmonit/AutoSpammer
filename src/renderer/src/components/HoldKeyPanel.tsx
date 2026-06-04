@@ -34,7 +34,6 @@ export function HoldKeyPanel({ field, title, helper }: Props): JSX.Element {
       <CaptureButton
         label="Set Key"
         mode="name"
-        allowMouse
         className="btn--ghost"
         onCapture={(name) => void assignBinding(field, name)}
       />

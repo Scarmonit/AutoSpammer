@@ -4,6 +4,7 @@ import { Section } from './Section'
 import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
 import { prettyName } from '../keycapture'
+import { prettyBindingLabel } from '@shared/bindings'
 
 const isMouse = (k: string): boolean => k === 'mouse-left' || k === 'mouse-right'
 
@@ -42,7 +43,8 @@ export function HoldKeysPanel(): JSX.Element {
         Holds these keys <strong>or mouse buttons</strong> <strong>down</strong> (e.g. hold W to keep
         walking, or hold Left Click) — not tapped. When <strong>Enabled</strong>, they're held for the
         whole run alongside <strong>Start Spam</strong> / <strong>F6</strong>; you can also toggle them
-        standalone with the button or <code className="keycap keycap--inline">{hotkey || '—'}</code>.
+        standalone with the button or{' '}
+        <code className="keycap keycap--inline">{hotkey ? prettyBindingLabel(hotkey) : '—'}</code>.
       </p>
 
       <div className="keylist">
@@ -105,7 +107,7 @@ export function HoldKeysPanel(): JSX.Element {
       <div className="field" style={{ marginTop: 8 }}>
         <label>Toggle hotkey</label>
         <CaptureButton
-          label={`Change (${hotkey || 'unset'})`}
+          label={`Change (${hotkey ? prettyBindingLabel(hotkey) : 'unset'})`}
           mode="accelerator"
           className="btn--ghost"
           onCapture={(accel) => void assignBinding('holdKeysHotkey', accel)}

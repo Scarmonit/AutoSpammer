@@ -195,6 +195,23 @@ function arrowVariant(lower: string): string | null {
 }
 
 // ---------------------------------------------------------------------------
+// Mouse buttons. Logical names (mouse-left/right/middle/4/5) <-> uiohook button
+// numbers (left=1, right=2, middle=3, back=4, forward=5).
+// ---------------------------------------------------------------------------
+const MOUSE_BUTTON_NUMBERS: Record<string, number> = {
+  'mouse-left': 1,
+  'mouse-right': 2,
+  'mouse-middle': 3,
+  'mouse-4': 4,
+  'mouse-5': 5
+}
+
+/** uiohook button number for a logical mouse-button name, or null if not one. */
+export function mouseButtonNumber(name: string): number | null {
+  return MOUSE_BUTTON_NUMBERS[name] ?? null
+}
+
+// ---------------------------------------------------------------------------
 // Electron-accelerator parsing (used to detect the macro record hotkey from raw
 // uiohook events, so the hotkey itself can be excluded from the recording).
 // ---------------------------------------------------------------------------
