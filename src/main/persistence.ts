@@ -37,6 +37,8 @@ function migrate(data: PersistedData): PersistedData {
   const defaultProfile = defaults.profiles[0]
   // Backfill fields added in newer versions so older saves stay valid.
   data.settings = { ...defaults.settings, ...data.settings }
+  // UI scale was added later; keep it a sane zoom factor.
+  data.settings.uiScale = Math.min(2.5, Math.max(1, Number(data.settings.uiScale) || 1))
   for (const p of data.profiles) {
     if (!Array.isArray(p.clickPositions)) p.clickPositions = []
     if (!p.holdKeys || !Array.isArray(p.holdKeys.keys)) p.holdKeys = { enabled: true, keys: [] }

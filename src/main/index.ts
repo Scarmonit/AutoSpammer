@@ -71,6 +71,11 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => mainWindow?.show())
 
+  // Apply the saved UI scale before content paints, so there's no resize flash.
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow?.webContents.setZoomFactor(data.settings.uiScale ?? 1)
+  })
+
   // Close-to-tray: hide the window instead of quitting, so global hotkeys keep
   // working in the background. Real quit goes through the tray / before-quit.
   mainWindow.on('close', (e) => {
@@ -302,6 +307,8 @@ function registerIpc(): void {
 
   ipcMain.handle(IPC.UpdateSettings, (_e, patch: Partial<AppSettings>) => {
     data.settings = { ...data.settings, ...patch }
+    // Clamp the UI scale to a sane zoom range.
+    data.settings.uiScale = Math.min(2.5, Math.max(1, Number(data.settings.uiScale) || 1))
     saveData(data)
     globalInput.onSettingsChanged()
     return data

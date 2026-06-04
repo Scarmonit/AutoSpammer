@@ -81,6 +81,37 @@ body {
   letter-spacing: 0.2px;
 }
 
+/* ---------- Top-bar tools (UI scale + status) ---------- */
+.topbar__tools {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  -webkit-app-region: no-drag;
+}
+
+.uiscale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dim);
+}
+.uiscale__icon {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+.uiscale__slider {
+  width: 96px;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+.uiscale__label {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  min-width: 38px;
+  text-align: right;
+}
+
 /* ---------- Status ---------- */
 .status {
   display: flex;

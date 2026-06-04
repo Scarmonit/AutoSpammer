@@ -76,6 +76,7 @@ export function createDefaultSettings(activeProfileId: string): AppSettings {
     holdKeysHotkey: 'F8',
     periodicKeyHotkey: 'F9',
     macroRecordHotkey: 'F10',
+    uiScale: 1,
     activeProfileId
   }
 }

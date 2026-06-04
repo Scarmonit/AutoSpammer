@@ -48,6 +48,8 @@ interface Store {
   setActiveProfile: (id: string) => Promise<void>
   saveNow: () => Promise<void>
   updateSettings: (patch: Partial<AppSettings>) => Promise<void>
+  /** Set the whole-window UI scale (zoom factor); applies immediately. */
+  setUiScale: (scale: number) => Promise<void>
   /**
    * Assign a hotkey / hold-trigger binding after checking it isn't already in
    * use. On conflict the binding is rejected and an error toast is shown.
@@ -234,6 +236,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     []
   )
 
+  const setUiScale = useCallback(
+    async (scale: number) => setData(await window.api.updateSettings({ uiScale: scale })),
+    []
+  )
+
+  // Apply the whole-window zoom whenever the saved UI scale changes (and on load).
+  const uiScale = data?.settings.uiScale
+  useEffect(() => {
+    if (uiScale != null) window.api.setZoomFactor(uiScale)
+  }, [uiScale])
+
   const assignBinding = useCallback(
     async (field: BindingField, value: string) => {
       const current = dataRef.current
@@ -396,6 +409,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     setActiveProfile,
     saveNow,
     updateSettings,
+    setUiScale,
     assignBinding,
     start,
     stop,

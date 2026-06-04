@@ -12,6 +12,7 @@ import { HoldKeysPanel } from './components/HoldKeysPanel'
 import { PeriodicKeyPanel } from './components/PeriodicKeyPanel'
 import { MacroPanel } from './components/MacroPanel'
 import { StatusIndicator } from './components/StatusIndicator'
+import { UiScaleControl } from './components/UiScaleControl'
 import { BottomBar } from './components/BottomBar'
 import { ResizablePane } from './components/ResizablePane'
 
@@ -38,7 +39,10 @@ export function App(): JSX.Element {
           <span className="brand__mark" />
           <h1>Auto Spammer</h1>
         </div>
-        <StatusIndicator />
+        <div className="topbar__tools">
+          <UiScaleControl />
+          <StatusIndicator />
+        </div>
       </header>
 
       {message && (

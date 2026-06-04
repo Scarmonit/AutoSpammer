@@ -144,6 +144,8 @@ export interface AppSettings {
   periodicKeyHotkey: string
   /** Global hotkey to start/stop macro recording, e.g. "F10". */
   macroRecordHotkey: string
+  /** Whole-window UI scale (zoom factor), e.g. 1 = 100%, 1.5 = 150%. */
+  uiScale: number
   activeProfileId: string
 }
 

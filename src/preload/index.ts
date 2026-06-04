@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webFrame } from 'electron'
 import { IPC } from '@shared/ipc'
 import type {
   PersistedData,
@@ -45,6 +45,9 @@ const api = {
   toggleHold: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.ToggleHold),
   togglePeriodic: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.TogglePeriodic),
   getAuxStatus: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.GetAuxStatus),
+
+  /** Scale the whole renderer (text, padding, buttons) like browser zoom. */
+  setZoomFactor: (factor: number): void => webFrame.setZoomFactor(factor),
 
   macroRecordStart: (): Promise<void> => ipcRenderer.invoke(IPC.MacroRecordStart),
   macroRecordStop: (): Promise<void> => ipcRenderer.invoke(IPC.MacroRecordStop),

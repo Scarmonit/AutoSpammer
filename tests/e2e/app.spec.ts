@@ -208,6 +208,14 @@ test('every section can be hidden/shown via its header toggle', async () => {
   await expect(keys.locator('.section__body')).toBeVisible()
 })
 
+test('the top bar has a UI scale slider showing the current percentage', async () => {
+  const slider = win.locator('.uiscale__slider')
+  await expect(slider).toBeVisible()
+  await expect(slider).toHaveAttribute('min', '100')
+  await expect(slider).toHaveAttribute('max', '200')
+  await expect(win.locator('.uiscale__label')).toHaveText('100%')
+})
+
 test('loop mode radios are interactive', async () => {
   const once = section('Loop').locator('label.radio', { hasText: 'Play Once' }).locator('input')
   await once.check()
