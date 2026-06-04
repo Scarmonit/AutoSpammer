@@ -38,8 +38,7 @@ export function createDefaultProfile(name = 'Default'): Profile {
     },
     periodicKey: {
       enabled: true,
-      key: 'f',
-      intervalSec: 5
+      entries: []
     },
     loop: {
       mode: 'forever',

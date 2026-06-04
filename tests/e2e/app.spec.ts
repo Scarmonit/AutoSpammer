@@ -181,8 +181,16 @@ test('Hold Keys Down can add a mouse button as a chip', async () => {
   await expect(hold.locator('.keyrow__static', { hasText: 'LMB' })).toBeVisible()
 })
 
-test('Periodic Key has an Enabled toggle (integrates with Start Spam)', async () => {
-  await expect(section('Periodic Key').locator('.section__toggle input')).toBeVisible()
+test('Periodic Key is a multi-entry list with an Enabled toggle', async () => {
+  const periodic = section('Periodic Key')
+  await expect(periodic.locator('.section__toggle input')).toBeVisible()
+
+  const rows = periodic.locator('.periodicrow')
+  const before = await rows.count()
+  await periodic.getByRole('button', { name: '+ Add Periodic Key' }).click()
+  await expect(rows).toHaveCount(before + 1)
+  // Each row has its own interval field.
+  await expect(rows.last().locator('.periodicrow__interval')).toBeVisible()
 })
 
 test('every section can be hidden/shown via its header toggle', async () => {

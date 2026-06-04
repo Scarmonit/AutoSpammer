@@ -384,6 +384,22 @@ body.is-resizing * {
   min-width: 0;
 }
 
+/* Periodic Key list rows: key chip + Set Key + per-row interval. */
+.periodicrow {
+  flex-wrap: wrap;
+}
+.periodicrow__key {
+  min-width: 46px;
+  text-align: center;
+}
+.periodicrow__set {
+  padding: 4px 8px;
+}
+.periodicrow__interval {
+  width: 64px;
+  flex: 0 0 auto;
+}
+
 /* Read-only label for a held mouse button (Left/Right Click) in the list. */
 .keyrow__static {
   display: flex;

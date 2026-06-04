@@ -87,11 +87,11 @@
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.15.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.15.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.16.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.16.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.15.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.15.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.16.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.16.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -171,11 +171,12 @@ stop. You can also hold them **standalone**, without spamming, using the panel's
 **Hold** button or **F8** (press again, or **Esc**, to release).
 
 ### ⏱️ Periodic Key
-Press one chosen key on a timer — e.g. press **F** every 5 seconds. Set the key and
-interval in the **Periodic Key** panel. With its **Enabled** switch on, it runs
-automatically alongside **Start Spam** / **F6** (together with Keys to Spam and Hold
-Keys Down) and stops when you stop. You can also run it **standalone** with the panel
-button or **F9**.
+Press **any number of keys or mouse buttons** on their **own independent timers** —
+e.g. **F** every 5 s *and* **MB4** every 2 s. Use **+ Add Periodic Key** to add a row,
+**Set Key** to bind a key/mouse button, and set its own *every X seconds*. With the
+section's **Enabled** switch on, all entries run automatically alongside **Start Spam**
+/ **F6** (together with Keys to Spam and Hold Keys Down) and stop when you stop. You can
+also run them **standalone** with the panel button or **F9**.
 
 ### 🖱️ Hold for Right-Click
 Want to **auto right-click while holding a button**? In the **Hold for Right-Click**

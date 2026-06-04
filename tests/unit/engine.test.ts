@@ -18,7 +18,9 @@ vi.mock('../../src/main/input', () => ({
   mouseButtonUp: vi.fn(() => Promise.resolve()),
   // Hold Keys Down primitives.
   holdKeyDown: vi.fn(() => Promise.resolve(true)),
-  releaseKey: vi.fn(() => Promise.resolve())
+  releaseKey: vi.fn(() => Promise.resolve()),
+  // Periodic press (taps a key or clicks a mouse button).
+  tapBinding: vi.fn(() => Promise.resolve())
 }))
 
 import { SpamEngine } from '../../src/main/engine'
@@ -48,7 +50,7 @@ function profile(mut: (p: Profile) => void): Profile {
   p.textFunction = { enabled: false, text: '', delayMs: 0 }
   // Keep the augmentations off by default so each test opts in explicitly.
   p.holdKeys = { enabled: true, keys: [] }
-  p.periodicKey = { enabled: false, key: 'f', intervalSec: 5 }
+  p.periodicKey = { enabled: false, entries: [] }
   p.loop = { mode: 'once', count: 1 }
   mut(p)
   return p
@@ -353,35 +355,45 @@ describe('SpamEngine — Hold Keys Down integration', () => {
 })
 
 describe('SpamEngine — Periodic Key integration', () => {
-  it('presses the periodic key on an interval during a manual run and stops on stop', async () => {
+  const tapBinding = vi.mocked(input.tapBinding)
+
+  it('runs each periodic entry on its own interval during a manual run, stopping on stop', async () => {
     const p = profile((p) => {
       p.entries = []
       p.options.enableKeys = false
       p.options.enableClickPositions = false
-      p.periodicKey = { enabled: true, key: 'f', intervalSec: 0.1 } // 100 ms
+      p.periodicKey = {
+        enabled: true,
+        entries: [
+          { id: 'pk1', key: 'f', intervalSec: 0.1 }, // 100 ms
+          { id: 'pk2', key: 'g', intervalSec: 0.1 }
+        ]
+      }
       p.loop = { mode: 'forever', count: 1 }
     })
     const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
     engine.start(p, 'manual')
     await new Promise((r) => setTimeout(r, 260))
 
-    expect(pressKey.mock.calls.some((c) => c[0] === 'f')).toBe(true)
-    const callsAtStop = pressKey.mock.calls.length
+    // Both independent timers fired.
+    expect(tapBinding.mock.calls.some((c) => c[0] === 'f')).toBe(true)
+    expect(tapBinding.mock.calls.some((c) => c[0] === 'g')).toBe(true)
+    const callsAtStop = tapBinding.mock.calls.length
     engine.stop()
     await new Promise((r) => setTimeout(r, 160))
-    // No further periodic presses after stopping (timer cleared).
-    expect(pressKey.mock.calls.length).toBe(callsAtStop)
+    // No further periodic presses after stopping (all timers cleared).
+    expect(tapBinding.mock.calls.length).toBe(callsAtStop)
     expect(engine.isRunning()).toBe(false)
   })
 
-  it('does not run the periodic press when it is disabled', async () => {
+  it('does not run the periodic presses when the section is disabled', async () => {
     const p = profile((p) => {
       p.entries = [key('a')]
-      p.periodicKey = { enabled: false, key: 'f', intervalSec: 0.1 }
+      p.periodicKey = { enabled: false, entries: [{ id: 'pk1', key: 'f', intervalSec: 0.1 }] }
       p.loop = { mode: 'once', count: 1 }
     })
     await runToIdle(p)
-    expect(pressKey.mock.calls.every((c) => c[0] !== 'f')).toBe(true)
+    expect(tapBinding).not.toHaveBeenCalled()
   })
 })
 
@@ -389,12 +401,13 @@ describe('SpamEngine — Hold-to-Spam (full spam while held)', () => {
   const holdKeyDown = vi.mocked(input.holdKeyDown)
   const releaseKey = vi.mocked(input.releaseKey)
   const keyDownName = vi.mocked(input.keyDownName)
+  const tapBinding = vi.mocked(input.tapBinding)
 
   it('runs every enabled section (keys + hold keys + periodic) while held, looping until released', async () => {
     const p = profile((p) => {
       p.entries = [key('a')]
       p.holdKeys = { enabled: true, keys: ['w'] }
-      p.periodicKey = { enabled: true, key: 'f', intervalSec: 0.1 } // 100 ms
+      p.periodicKey = { enabled: true, entries: [{ id: 'pk1', key: 'f', intervalSec: 0.1 }] } // 100 ms
       p.loop = { mode: 'once', count: 1 } // hold ignores Loop — runs while held
     })
     const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
@@ -404,7 +417,7 @@ describe('SpamEngine — Hold-to-Spam (full spam while held)', () => {
     expect(engine.isRunning()).toBe(true) // Loop "once" did NOT end it (still held)
     expect(holdKeyDown).toHaveBeenCalledWith('w') // Hold Keys Down active
     expect(pressKey.mock.calls.some((c) => c[0] === 'a')).toBe(true) // Keys to Spam
-    expect(pressKey.mock.calls.some((c) => c[0] === 'f')).toBe(true) // Periodic Key
+    expect(tapBinding.mock.calls.some((c) => c[0] === 'f')).toBe(true) // Periodic Key
 
     engine.stop() // key released
     await new Promise((r) => setTimeout(r, 30))

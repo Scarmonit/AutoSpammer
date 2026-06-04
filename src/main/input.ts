@@ -83,14 +83,37 @@ export async function typeText(text: string): Promise<void> {
   if (text) await keyboard.type(text)
 }
 
-export async function clickMouse(button: 'left' | 'right'): Promise<void> {
-  const token = `m:${button === 'left' ? 1 : 2}`
+export async function clickMouse(button: 'left' | 'right' | 'middle'): Promise<void> {
+  const num = button === 'right' ? 2 : button === 'middle' ? 3 : 1
+  const nutBtn = button === 'right' ? Button.RIGHT : button === 'middle' ? Button.MIDDLE : Button.LEFT
+  const token = `m:${num}`
   recordSyntheticUp(token)
   try {
-    await mouse.click(button === 'left' ? Button.LEFT : Button.RIGHT)
+    await mouse.click(nutBtn)
   } catch (err) {
     consumeSyntheticUp(token)
     throw err
+  }
+}
+
+/**
+ * Tap a key OR mouse button once — used by the periodic presses. Left/right/middle
+ * clicks are supported; nut-js can't synthesize extra-button (MB4/MB5) clicks, so
+ * those are ignored.
+ */
+export async function tapBinding(name: string): Promise<void> {
+  switch (name) {
+    case 'mouse-left':
+      return clickMouse('left')
+    case 'mouse-right':
+      return clickMouse('right')
+    case 'mouse-middle':
+      return clickMouse('middle')
+    case 'mouse-4':
+    case 'mouse-5':
+      return // not synthesizable
+    default:
+      return pressKey(name)
   }
 }
 

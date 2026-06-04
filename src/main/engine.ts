@@ -9,7 +9,8 @@ import {
   mouseButtonDown,
   mouseButtonUp,
   holdKeyDown,
-  releaseKey
+  releaseKey,
+  tapBinding
 } from './input'
 import { playMacroEvent } from './macro'
 
@@ -28,23 +29,28 @@ interface EngineCallbacks {
   onError: (message: string) => void
 }
 
+/** One periodic press: tap `key` every `intervalMs` for the duration of a run. */
+interface PeriodicTask {
+  key: string
+  intervalMs: number
+}
+
 /**
  * Side-effects that ride along with a manual run, controlled by the main Start
  * Spam button / toggle hotkey:
  *  - holdKeys: keys/mouse-buttons held DOWN for the whole run.
- *  - periodicKey: a key pressed once every `periodicIntervalMs` during the run.
+ *  - periodic: any number of keys/buttons, each tapped on its own interval.
  */
 interface RunAugment {
   holdKeys: string[]
-  periodicKey: string | null
-  periodicIntervalMs: number
+  periodic: PeriodicTask[]
 }
 
-const NO_AUGMENT: RunAugment = { holdKeys: [], periodicKey: null, periodicIntervalMs: 0 }
+const NO_AUGMENT: RunAugment = { holdKeys: [], periodic: [] }
 
 interface AugmentState {
   held: string[]
-  periodicTimer: ReturnType<typeof setInterval> | null
+  periodicTimers: Array<ReturnType<typeof setInterval>>
 }
 
 function isMouseHold(key: string): 'left' | 'right' | null {
@@ -178,17 +184,16 @@ export class SpamEngine {
       }
     }
 
-    let periodicTimer: ReturnType<typeof setInterval> | null = null
-    if (aug.periodicKey) {
-      const key = aug.periodicKey
-      periodicTimer = setInterval(() => void pressKey(key), aug.periodicIntervalMs)
-    }
-    return { held, periodicTimer }
+    // One independent timer per periodic key/button.
+    const periodicTimers = aug.periodic.map((t) =>
+      setInterval(() => void tapBinding(t.key), t.intervalMs)
+    )
+    return { held, periodicTimers }
   }
 
   /** Release everything beginAugment started. */
   private async endAugment(state: AugmentState): Promise<void> {
-    if (state.periodicTimer) clearInterval(state.periodicTimer)
+    for (const timer of state.periodicTimers) clearInterval(timer)
     for (const k of state.held) {
       try {
         const mouse = isMouseHold(k)
@@ -458,19 +463,19 @@ function activeHoldKeys(profile: Profile): string[] {
 function buildAugment(profile: Profile): RunAugment {
   const holdKeys = activeHoldKeys(profile)
   const pk = profile.periodicKey
-  const key = pk?.enabled ? (pk.key ?? '').trim() : ''
-  if (key) {
-    return {
-      holdKeys,
-      periodicKey: key,
-      periodicIntervalMs: Math.max(100, Math.round((pk.intervalSec || 0) * 1000))
-    }
-  }
-  return { holdKeys, periodicKey: null, periodicIntervalMs: 0 }
+  const periodic: PeriodicTask[] = pk?.enabled
+    ? (pk.entries ?? [])
+        .filter((e) => (e.key ?? '').trim() !== '')
+        .map((e) => ({
+          key: e.key.trim(),
+          intervalMs: Math.max(100, Math.round((e.intervalSec || 0) * 1000))
+        }))
+    : []
+  return { holdKeys, periodic }
 }
 
 function hasAugment(aug: RunAugment): boolean {
-  return aug.holdKeys.length > 0 || aug.periodicKey !== null
+  return aug.holdKeys.length > 0 || aug.periodic.length > 0
 }
 
 function buildFocusFireable(key: string, delayMs: number): Fireable[] {

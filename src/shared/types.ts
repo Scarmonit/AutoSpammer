@@ -64,12 +64,19 @@ export interface HoldKeysConfig {
   keys: string[]
 }
 
-/** A single chosen key pressed once every N seconds while active. */
-export interface PeriodicKeyConfig {
-  /** When on, Start Spam (and F6) also runs the periodic press for the run. */
-  enabled: boolean
+/** One key/mouse-button pressed once every N seconds while active. */
+export interface PeriodicEntry {
+  id: string
+  /** Logical key name or mouse button (e.g. "f", "mouse-left"). */
   key: string
   intervalSec: number
+}
+
+/** Any number of periodic presses, each on its own independent timer. */
+export interface PeriodicKeyConfig {
+  /** When on, Start Spam (and F6) also runs the periodic presses for the run. */
+  enabled: boolean
+  entries: PeriodicEntry[]
 }
 
 /** One recorded input event in a macro. */

@@ -1,5 +1,5 @@
 import type { Profile, AuxStatus } from '@shared/types'
-import { holdKeyDown, releaseKey, pressKey, mouseButtonDown, mouseButtonUp } from './input'
+import { holdKeyDown, releaseKey, tapBinding, mouseButtonDown, mouseButtonUp } from './input'
 
 function isMouseHold(key: string): 'left' | 'right' | null {
   if (key === 'mouse-left') return 'left'
@@ -23,7 +23,7 @@ export class AuxController {
   private holdActive = false
   private periodicActive = false
   private heldKeys: string[] = []
-  private periodicTimer: NodeJS.Timeout | null = null
+  private periodicTimers: NodeJS.Timeout[] = []
 
   constructor(private readonly cb: AuxCallbacks) {}
 
@@ -77,22 +77,25 @@ export class AuxController {
       this.cb.onStatus(this.getStatus())
       return
     }
-    const { key, intervalSec } = this.cb.getProfile().periodicKey
-    if (!key || key.trim() === '') {
-      this.cb.onError('Choose a key for the periodic press first.')
+    const entries = (this.cb.getProfile().periodicKey.entries ?? []).filter(
+      (e) => (e.key ?? '').trim() !== ''
+    )
+    if (entries.length === 0) {
+      this.cb.onError('Add a periodic key first.')
       return
     }
-    const ms = Math.max(100, Math.round((intervalSec || 0) * 1000))
     this.periodicActive = true
-    this.periodicTimer = setInterval(() => void pressKey(key), ms)
+    // One independent timer per entry.
+    this.periodicTimers = entries.map((e) => {
+      const ms = Math.max(100, Math.round((e.intervalSec || 0) * 1000))
+      return setInterval(() => void tapBinding(e.key.trim()), ms)
+    })
     this.cb.onStatus(this.getStatus())
   }
 
   private stopPeriodic(): void {
-    if (this.periodicTimer) {
-      clearInterval(this.periodicTimer)
-      this.periodicTimer = null
-    }
+    for (const timer of this.periodicTimers) clearInterval(timer)
+    this.periodicTimers = []
     this.periodicActive = false
   }
 

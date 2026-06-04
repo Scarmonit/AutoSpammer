@@ -166,9 +166,12 @@ function sanitizeProfile(p: Profile): Profile {
     },
     periodicKey: {
       enabled: p.periodicKey?.enabled !== false,
-      key: String(p.periodicKey?.key ?? ''),
-      // seconds, clamped to a sane range (0.1s – 3600s)
-      intervalSec: Math.min(3600, Math.max(0.1, Number(p.periodicKey?.intervalSec) || 5))
+      entries: (p.periodicKey?.entries ?? []).map((e) => ({
+        id: typeof e?.id === 'string' ? e.id : makeId('pk'),
+        key: String(e?.key ?? ''),
+        // seconds, clamped to a sane range (0.1s – 3600s)
+        intervalSec: Math.min(3600, Math.max(0.1, Number(e?.intervalSec) || 5))
+      }))
     },
     loop: {
       ...p.loop,

@@ -2,7 +2,7 @@ import { app } from 'electron'
 import { promises as fs, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { PersistedData, Profile, AppSettings } from '@shared/types'
-import { createDefaultData, DATA_VERSION } from '@shared/defaults'
+import { createDefaultData, DATA_VERSION, makeId } from '@shared/defaults'
 
 const FILE_NAME = 'autospammer-data.json'
 
@@ -42,9 +42,20 @@ function migrate(data: PersistedData): PersistedData {
     if (!p.holdKeys || !Array.isArray(p.holdKeys.keys)) p.holdKeys = { enabled: true, keys: [] }
     // Hold Keys Down gained an "enabled" switch later; default older saves to on.
     if (typeof p.holdKeys.enabled !== 'boolean') p.holdKeys.enabled = true
-    if (!p.periodicKey) p.periodicKey = { ...defaultProfile.periodicKey }
+    if (!p.periodicKey || typeof p.periodicKey !== 'object') {
+      p.periodicKey = { ...defaultProfile.periodicKey }
+    }
     // Periodic Key gained an "enabled" switch later; default older saves to on.
     if (typeof p.periodicKey.enabled !== 'boolean') p.periodicKey.enabled = true
+    // Periodic Key became multi-key; migrate the old single { key, intervalSec }.
+    if (!Array.isArray(p.periodicKey.entries)) {
+      const old = p.periodicKey as unknown as { key?: unknown; intervalSec?: unknown }
+      const key = typeof old.key === 'string' ? old.key.trim() : ''
+      const intervalSec = Number(old.intervalSec) > 0 ? Number(old.intervalSec) : 5
+      p.periodicKey.entries = key ? [{ id: makeId('pk'), key, intervalSec }] : []
+      delete (p.periodicKey as { key?: unknown }).key
+      delete (p.periodicKey as { intervalSec?: unknown }).intervalSec
+    }
     if (!p.rightClickHold) p.rightClickHold = { ...defaultProfile.rightClickHold }
     if (!p.options) p.options = { ...defaultProfile.options }
     // Section master switches were added later — default older saves to "on" so
