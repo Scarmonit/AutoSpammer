@@ -170,6 +170,19 @@ test('Hold Keys Down: has an Enabled toggle and "+ Add Key" adds a row', async (
   await expect(newKey).toHaveValue('w')
 })
 
+test('Hold Keys Down can add a mouse button as a chip', async () => {
+  const hold = section('Hold Keys Down')
+  const rows = hold.locator('.keyrow')
+  const before = await rows.count()
+  await hold.getByRole('button', { name: '+ Left Click' }).click()
+  await expect(rows).toHaveCount(before + 1)
+  await expect(hold.locator('.keyrow__static', { hasText: 'Left Click' })).toBeVisible()
+})
+
+test('Periodic Key has an Enabled toggle (integrates with Start Spam)', async () => {
+  await expect(section('Periodic Key').locator('.section__toggle input')).toBeVisible()
+})
+
 test('every section can be hidden/shown via its header toggle', async () => {
   // 6 sections (left) + 7 sections (right) = 13 collapse buttons.
   await expect(win.locator('.section__collapse')).toHaveCount(13)

@@ -6,6 +6,7 @@ import {
   clickAt,
   clearSynthetic,
   keyUpName,
+  mouseButtonDown,
   mouseButtonUp,
   holdKeyDown,
   releaseKey
@@ -25,6 +26,31 @@ interface Fireable {
 interface EngineCallbacks {
   onStatus: (status: StatusPayload) => void
   onError: (message: string) => void
+}
+
+/**
+ * Side-effects that ride along with a manual run, controlled by the main Start
+ * Spam button / toggle hotkey:
+ *  - holdKeys: keys/mouse-buttons held DOWN for the whole run.
+ *  - periodicKey: a key pressed once every `periodicIntervalMs` during the run.
+ */
+interface RunAugment {
+  holdKeys: string[]
+  periodicKey: string | null
+  periodicIntervalMs: number
+}
+
+const NO_AUGMENT: RunAugment = { holdKeys: [], periodicKey: null, periodicIntervalMs: 0 }
+
+interface AugmentState {
+  held: string[]
+  periodicTimer: ReturnType<typeof setInterval> | null
+}
+
+function isMouseHold(key: string): 'left' | 'right' | null {
+  if (key === 'mouse-left') return 'left'
+  if (key === 'mouse-right') return 'right'
+  return null
 }
 
 /**
@@ -61,21 +87,21 @@ export class SpamEngine {
   start(profile: Profile, mode: SpamMode, overrideDelayMs?: number, focusKey?: string): void {
     if (this.running) return
 
-    // Hold Keys Down rides along with a manual Start Spam run (alongside Keys to
-    // Spam or a Macro), holding its keys for the whole run and releasing on stop.
-    const holdKeys = mode === 'manual' ? activeHoldKeys(profile) : []
+    // Hold Keys Down + Periodic Key ride along with a manual Start Spam run
+    // (alongside Keys to Spam or a Macro), and stop when the run stops.
+    const aug = mode === 'manual' ? buildAugment(profile) : NO_AUGMENT
 
     // A manual run with the macro enabled replays the recording (looped per the
     // Loop config) instead of the keys/positions spam.
     if (mode === 'manual' && profile.macro?.enabled) {
       const events = profile.macro.events ?? []
-      if (events.length === 0 && holdKeys.length === 0) {
+      if (events.length === 0 && !hasAugment(aug)) {
         this.cb.onError('Macro is enabled but empty — record something first.')
         return
       }
       this.begin(mode)
-      if (events.length === 0) void this.runHoldOnly(holdKeys)
-      else void this.runMacroLoop(events, profile.loop, holdKeys)
+      if (events.length === 0) void this.runAugmentOnly(aug)
+      else void this.runMacroLoop(events, profile.loop, aug)
       return
     }
 
@@ -95,7 +121,7 @@ export class SpamEngine {
       return
     }
 
-    if (fireables.length === 0 && holdKeys.length === 0) {
+    if (fireables.length === 0 && !hasAugment(aug)) {
       const bothOff =
         mode === 'manual' && !profile.options.enableKeys && !profile.options.enableClickPositions
       this.cb.onError(
@@ -108,10 +134,10 @@ export class SpamEngine {
 
     this.begin(mode)
     if (fireables.length === 0) {
-      // Only Hold Keys Down is active — just hold the keys until stopped.
-      void this.runHoldOnly(holdKeys)
+      // Only Hold Keys Down / Periodic Key are active — run them until stopped.
+      void this.runAugmentOnly(aug)
     } else {
-      void this.runLoop(fireables, profile.options.sequenceMode, profile.loop, mode, holdKeys)
+      void this.runLoop(fireables, profile.options.sequenceMode, profile.loop, mode, aug)
     }
   }
 
@@ -124,38 +150,58 @@ export class SpamEngine {
     this.emit(true)
   }
 
-  /** Press a set of keys down; returns the ones actually held (to release later). */
-  private async holdDown(keys: string[]): Promise<string[]> {
+  // -------------------------------------------------------------------------
+  // Run augmentations (Hold Keys Down + Periodic Key)
+  // -------------------------------------------------------------------------
+
+  /** Hold down keys/mouse-buttons and start the periodic timer. */
+  private async beginAugment(aug: RunAugment): Promise<AugmentState> {
     const held: string[] = []
-    for (const k of keys) {
+    for (const k of aug.holdKeys) {
       try {
-        if (await holdKeyDown(k)) held.push(k)
+        const mouse = isMouseHold(k)
+        if (mouse) {
+          await mouseButtonDown(mouse)
+          held.push(k)
+        } else if (await holdKeyDown(k)) {
+          held.push(k)
+        }
       } catch {
-        /* ignore a key we couldn't hold */
+        /* ignore a key/button we couldn't hold */
       }
     }
-    return held
+
+    let periodicTimer: ReturnType<typeof setInterval> | null = null
+    if (aug.periodicKey) {
+      const key = aug.periodicKey
+      periodicTimer = setInterval(() => void pressKey(key), aug.periodicIntervalMs)
+    }
+    return { held, periodicTimer }
   }
 
-  private async releaseHeld(keys: string[]): Promise<void> {
-    for (const k of keys) {
+  /** Release everything beginAugment started. */
+  private async endAugment(state: AugmentState): Promise<void> {
+    if (state.periodicTimer) clearInterval(state.periodicTimer)
+    for (const k of state.held) {
       try {
-        await releaseKey(k)
+        const mouse = isMouseHold(k)
+        if (mouse) await mouseButtonUp(mouse)
+        else await releaseKey(k)
       } catch {
         /* ignore */
       }
     }
   }
 
-  /** Hold the given keys down until stopped (a manual run with no taps/macro). */
-  private async runHoldOnly(holdKeys: string[]): Promise<void> {
-    const held = await this.holdDown(holdKeys)
+  /** A manual run with no taps/macro — just hold keys and/or press periodically. */
+  private async runAugmentOnly(aug: RunAugment): Promise<void> {
+    const state = await this.beginAugment(aug)
     try {
       await this.waitForAbort()
     } catch (err) {
       this.cb.onError(err instanceof Error ? err.message : String(err))
     } finally {
-      await this.releaseHeld(held)
+      await this.endAugment(state)
       this.running = false
       this.mode = null
       this.wake = null
@@ -163,7 +209,7 @@ export class SpamEngine {
     }
   }
 
-  /** Resolve when stop() is called (used by hold-only runs). */
+  /** Resolve when stop() is called (used by augment-only runs). */
   private waitForAbort(): Promise<void> {
     return new Promise<void>((resolve) => {
       if (this.abort) {
@@ -188,9 +234,9 @@ export class SpamEngine {
     sequenceMode: boolean,
     loop: LoopConfig,
     mode: SpamMode,
-    holdKeys: string[] = []
+    aug: RunAugment = NO_AUGMENT
   ): Promise<void> {
-    const held = await this.holdDown(holdKeys)
+    const state = await this.beginAugment(aug)
     try {
       let seqIndex = 0
       while (!this.abort) {
@@ -221,7 +267,7 @@ export class SpamEngine {
     } catch (err) {
       this.cb.onError(err instanceof Error ? err.message : String(err))
     } finally {
-      await this.releaseHeld(held)
+      await this.endAugment(state)
       this.running = false
       this.mode = null
       this.wake = null
@@ -234,14 +280,14 @@ export class SpamEngine {
    * Replay a macro with its recorded per-event delays, looping per the Loop
    * config (a held key/button is tracked so an abort mid-press still releases
    * it — no stuck inputs). Each event's delay is the wait BEFORE it fires.
-   * Hold Keys Down (if any) are held for the whole run.
+   * Hold Keys Down / Periodic Key (if any) run for the whole macro run.
    */
   private async runMacroLoop(
     events: MacroEvent[],
     loop: LoopConfig,
-    holdKeys: string[] = []
+    aug: RunAugment = NO_AUGMENT
   ): Promise<void> {
-    const held = await this.holdDown(holdKeys)
+    const state = await this.beginAugment(aug)
     const downKeys = new Set<string>()
     const downButtons = new Set<'left' | 'right' | 'middle'>()
     try {
@@ -280,7 +326,7 @@ export class SpamEngine {
           /* ignore */
         }
       }
-      await this.releaseHeld(held)
+      await this.endAugment(state)
       this.running = false
       this.mode = null
       this.wake = null
@@ -348,7 +394,7 @@ export class SpamEngine {
 }
 
 // ---------------------------------------------------------------------------
-// Fireable construction
+// Fireable + augmentation construction
 // ---------------------------------------------------------------------------
 function buildFireables(profile: Profile, overrideDelayMs?: number): Fireable[] {
   const def = overrideDelayMs ?? profile.options.defaultDelayMs
@@ -393,10 +439,29 @@ function buildFireables(profile: Profile, overrideDelayMs?: number): Fireable[] 
   return out
 }
 
-/** The non-empty Hold Keys Down list, or [] when the section is disabled. */
+/** The non-empty Hold Keys Down list (keys + mouse buttons), or [] when off. */
 function activeHoldKeys(profile: Profile): string[] {
   if (!profile.holdKeys?.enabled) return []
   return (profile.holdKeys.keys ?? []).filter((k) => k.trim() !== '')
+}
+
+/** Build the manual-run augmentation (Hold Keys Down + Periodic Key). */
+function buildAugment(profile: Profile): RunAugment {
+  const holdKeys = activeHoldKeys(profile)
+  const pk = profile.periodicKey
+  const key = pk?.enabled ? (pk.key ?? '').trim() : ''
+  if (key) {
+    return {
+      holdKeys,
+      periodicKey: key,
+      periodicIntervalMs: Math.max(100, Math.round((pk.intervalSec || 0) * 1000))
+    }
+  }
+  return { holdKeys, periodicKey: null, periodicIntervalMs: 0 }
+}
+
+function hasAugment(aug: RunAugment): boolean {
+  return aug.holdKeys.length > 0 || aug.periodicKey !== null
 }
 
 function buildFocusFireable(key: string, delayMs: number): Fireable[] {

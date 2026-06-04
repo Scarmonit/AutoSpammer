@@ -165,6 +165,7 @@ function sanitizeProfile(p: Profile): Profile {
       keys: (p.holdKeys?.keys ?? []).map((k) => String(k))
     },
     periodicKey: {
+      enabled: p.periodicKey?.enabled !== false,
       key: String(p.periodicKey?.key ?? ''),
       // seconds, clamped to a sane range (0.1s – 3600s)
       intervalSec: Math.min(3600, Math.max(0.1, Number(p.periodicKey?.intervalSec) || 5))

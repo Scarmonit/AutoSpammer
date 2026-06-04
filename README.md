@@ -84,11 +84,11 @@
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.13.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.13.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.14.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.14.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.13.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.13.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.14.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.14.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -159,17 +159,20 @@ and clicks it, in order, every cycle.
 You can change the single-spot record hotkey from **F7** to anything else in that panel.
 
 ### ⌨️ Hold Keys Down
-Hold any keys *down* continuously (not tapped) — e.g. hold **W** to keep walking
-in a game. Add keys with **+ Add Key** in the **Hold Keys Down** panel. With the
-section's **Enabled** switch on, those keys are held automatically whenever you press
-**Start Spam** / **F6** (right alongside Keys to Spam or a Macro) and released when
-you stop — exactly like the other sections. You can also hold them **standalone**,
-without spamming, using the panel's **Hold Keys** button or **F8** (press again, or
-**Esc**, to release).
+Hold keys **or mouse buttons** *down* continuously (not tapped) — e.g. hold **W** to
+keep walking, or hold **Left Click**. Use **+ Add Key** to type a keyboard key, or
+**+ Left Click** / **+ Right Click** to add a mouse button (shown as a chip). With the
+section's **Enabled** switch on, they're held automatically whenever you press
+**Start Spam** / **F6** (right alongside Keys to Spam or a Macro) and released when you
+stop. You can also hold them **standalone**, without spamming, using the panel's
+**Hold** button or **F8** (press again, or **Esc**, to release).
 
 ### ⏱️ Periodic Key
-Press one chosen key on a timer — e.g. press **F** every 5 seconds. Set the key
-and interval in the **Periodic Key** panel, then toggle with the button or **F9**.
+Press one chosen key on a timer — e.g. press **F** every 5 seconds. Set the key and
+interval in the **Periodic Key** panel. With its **Enabled** switch on, it runs
+automatically alongside **Start Spam** / **F6** (together with Keys to Spam and Hold
+Keys Down) and stops when you stop. You can also run it **standalone** with the panel
+button or **F9**.
 
 ### 🖱️ Hold for Right-Click
 Want to **auto right-click while holding a button**? In the **Hold for Right-Click**

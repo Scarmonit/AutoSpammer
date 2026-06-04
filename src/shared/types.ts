@@ -66,6 +66,8 @@ export interface HoldKeysConfig {
 
 /** A single chosen key pressed once every N seconds while active. */
 export interface PeriodicKeyConfig {
+  /** When on, Start Spam (and F6) also runs the periodic press for the run. */
+  enabled: boolean
   key: string
   intervalSec: number
 }

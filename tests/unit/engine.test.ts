@@ -46,6 +46,9 @@ function profile(mut: (p: Profile) => void): Profile {
     enableClickPositions: true
   }
   p.textFunction = { enabled: false, text: '', delayMs: 0 }
+  // Keep the augmentations off by default so each test opts in explicitly.
+  p.holdKeys = { enabled: true, keys: [] }
+  p.periodicKey = { enabled: false, key: 'f', intervalSec: 5 }
   p.loop = { mode: 'once', count: 1 }
   mut(p)
   return p
@@ -332,6 +335,53 @@ describe('SpamEngine — Hold Keys Down integration', () => {
     await new Promise((r) => setTimeout(r, 20))
     expect(releaseKey.mock.calls.map((c) => c[0])).toEqual(['w'])
     expect(engine.isRunning()).toBe(false)
+  })
+
+  it('holds a mouse button during a manual run and releases it on stop', async () => {
+    const mouseButtonDown = vi.mocked(input.mouseButtonDown)
+    const mouseButtonUp = vi.mocked(input.mouseButtonUp)
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.holdKeys = { enabled: true, keys: ['mouse-left'] }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    await runToIdle(p)
+    expect(mouseButtonDown).toHaveBeenCalledWith('left')
+    expect(mouseButtonUp).toHaveBeenCalledWith('left')
+    expect(holdKeyDown).not.toHaveBeenCalled() // a mouse button isn't a keyboard hold
+  })
+})
+
+describe('SpamEngine — Periodic Key integration', () => {
+  it('presses the periodic key on an interval during a manual run and stops on stop', async () => {
+    const p = profile((p) => {
+      p.entries = []
+      p.options.enableKeys = false
+      p.options.enableClickPositions = false
+      p.periodicKey = { enabled: true, key: 'f', intervalSec: 0.1 } // 100 ms
+      p.loop = { mode: 'forever', count: 1 }
+    })
+    const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
+    engine.start(p, 'manual')
+    await new Promise((r) => setTimeout(r, 260))
+
+    expect(pressKey.mock.calls.some((c) => c[0] === 'f')).toBe(true)
+    const callsAtStop = pressKey.mock.calls.length
+    engine.stop()
+    await new Promise((r) => setTimeout(r, 160))
+    // No further periodic presses after stopping (timer cleared).
+    expect(pressKey.mock.calls.length).toBe(callsAtStop)
+    expect(engine.isRunning()).toBe(false)
+  })
+
+  it('does not run the periodic press when it is disabled', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.periodicKey = { enabled: false, key: 'f', intervalSec: 0.1 }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    await runToIdle(p)
+    expect(pressKey.mock.calls.every((c) => c[0] !== 'f')).toBe(true)
   })
 })
 

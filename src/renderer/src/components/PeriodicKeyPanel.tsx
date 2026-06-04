@@ -1,6 +1,7 @@
 import React from 'react'
 import { useStore } from '../store'
 import { Section } from './Section'
+import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
 
 export function PeriodicKeyPanel(): JSX.Element {
@@ -14,10 +15,21 @@ export function PeriodicKeyPanel(): JSX.Element {
     updateProfile((prof) => ({ ...prof, periodicKey: { ...prof.periodicKey, ...p } }))
 
   return (
-    <Section title="Periodic Key">
+    <Section
+      title="Periodic Key"
+      dim={!pk.enabled}
+      right={
+        <SectionToggle
+          checked={pk.enabled}
+          onChange={(v) => patch({ enabled: v })}
+          title="Run the periodic press while Start Spam (or F6) is running"
+        />
+      }
+    >
       <p className="helper">
-        Presses one key on a timer (e.g. press F every few seconds). Toggle with the button or{' '}
-        <code className="keycap keycap--inline">{hotkey || '—'}</code>.
+        Presses one key on a timer (e.g. press F every few seconds). When <strong>Enabled</strong>, it
+        runs alongside <strong>Start Spam</strong> / <strong>F6</strong>; you can also run it standalone
+        with the button or <code className="keycap keycap--inline">{hotkey || '—'}</code>.
       </p>
 
       <div className="field">

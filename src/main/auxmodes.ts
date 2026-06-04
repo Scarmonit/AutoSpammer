@@ -1,5 +1,11 @@
 import type { Profile, AuxStatus } from '@shared/types'
-import { holdKeyDown, releaseKey, pressKey } from './input'
+import { holdKeyDown, releaseKey, pressKey, mouseButtonDown, mouseButtonUp } from './input'
+
+function isMouseHold(key: string): 'left' | 'right' | null {
+  if (key === 'mouse-left') return 'left'
+  if (key === 'mouse-right') return 'right'
+  return null
+}
 
 interface AuxCallbacks {
   getProfile: () => Profile
@@ -43,8 +49,13 @@ export class AuxController {
 
   private async holdAll(keys: string[]): Promise<void> {
     for (const k of keys) {
-      const ok = await holdKeyDown(k)
-      if (ok) this.heldKeys.push(k)
+      const mouse = isMouseHold(k)
+      if (mouse) {
+        await mouseButtonDown(mouse)
+        this.heldKeys.push(k)
+      } else if (await holdKeyDown(k)) {
+        this.heldKeys.push(k)
+      }
     }
   }
 
@@ -52,7 +63,11 @@ export class AuxController {
     const keys = this.heldKeys
     this.heldKeys = []
     this.holdActive = false
-    for (const k of keys) await releaseKey(k)
+    for (const k of keys) {
+      const mouse = isMouseHold(k)
+      if (mouse) await mouseButtonUp(mouse)
+      else await releaseKey(k)
+    }
     this.cb.onStatus(this.getStatus())
   }
 

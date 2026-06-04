@@ -43,6 +43,8 @@ function migrate(data: PersistedData): PersistedData {
     // Hold Keys Down gained an "enabled" switch later; default older saves to on.
     if (typeof p.holdKeys.enabled !== 'boolean') p.holdKeys.enabled = true
     if (!p.periodicKey) p.periodicKey = { ...defaultProfile.periodicKey }
+    // Periodic Key gained an "enabled" switch later; default older saves to on.
+    if (typeof p.periodicKey.enabled !== 'boolean') p.periodicKey.enabled = true
     if (!p.rightClickHold) p.rightClickHold = { ...defaultProfile.rightClickHold }
     if (!p.options) p.options = { ...defaultProfile.options }
     // Section master switches were added later — default older saves to "on" so
