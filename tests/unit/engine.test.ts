@@ -15,7 +15,10 @@ vi.mock('../../src/main/input', () => ({
   keyUpName: vi.fn(() => Promise.resolve()),
   mouseMove: vi.fn(() => Promise.resolve()),
   mouseButtonDown: vi.fn(() => Promise.resolve()),
-  mouseButtonUp: vi.fn(() => Promise.resolve())
+  mouseButtonUp: vi.fn(() => Promise.resolve()),
+  // Hold Keys Down primitives.
+  holdKeyDown: vi.fn(() => Promise.resolve(true)),
+  releaseKey: vi.fn(() => Promise.resolve())
 }))
 
 import { SpamEngine } from '../../src/main/engine'
@@ -279,6 +282,55 @@ describe('SpamEngine — macro playback', () => {
     expect(keyDownName.mock.calls.map((c) => c[0])).toEqual(['w'])
     // The scheduled key-up never fired, but the cleanup released 'w'.
     expect(keyUpName.mock.calls.map((c) => c[0])).toEqual(['w'])
+    expect(engine.isRunning()).toBe(false)
+  })
+})
+
+describe('SpamEngine — Hold Keys Down integration', () => {
+  const holdKeyDown = vi.mocked(input.holdKeyDown)
+  const releaseKey = vi.mocked(input.releaseKey)
+
+  it('holds the enabled keys during a manual run and releases them on stop', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.holdKeys = { enabled: true, keys: ['w', 'shift'] }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    await runToIdle(p)
+    expect(holdKeyDown.mock.calls.map((c) => c[0])).toEqual(['w', 'shift'])
+    expect(releaseKey.mock.calls.map((c) => c[0])).toEqual(['w', 'shift'])
+    expect(pressedKeys()).toContain('a') // the keys-to-spam still ran too
+  })
+
+  it('does not hold keys when Hold Keys Down is disabled', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.holdKeys = { enabled: false, keys: ['w'] }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    await runToIdle(p)
+    expect(holdKeyDown).not.toHaveBeenCalled()
+  })
+
+  it('runs hold-only (no taps): holds until stopped, then releases', async () => {
+    const p = profile((p) => {
+      p.entries = []
+      p.options.enableKeys = false
+      p.options.enableClickPositions = false
+      p.holdKeys = { enabled: true, keys: ['w'] }
+      p.loop = { mode: 'forever', count: 1 }
+    })
+    const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
+    engine.start(p, 'manual')
+    await new Promise((r) => setTimeout(r, 20))
+
+    expect(engine.isRunning()).toBe(true)
+    expect(holdKeyDown.mock.calls.map((c) => c[0])).toEqual(['w'])
+    expect(releaseKey).not.toHaveBeenCalled() // still holding
+
+    engine.stop()
+    await new Promise((r) => setTimeout(r, 20))
+    expect(releaseKey.mock.calls.map((c) => c[0])).toEqual(['w'])
     expect(engine.isRunning()).toBe(false)
   })
 })

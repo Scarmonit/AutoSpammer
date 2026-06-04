@@ -155,6 +155,21 @@ test('the Escape key can be bound to a hotkey', async () => {
   await expect(caps.nth(0)).toHaveText('Escape')
 })
 
+test('Hold Keys Down: has an Enabled toggle and "+ Add Key" adds a row', async () => {
+  const hold = section('Hold Keys Down')
+  await expect(hold.locator('.section__toggle input')).toBeVisible()
+
+  const rows = hold.locator('.keyrow')
+  const before = await rows.count()
+  await hold.getByRole('button', { name: '+ Add Key' }).click()
+  await expect(rows).toHaveCount(before + 1)
+
+  // Type into the new row and confirm it sticks.
+  const newKey = hold.locator('.keyrow__key').last()
+  await newKey.fill('w')
+  await expect(newKey).toHaveValue('w')
+})
+
 test('every section can be hidden/shown via its header toggle', async () => {
   // 6 sections (left) + 7 sections (right) = 13 collapse buttons.
   await expect(win.locator('.section__collapse')).toHaveCount(13)

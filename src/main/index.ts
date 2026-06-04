@@ -161,6 +161,7 @@ function sanitizeProfile(p: Profile): Profile {
       delayMs: c.delayMs === null ? null : clampInt(c.delayMs, 0, 600000, 0)
     })),
     holdKeys: {
+      enabled: p.holdKeys?.enabled !== false,
       keys: (p.holdKeys?.keys ?? []).map((k) => String(k))
     },
     periodicKey: {

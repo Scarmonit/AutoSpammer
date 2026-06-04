@@ -39,7 +39,9 @@ function migrate(data: PersistedData): PersistedData {
   data.settings = { ...defaults.settings, ...data.settings }
   for (const p of data.profiles) {
     if (!Array.isArray(p.clickPositions)) p.clickPositions = []
-    if (!p.holdKeys || !Array.isArray(p.holdKeys.keys)) p.holdKeys = { keys: [] }
+    if (!p.holdKeys || !Array.isArray(p.holdKeys.keys)) p.holdKeys = { enabled: true, keys: [] }
+    // Hold Keys Down gained an "enabled" switch later; default older saves to on.
+    if (typeof p.holdKeys.enabled !== 'boolean') p.holdKeys.enabled = true
     if (!p.periodicKey) p.periodicKey = { ...defaultProfile.periodicKey }
     if (!p.rightClickHold) p.rightClickHold = { ...defaultProfile.rightClickHold }
     if (!p.options) p.options = { ...defaultProfile.options }

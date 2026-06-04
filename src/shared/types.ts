@@ -59,6 +59,8 @@ export interface Options {
 
 /** Keys to physically hold DOWN continuously (not tapped) while active. */
 export interface HoldKeysConfig {
+  /** When on, Start Spam (and F6) also holds these keys down for the run. */
+  enabled: boolean
   keys: string[]
 }
 

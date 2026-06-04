@@ -84,11 +84,11 @@
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.12.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.12.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.13.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.13.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.12.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.12.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.13.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.13.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**
@@ -160,8 +160,12 @@ You can change the single-spot record hotkey from **F7** to anything else in tha
 
 ### ⌨️ Hold Keys Down
 Hold any keys *down* continuously (not tapped) — e.g. hold **W** to keep walking
-in a game. Add the keys in the **Hold Keys Down** panel, then toggle it with the
-button or **F8**. Press again (or **Esc**) to release.
+in a game. Add keys with **+ Add Key** in the **Hold Keys Down** panel. With the
+section's **Enabled** switch on, those keys are held automatically whenever you press
+**Start Spam** / **F6** (right alongside Keys to Spam or a Macro) and released when
+you stop — exactly like the other sections. You can also hold them **standalone**,
+without spamming, using the panel's **Hold Keys** button or **F8** (press again, or
+**Esc**, to release).
 
 ### ⏱️ Periodic Key
 Press one chosen key on a timer — e.g. press **F** every 5 seconds. Set the key

@@ -33,6 +33,7 @@ export function createDefaultProfile(name = 'Default'): Profile {
     },
     clickPositions: [],
     holdKeys: {
+      enabled: true,
       keys: []
     },
     periodicKey: {

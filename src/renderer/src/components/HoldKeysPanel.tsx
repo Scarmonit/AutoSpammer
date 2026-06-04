@@ -1,6 +1,7 @@
 import React from 'react'
 import { useStore } from '../store'
 import { Section } from './Section'
+import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
 
 export function HoldKeysPanel(): JSX.Element {
@@ -8,17 +9,32 @@ export function HoldKeysPanel(): JSX.Element {
   if (!data || !activeProfile) return <></>
 
   const keys = activeProfile.holdKeys.keys
+  const enabled = activeProfile.holdKeys.enabled
   const hotkey = data.settings.holdKeysHotkey
 
   const setKeys = (next: string[]): void =>
-    updateProfile((p) => ({ ...p, holdKeys: { keys: next } }))
+    updateProfile((p) => ({ ...p, holdKeys: { ...p.holdKeys, keys: next } }))
+
+  const setEnabled = (value: boolean): void =>
+    updateProfile((p) => ({ ...p, holdKeys: { ...p.holdKeys, enabled: value } }))
 
   return (
-    <Section title="Hold Keys Down">
+    <Section
+      title="Hold Keys Down"
+      dim={!enabled}
+      right={
+        <SectionToggle
+          checked={enabled}
+          onChange={setEnabled}
+          title="Hold these keys down while Start Spam (or F6) is running"
+        />
+      }
+    >
       <p className="helper">
         Presses these keys <strong>down and keeps them held</strong> (e.g. hold W to keep walking) —
-        not tapped. Toggle with the button or{' '}
-        <code className="keycap keycap--inline">{hotkey || '—'}</code>.
+        not tapped. When <strong>Enabled</strong>, they're held for the whole run alongside
+        <strong> Start Spam</strong> / <strong>F6</strong>; you can also toggle them standalone with the
+        button or <code className="keycap keycap--inline">{hotkey || '—'}</code>.
       </p>
 
       <div className="keylist">

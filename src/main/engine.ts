@@ -1,5 +1,15 @@
 import type { Profile, SpamMode, StatusPayload, ActionKind, LoopConfig, MacroEvent } from '@shared/types'
-import { pressKey, typeText, clickMouse, clickAt, clearSynthetic, keyUpName, mouseButtonUp } from './input'
+import {
+  pressKey,
+  typeText,
+  clickMouse,
+  clickAt,
+  clearSynthetic,
+  keyUpName,
+  mouseButtonUp,
+  holdKeyDown,
+  releaseKey
+} from './input'
 import { playMacroEvent } from './macro'
 
 interface Fireable {
@@ -51,20 +61,21 @@ export class SpamEngine {
   start(profile: Profile, mode: SpamMode, overrideDelayMs?: number, focusKey?: string): void {
     if (this.running) return
 
+    // Hold Keys Down rides along with a manual Start Spam run (alongside Keys to
+    // Spam or a Macro), holding its keys for the whole run and releasing on stop.
+    const holdKeys = mode === 'manual' ? activeHoldKeys(profile) : []
+
     // A manual run with the macro enabled replays the recording (looped per the
     // Loop config) instead of the keys/positions spam.
     if (mode === 'manual' && profile.macro?.enabled) {
       const events = profile.macro.events ?? []
-      if (events.length === 0) {
+      if (events.length === 0 && holdKeys.length === 0) {
         this.cb.onError('Macro is enabled but empty — record something first.')
         return
       }
-      this.running = true
-      this.mode = mode
-      this.abort = false
-      this.cyclesDone = 0
-      this.emit(true)
-      void this.runMacroLoop(events, profile.loop)
+      this.begin(mode)
+      if (events.length === 0) void this.runHoldOnly(holdKeys)
+      else void this.runMacroLoop(events, profile.loop, holdKeys)
       return
     }
 
@@ -84,7 +95,7 @@ export class SpamEngine {
       return
     }
 
-    if (fireables.length === 0) {
+    if (fireables.length === 0 && holdKeys.length === 0) {
       const bothOff =
         mode === 'manual' && !profile.options.enableKeys && !profile.options.enableClickPositions
       this.cb.onError(
@@ -95,13 +106,75 @@ export class SpamEngine {
       return
     }
 
+    this.begin(mode)
+    if (fireables.length === 0) {
+      // Only Hold Keys Down is active — just hold the keys until stopped.
+      void this.runHoldOnly(holdKeys)
+    } else {
+      void this.runLoop(fireables, profile.options.sequenceMode, profile.loop, mode, holdKeys)
+    }
+  }
+
+  /** Common bookkeeping when a run begins. */
+  private begin(mode: SpamMode): void {
     this.running = true
     this.mode = mode
     this.abort = false
     this.cyclesDone = 0
     this.emit(true)
+  }
 
-    void this.runLoop(fireables, profile.options.sequenceMode, profile.loop, mode)
+  /** Press a set of keys down; returns the ones actually held (to release later). */
+  private async holdDown(keys: string[]): Promise<string[]> {
+    const held: string[] = []
+    for (const k of keys) {
+      try {
+        if (await holdKeyDown(k)) held.push(k)
+      } catch {
+        /* ignore a key we couldn't hold */
+      }
+    }
+    return held
+  }
+
+  private async releaseHeld(keys: string[]): Promise<void> {
+    for (const k of keys) {
+      try {
+        await releaseKey(k)
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  /** Hold the given keys down until stopped (a manual run with no taps/macro). */
+  private async runHoldOnly(holdKeys: string[]): Promise<void> {
+    const held = await this.holdDown(holdKeys)
+    try {
+      await this.waitForAbort()
+    } catch (err) {
+      this.cb.onError(err instanceof Error ? err.message : String(err))
+    } finally {
+      await this.releaseHeld(held)
+      this.running = false
+      this.mode = null
+      this.wake = null
+      this.emit(true)
+    }
+  }
+
+  /** Resolve when stop() is called (used by hold-only runs). */
+  private waitForAbort(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      if (this.abort) {
+        resolve()
+        return
+      }
+      this.wake = (): void => {
+        this.wake = null
+        resolve()
+      }
+    })
   }
 
   stop(): void {
@@ -114,8 +187,10 @@ export class SpamEngine {
     fireables: Fireable[],
     sequenceMode: boolean,
     loop: LoopConfig,
-    mode: SpamMode
+    mode: SpamMode,
+    holdKeys: string[] = []
   ): Promise<void> {
+    const held = await this.holdDown(holdKeys)
     try {
       let seqIndex = 0
       while (!this.abort) {
@@ -146,6 +221,7 @@ export class SpamEngine {
     } catch (err) {
       this.cb.onError(err instanceof Error ? err.message : String(err))
     } finally {
+      await this.releaseHeld(held)
       this.running = false
       this.mode = null
       this.wake = null
@@ -158,8 +234,14 @@ export class SpamEngine {
    * Replay a macro with its recorded per-event delays, looping per the Loop
    * config (a held key/button is tracked so an abort mid-press still releases
    * it — no stuck inputs). Each event's delay is the wait BEFORE it fires.
+   * Hold Keys Down (if any) are held for the whole run.
    */
-  private async runMacroLoop(events: MacroEvent[], loop: LoopConfig): Promise<void> {
+  private async runMacroLoop(
+    events: MacroEvent[],
+    loop: LoopConfig,
+    holdKeys: string[] = []
+  ): Promise<void> {
+    const held = await this.holdDown(holdKeys)
     const downKeys = new Set<string>()
     const downButtons = new Set<'left' | 'right' | 'middle'>()
     try {
@@ -198,6 +280,7 @@ export class SpamEngine {
           /* ignore */
         }
       }
+      await this.releaseHeld(held)
       this.running = false
       this.mode = null
       this.wake = null
@@ -308,6 +391,12 @@ function buildFireables(profile: Profile, overrideDelayMs?: number): Fireable[] 
   }
 
   return out
+}
+
+/** The non-empty Hold Keys Down list, or [] when the section is disabled. */
+function activeHoldKeys(profile: Profile): string[] {
+  if (!profile.holdKeys?.enabled) return []
+  return (profile.holdKeys.keys ?? []).filter((k) => k.trim() !== '')
 }
 
 function buildFocusFireable(key: string, delayMs: number): Fireable[] {
