@@ -40,8 +40,11 @@
   double-click to reset. Layout is saved per profile.
 - 👁️ **Click to hide / show sections** — collapse any panel to just its title bar with
   the header chevron; remembered per profile.
-- 🔀 **Independent enabling** of **Keys to Spam**, **Click Positions**, and **Macro** —
-  each has its own *Enabled* switch (Macro is mutually exclusive with the other two).
+- 🔀 **Independent enabling** of every section — **Keys to Spam**, **Click Positions**,
+  **Text Function**, **Hold Keys Down**, **Periodic Key**, **Hold-to-Spam**, **Focus Hold**,
+  **Hold for Right-Click**, and **Macro** each have their own *Enabled* switch in the header,
+  saved per profile (Macro is mutually exclusive with Keys / Click Positions). A disabled
+  section greys out and is skipped on the next run.
 - 🔎 **UI scale / text size** — a top-bar dropdown zooms the **whole app**
   (100–200%) for readability; double-click it to type a custom %. Applied
   instantly and remembered.
@@ -95,11 +98,11 @@
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.19.2.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.19.2.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.20.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.20.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.19.2.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.19.2.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.20.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.20.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**

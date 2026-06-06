@@ -2,6 +2,7 @@ import React from 'react'
 import type { HoldConfig } from '@shared/types'
 import { useStore } from '../store'
 import { Section } from './Section'
+import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
 import { prettyName } from '../keycapture'
 
@@ -20,12 +21,17 @@ export function HoldKeyPanel({ field, title, helper }: Props): JSX.Element {
     updateProfile((prof) => ({ ...prof, [field]: { ...prof[field], ...p } }))
 
   return (
-    <Section title={title}>
-      <label className="check">
-        <input type="checkbox" checked={cfg.enabled} onChange={(e) => patch({ enabled: e.target.checked })} />
-        <span>Enable</span>
-      </label>
-
+    <Section
+      title={title}
+      dim={!cfg.enabled}
+      right={
+        <SectionToggle
+          checked={cfg.enabled}
+          onChange={(value) => patch({ enabled: value })}
+          title={`Enable ${title} — hold the set key/button to trigger it`}
+        />
+      }
+    >
       <div className="field">
         <label>Key</label>
         <code className="keycap">{prettyName(cfg.key)}</code>

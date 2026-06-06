@@ -263,6 +263,28 @@ test('drag-to-resize a section works at a normal window size', async () => {
   expect(reset).toBeLessThan(after)
 })
 
+test('Text Function and the three Hold sections have header Enabled toggles', async () => {
+  for (const heading of [
+    'Text Function',
+    'Hold-to-Spam Key',
+    'Focus Hold Key',
+    'Hold for Right-Click'
+  ]) {
+    const sec = section(heading)
+    const toggle = sec.locator('.section__toggle input')
+    const body = sec.locator('.section__body')
+    await expect(toggle).toBeVisible()
+
+    // Enabling clears the dimmed-off state; disabling re-applies it.
+    if (!(await toggle.isChecked())) await toggle.check()
+    await expect(body).not.toHaveClass(/section__body--off/)
+
+    await toggle.uncheck()
+    await expect(toggle).not.toBeChecked()
+    await expect(body).toHaveClass(/section__body--off/)
+  }
+})
+
 test('loop mode radios are interactive', async () => {
   const once = section('Loop').locator('label.radio', { hasText: 'Play Once' }).locator('input')
   await once.check()

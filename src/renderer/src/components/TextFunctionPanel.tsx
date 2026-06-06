@@ -1,6 +1,7 @@
 import React from 'react'
 import { useStore } from '../store'
 import { Section } from './Section'
+import { SectionToggle } from './SectionToggle'
 
 export function TextFunctionPanel(): JSX.Element {
   const { activeProfile, updateProfile } = useStore()
@@ -11,11 +12,21 @@ export function TextFunctionPanel(): JSX.Element {
     updateProfile((prof) => ({ ...prof, textFunction: { ...prof.textFunction, ...p } }))
 
   return (
-    <Section title="Text Function">
-      <label className="check">
-        <input type="checkbox" checked={tf.enabled} onChange={(e) => patch({ enabled: e.target.checked })} />
-        <span>Type a string each cycle</span>
-      </label>
+    <Section
+      title="Text Function"
+      dim={!tf.enabled}
+      right={
+        <SectionToggle
+          checked={tf.enabled}
+          onChange={(value) => patch({ enabled: value })}
+          title="Type this string each cycle while Start Spam (or F6) is running"
+        />
+      }
+    >
+      <p className="helper">
+        When <strong>Enabled</strong>, types this string once per cycle alongside{' '}
+        <strong>Start Spam</strong> / <strong>F6</strong>.
+      </p>
 
       <div className="field">
         <label>Text</label>
