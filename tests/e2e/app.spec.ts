@@ -234,29 +234,25 @@ test('sections reorder via the grip handle (not the whole pane) + Reset Layout',
   await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
 })
 
-test('resizing a section still works (and survives the drag-and-drop change)', async () => {
-  // Give the window real vertical room so a grown pane isn't flex-shrunk by a
-  // short column (panes don't flex-grow, so with slack they stay where dragged).
-  await app.evaluate(({ BrowserWindow }) => {
-    BrowserWindow.getAllWindows()[0]?.setContentSize(1100, 1400)
-  })
-
+test('drag-to-resize a section works at a normal window size', async () => {
   const keysPane = win.locator('[data-rs-pane][data-section-id="keys"]')
   // The splitter directly beneath the Keys pane.
   const splitter = keysPane.locator('xpath=following-sibling::*[1]')
   await expect(splitter).toHaveClass(/rs-splitter/)
+  await expect(splitter).toHaveCSS('cursor', 'ns-resize')
 
   const before = (await keysPane.boundingBox())!.height
   const box = (await splitter.boundingBox())!
-  // Drag the splitter down ~120px to grow the Keys pane.
+  // Drag the splitter down 100px. Panes no longer flex-shrink, so the pane
+  // should grow by essentially the full drag distance (the column scrolls).
   await win.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await win.mouse.down()
-  await win.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 120, { steps: 10 })
+  await win.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 100, { steps: 10 })
   await win.mouse.up()
 
   const after = (await keysPane.boundingBox())!.height
-  // Dragging the splitter down grew the pane...
-  expect(after).toBeGreaterThan(before + 20)
+  // Grew by close to the full 100px (not eaten by the layout)...
+  expect(after).toBeGreaterThan(before + 80)
   // ...and the new height was committed (saved per profile) as an inline style.
   await expect(keysPane).toHaveAttribute('style', /height/)
 

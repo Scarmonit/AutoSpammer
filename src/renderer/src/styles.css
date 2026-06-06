@@ -215,6 +215,11 @@ body {
   gap: 12px;
   padding: 12px 16px;
   overflow-y: auto;
+  /* Size each column to its content (top-aligned) instead of stretching it to
+     the viewport height — otherwise a full column flex-shrinks its panes and a
+     splitter drag has nothing to grow into. The whole area scrolls when tall. */
+  align-content: start;
+  align-items: start;
 }
 
 .column {
@@ -244,6 +249,9 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 64px;
+  /* Honor the pane's natural / dragged height exactly — never flex-shrink it,
+     or the splitter resize would be silently undone by the column layout. */
+  flex: 0 0 auto;
 }
 /* A collapsed pane is just its header — let it shrink below the resize minimum. */
 .rs-pane--collapsed {
