@@ -223,6 +223,13 @@ test('the top bar UI scale is a dropdown that double-clicks into a custom input'
   await expect(win.locator('.uiscale__select')).toBeVisible()
 })
 
+test('sections are draggable and the top bar has a Reset Layout button', async () => {
+  // Every section pane is a draggable reorder target with a stable id + grip.
+  await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(13)
+  await expect(win.locator('.section__grip').first()).toBeVisible()
+  await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
+})
+
 test('loop mode radios are interactive', async () => {
   const once = section('Loop').locator('label.radio', { hasText: 'Play Once' }).locator('input')
   await once.check()

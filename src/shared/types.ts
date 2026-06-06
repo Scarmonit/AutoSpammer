@@ -1,5 +1,7 @@
 // Types shared between the main process, preload bridge, and renderer.
 
+import type { SectionLayout } from './sections'
+
 /** What a single spam action does. */
 export type ActionKind = 'key' | 'mouse-left' | 'mouse-right'
 
@@ -129,6 +131,8 @@ export interface Profile {
   collapsedSections: Record<string, boolean>
   /** Full keyboard + mouse macro recording for this profile. */
   macro: MacroConfig
+  /** Drag-and-drop section order, per column. */
+  sectionLayout: SectionLayout
 }
 
 /** Last saved main-window geometry, restored on the next launch. */

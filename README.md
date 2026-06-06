@@ -33,6 +33,9 @@
 - 🎬 **Full Macro recording &amp; playback** — capture *everything* (keys, clicks, and
   mouse movement) with the exact timing between events, edit any delay, then replay it
   on a loop via **Start Spam** / **F6**.
+- 🧩 **Drag-and-drop sections** — grab any section header (⠿ grip) to reorder it,
+  even across the two columns. The arrangement is saved per profile; a **Reset
+  Layout** button in the top bar restores the default order.
 - ↕️ **Resizable sections** — drag the splitter between any two panels to resize them;
   double-click to reset. Layout is saved per profile.
 - 👁️ **Click to hide / show sections** — collapse any panel to just its title bar with
@@ -92,11 +95,11 @@
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.18.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.18.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.19.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.19.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.18.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.18.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.19.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.19.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**

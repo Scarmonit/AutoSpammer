@@ -20,6 +20,9 @@ export function Section({ title, children, right, dim = false }: Props): JSX.Ele
   return (
     <section className={`section${collapsed ? ' section--collapsed' : ''}`}>
       <header className="section__head">
+        <span className="section__grip" aria-hidden="true" title="Drag to move this section">
+          ⠿
+        </span>
         <h2 className="section__title">{title}</h2>
         <div className="section__head-actions">
           {right}

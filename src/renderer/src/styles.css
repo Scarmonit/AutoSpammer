@@ -85,8 +85,24 @@ body {
 .topbar__tools {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   -webkit-app-region: no-drag;
+}
+
+/* Small text button in the top bar (e.g. Reset Layout). */
+.topbar__btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.topbar__btn:hover {
+  color: var(--text);
+  border-color: var(--blue);
 }
 
 .uiscale {
@@ -207,6 +223,20 @@ body {
   /* Spacing between sections is provided by the draggable splitters. */
   gap: 0;
   min-width: 0;
+  /* Stay a valid drop target even when emptied by dragging everything out. */
+  min-height: 120px;
+}
+
+/* Drag-to-reorder feedback. */
+.rs-pane--dragging {
+  opacity: 0.4;
+}
+.rs-dropline {
+  height: 3px;
+  margin: 3px 2px;
+  border-radius: 2px;
+  background: var(--blue);
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.55);
 }
 
 /* ---------- Resizable panes + splitters ---------- */
@@ -261,9 +291,11 @@ body.is-resizing .rs-splitter:hover::after {
   background: var(--blue);
 }
 
-/* Splitter below a collapsed section: a plain spacer, not a drag handle. */
+/* Splitter below a collapsed section: a plain spacer, not a drag handle, and
+   non-interactive so it can't intercept clicks on the section's own controls. */
 .rs-splitter--disabled {
   cursor: default;
+  pointer-events: none;
 }
 .rs-splitter--disabled::after {
   display: none;
@@ -289,10 +321,26 @@ body.is-resizing * {
   justify-content: space-between;
   padding: 8px 12px;
   border-bottom: 1px solid var(--border-soft);
+  /* The header is the drag handle for reordering sections. */
+  cursor: grab;
+}
+.section__head:active {
+  cursor: grabbing;
+}
+
+/* Drag-handle dots; the title sits right after it. */
+.section__grip {
+  margin-right: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: -1px;
+  user-select: none;
 }
 
 .section__title {
   margin: 0;
+  flex: 1 1 auto; /* keep grip+title on the left, actions pushed to the right */
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;

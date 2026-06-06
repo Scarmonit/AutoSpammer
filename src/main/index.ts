@@ -18,6 +18,7 @@ import { AuxController } from './auxmodes'
 import { getMousePosition } from './input'
 import { pointInRect } from './geometry'
 import { parseAccelerator } from './keymap'
+import { normalizeLayout } from '@shared/sections'
 import { MacroRecorder, MacroPlayer } from './macro'
 import { createTray, type TrayHandle } from './tray'
 import { WINDOW_ICON_DATA_URL } from './trayicon'
@@ -219,7 +220,8 @@ function sanitizeProfile(p: Profile): Profile {
     },
     sectionHeights: sanitizeSectionHeights(p.sectionHeights),
     collapsedSections: sanitizeCollapsedSections(p.collapsedSections),
-    macro: sanitizeMacro(p.macro)
+    macro: sanitizeMacro(p.macro),
+    sectionLayout: normalizeLayout(p.sectionLayout)
   }
 }
 

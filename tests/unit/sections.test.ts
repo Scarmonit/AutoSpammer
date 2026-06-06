@@ -1,0 +1,53 @@
+import { describe, it, expect } from 'vitest'
+import { SECTION_IDS, DEFAULT_LAYOUT, normalizeLayout, moveSection } from '@shared/sections'
+
+describe('normalizeLayout', () => {
+  it('keeps a valid layout intact', () => {
+    const out = normalizeLayout(DEFAULT_LAYOUT)
+    expect(out).toEqual(DEFAULT_LAYOUT)
+  })
+
+  it('drops unknowns, removes duplicates, and appends missing sections', () => {
+    const out = normalizeLayout({ left: ['keys', 'keys', 'bogus'], right: ['loop'] })
+    const all = [...out.left, ...out.right]
+    // every known section appears exactly once
+    expect([...all].sort()).toEqual([...SECTION_IDS].sort())
+    expect(all.filter((id) => id === 'keys')).toHaveLength(1)
+    expect(all).not.toContain('bogus')
+    // explicitly placed ones keep their column/position
+    expect(out.left[0]).toBe('keys')
+    expect(out.right[0]).toBe('loop')
+  })
+
+  it('falls back to a full default-shaped layout for null/empty input', () => {
+    const out = normalizeLayout(null)
+    expect([...out.left, ...out.right].sort()).toEqual([...SECTION_IDS].sort())
+  })
+})
+
+describe('moveSection', () => {
+  it('reorders within a column (downward, with the off-by-one handled)', () => {
+    // Move "options" to the very end of the default left column.
+    const l = normalizeLayout(DEFAULT_LAYOUT)
+    const out = moveSection(l, 'options', 'left', l.left.length)
+    expect(out.left[out.left.length - 1]).toBe('options')
+    expect([...out.left, ...out.right].sort()).toEqual([...SECTION_IDS].sort())
+  })
+
+  it('moves a section to the other column at a chosen index', () => {
+    const l = normalizeLayout(DEFAULT_LAYOUT)
+    const out = moveSection(l, 'keys', 'right', 1)
+    expect(out.left).not.toContain('keys')
+    expect(out.right[1]).toBe('keys')
+    // still complete + unique
+    expect([...out.left, ...out.right].sort()).toEqual([...SECTION_IDS].sort())
+  })
+
+  it('keeps the layout complete and unique after several moves', () => {
+    let l = normalizeLayout(DEFAULT_LAYOUT)
+    l = moveSection(l, 'macro', 'right', 0)
+    l = moveSection(l, 'loop', 'left', 2)
+    l = moveSection(l, 'keys', 'right', l.right.length)
+    expect([...l.left, ...l.right].sort()).toEqual([...SECTION_IDS].sort())
+  })
+})

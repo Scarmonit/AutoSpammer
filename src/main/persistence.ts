@@ -3,6 +3,7 @@ import { promises as fs, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { PersistedData, Profile, AppSettings } from '@shared/types'
 import { createDefaultData, DATA_VERSION, makeId } from '@shared/defaults'
+import { normalizeLayout } from '@shared/sections'
 
 const FILE_NAME = 'autospammer-data.json'
 
@@ -71,6 +72,8 @@ function migrate(data: PersistedData): PersistedData {
     // The macro recorder was added later; older saves start with an empty macro.
     if (!p.macro || typeof p.macro !== 'object') p.macro = { enabled: false, events: [] }
     if (!Array.isArray(p.macro.events)) p.macro.events = []
+    // Draggable section order was added later; normalise (adds any new sections).
+    p.sectionLayout = normalizeLayout(p.sectionLayout)
   }
 
   // Ensure the active profile id points at something real.

@@ -11,6 +11,11 @@ interface Props {
   id: string
   /** The last pane in a column has no splitter beneath it. */
   last?: boolean
+  /** True while this pane is the one being dragged (for the fade effect). */
+  dragging?: boolean
+  /** Drag started from the section header (drag-to-reorder). */
+  onPaneDragStart?: (id: string) => void
+  onPaneDragEnd?: () => void
   children: React.ReactNode
 }
 
@@ -23,7 +28,14 @@ interface Props {
  * re-render-free feedback; the final height is committed to the store (and saved
  * per profile) on mouse-up. Double-clicking the splitter clears the saved height.
  */
-export function ResizablePane({ id, last = false, children }: Props): JSX.Element {
+export function ResizablePane({
+  id,
+  last = false,
+  dragging = false,
+  onPaneDragStart,
+  onPaneDragEnd,
+  children
+}: Props): JSX.Element {
   const { activeProfile, setSectionHeight, resetSectionHeight } = useStore()
   const paneRef = useRef<HTMLDivElement>(null)
   const drag = useRef<{ startY: number; startH: number } | null>(null)
@@ -61,12 +73,29 @@ export function ResizablePane({ id, last = false, children }: Props): JSX.Elemen
     window.addEventListener('mouseup', endDrag)
   }
 
+  // Reorder drag (HTML5): only starts when grabbed by the section header, so
+  // inputs/buttons in the body stay usable and key-row drags aren't hijacked.
+  const onDragStart = (e: React.DragEvent): void => {
+    if (!(e.target instanceof Element) || !e.target.closest('.section__head')) {
+      e.preventDefault()
+      return
+    }
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', id)
+    onPaneDragStart?.(id)
+  }
+
   return (
     <>
       <div
-        className={`rs-pane${collapsed ? ' rs-pane--collapsed' : ''}`}
+        className={`rs-pane${collapsed ? ' rs-pane--collapsed' : ''}${dragging ? ' rs-pane--dragging' : ''}`}
         ref={paneRef}
         style={storedHeight ? { height: storedHeight } : undefined}
+        data-rs-pane
+        data-section-id={id}
+        draggable
+        onDragStart={onDragStart}
+        onDragEnd={() => onPaneDragEnd?.()}
       >
         <SectionIdContext.Provider value={id}>{children}</SectionIdContext.Provider>
       </div>

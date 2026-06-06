@@ -1,4 +1,5 @@
 import type { Profile, AppSettings, PersistedData } from './types'
+import { cloneDefaultLayout } from './sections'
 
 export const DATA_VERSION = 1
 
@@ -64,7 +65,8 @@ export function createDefaultProfile(name = 'Default'): Profile {
     macro: {
       enabled: false,
       events: []
-    }
+    },
+    sectionLayout: cloneDefaultLayout()
   }
 }
 

@@ -10,6 +10,7 @@ import type {
   AuxStatus
 } from '@shared/types'
 import { makeId } from '@shared/defaults'
+import { cloneDefaultLayout, normalizeLayout, type SectionLayout } from '@shared/sections'
 import {
   collectBindings,
   findBindingConflict,
@@ -41,6 +42,10 @@ interface Store {
   resetSectionHeight: (id: string) => void
   /** Collapse/expand a section (header-only), persisted per profile. */
   toggleSectionCollapsed: (id: string) => void
+  /** Persist a new drag-and-drop section layout (per profile). */
+  setSectionLayout: (layout: SectionLayout) => void
+  /** Restore the default section order. */
+  resetSectionLayout: () => void
 
   createProfile: (name: string) => Promise<void>
   renameProfile: (id: string, name: string) => Promise<void>
@@ -220,6 +225,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     },
     [updateProfile]
   )
+
+  const setSectionLayout = useCallback(
+    (layout: SectionLayout) => {
+      updateProfile((p) => ({ ...p, sectionLayout: normalizeLayout(layout) }))
+    },
+    [updateProfile]
+  )
+
+  const resetSectionLayout = useCallback(() => {
+    updateProfile((p) => ({ ...p, sectionLayout: cloneDefaultLayout() }))
+  }, [updateProfile])
 
   const createProfile = useCallback(async (name: string) => setData(await window.api.createProfile(name)), [])
   const renameProfile = useCallback(
@@ -403,6 +419,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     setSectionHeight,
     resetSectionHeight,
     toggleSectionCollapsed,
+    setSectionLayout,
+    resetSectionLayout,
     createProfile,
     renameProfile,
     deleteProfile,
