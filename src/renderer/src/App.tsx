@@ -16,6 +16,7 @@ import { StatusIndicator } from './components/StatusIndicator'
 import { UiScaleControl } from './components/UiScaleControl'
 import { BottomBar } from './components/BottomBar'
 import { ResizablePane } from './components/ResizablePane'
+import { SettingsModal } from './components/SettingsModal'
 
 // Each section id maps to its rendered panel. Built once; the columns are laid
 // out from the (per-profile) drag-and-drop order.
@@ -112,6 +113,7 @@ export function App(): JSX.Element {
     useStore()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null)
+  const [optionsOpen, setOptionsOpen] = useState(false)
 
   // Auto-dismiss info toasts after a moment; keep errors until clicked.
   useEffect(() => {
@@ -189,9 +191,20 @@ export function App(): JSX.Element {
           >
             Reset Layout
           </button>
+          <button
+            type="button"
+            className="topbar__btn topbar__btn--icon"
+            title="Options"
+            aria-label="Options"
+            onClick={() => setOptionsOpen(true)}
+          >
+            ⚙️
+          </button>
           <StatusIndicator />
         </div>
       </header>
+
+      {optionsOpen && <SettingsModal onClose={() => setOptionsOpen(false)} />}
 
       {message && (
         <div className={`toast toast--${message.kind}`} onClick={dismissMessage}>

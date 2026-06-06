@@ -158,6 +158,11 @@ export interface AppSettings {
   macroRecordHotkey: string
   /** Whole-window UI scale (zoom factor), e.g. 1 = 100%, 1.5 = 150%. */
   uiScale: number
+  /**
+   * When true (default), closing the window (X) hides it to the system tray and
+   * keeps global hotkeys running. When false, closing fully quits the app.
+   */
+  minimizeToTrayOnClose: boolean
   /** Last main-window size + position; restored on launch. Null = use defaults. */
   windowBounds: WindowBounds | null
   activeProfileId: string

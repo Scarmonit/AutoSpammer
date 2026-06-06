@@ -40,6 +40,10 @@ function migrate(data: PersistedData): PersistedData {
   data.settings = { ...defaults.settings, ...data.settings }
   // UI scale was added later; keep it a sane zoom factor.
   data.settings.uiScale = Math.min(2.5, Math.max(1, Number(data.settings.uiScale) || 1))
+  // Close-to-tray toggle was added later; default older saves to "minimize to tray".
+  if (typeof data.settings.minimizeToTrayOnClose !== 'boolean') {
+    data.settings.minimizeToTrayOnClose = true
+  }
   for (const p of data.profiles) {
     if (!Array.isArray(p.clickPositions)) p.clickPositions = []
     if (!p.holdKeys || !Array.isArray(p.holdKeys.keys)) p.holdKeys = { enabled: true, keys: [] }

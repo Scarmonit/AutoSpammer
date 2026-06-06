@@ -30,6 +30,10 @@
 
 **Latest additions**
 
+- ⚙️ **Options dialog** — a gear button in the top bar opens a settings popup. Toggle
+  **"Minimize to system tray when closing the window"**: on (default) keeps Auto Spammer
+  running in the tray when you hit ✕ (global hotkeys stay live); off makes ✕ fully quit
+  the app. Saved globally.
 - 🎬 **Full Macro recording &amp; playback** — capture *everything* (keys, clicks, and
   mouse movement) with the exact timing between events, edit any delay, then replay it
   on a loop via **Start Spam** / **F6**.
@@ -69,7 +73,8 @@
 - ⬇️ **Hold Keys Down** and ⏱️ **Periodic Key** for walk-keys and timed presses.
 - 🗂️ **Profiles** — save and switch between different setups; everything is remembered.
 - 🎯 **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
-- 🔻 **System tray** — runs in the background with close-to-tray.
+- 🔻 **System tray** — runs in the background with close-to-tray (toggle this off in
+  **⚙️ Options** to make the ✕ button quit instead).
 - 🛡️ Hardened Electron build (sandbox, context isolation, fuses) — open source, no telemetry.
 
 ---
@@ -98,11 +103,11 @@
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.20.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.20.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.21.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.21.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.20.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.20.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.21.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.21.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**

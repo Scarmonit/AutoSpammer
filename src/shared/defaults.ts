@@ -79,6 +79,7 @@ export function createDefaultSettings(activeProfileId: string): AppSettings {
     periodicKeyHotkey: 'F9',
     macroRecordHotkey: 'F10',
     uiScale: 1,
+    minimizeToTrayOnClose: true,
     windowBounds: null,
     activeProfileId
   }

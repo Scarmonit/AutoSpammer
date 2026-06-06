@@ -285,6 +285,34 @@ test('Text Function and the three Hold sections have header Enabled toggles', as
   }
 })
 
+test('the Options (⚙️) button opens a modal with the close-to-tray setting', async () => {
+  // Open the dialog from the top bar.
+  await win.getByRole('button', { name: 'Options', exact: true }).click()
+  const modal = win.locator('.modal')
+  await expect(modal).toBeVisible()
+
+  // The close-to-tray checkbox defaults to ON.
+  const toggle = modal.locator('.check input[type="checkbox"]')
+  await expect(toggle).toBeChecked()
+
+  // Toggling round-trips through the UpdateSettings IPC (the checkbox reflects
+  // the value the main process returns), then back on.
+  await toggle.uncheck()
+  await expect(toggle).not.toBeChecked()
+  await toggle.check()
+  await expect(toggle).toBeChecked()
+
+  // Closes via the Done button...
+  await modal.getByRole('button', { name: 'Done' }).click()
+  await expect(win.locator('.modal')).toHaveCount(0)
+
+  // ...and via Escape.
+  await win.getByRole('button', { name: 'Options', exact: true }).click()
+  await expect(win.locator('.modal')).toBeVisible()
+  await win.keyboard.press('Escape')
+  await expect(win.locator('.modal')).toHaveCount(0)
+})
+
 test('loop mode radios are interactive', async () => {
   const once = section('Loop').locator('label.radio', { hasText: 'Play Once' }).locator('input')
   await once.check()

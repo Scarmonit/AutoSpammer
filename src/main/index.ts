@@ -88,11 +88,19 @@ function createWindow(): void {
     mainWindow?.webContents.setZoomFactor(data.settings.uiScale ?? 1)
   })
 
-  // Close-to-tray: hide the window instead of quitting, so global hotkeys keep
-  // working in the background. Real quit goes through the tray / before-quit.
+  // Close behavior depends on the user's setting:
+  //  • minimizeToTrayOnClose (default): hide the window so global hotkeys keep
+  //    working in the background; real quit goes through the tray / before-quit.
+  //  • otherwise: closing the window fully quits the app.
   mainWindow.on('close', (e) => {
     saveWindowBounds() // capture geometry before hiding/destroying
     if (isQuitting) return
+    if (!data.settings.minimizeToTrayOnClose) {
+      // Fully quit: let the window close and tear everything down.
+      isQuitting = true
+      app.quit()
+      return
+    }
     e.preventDefault()
     mainWindow?.hide()
     if (!trayHintShown && Notification.isSupported()) {
