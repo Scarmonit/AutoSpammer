@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { useStore } from '../store'
-import { SectionIdContext } from './sectionContext'
+import { SectionIdContext, SectionDragContext, type SectionDragHandlers } from './sectionContext'
 
 /** Clamp range for a draggable section, in pixels. */
 const MIN_HEIGHT = 64
@@ -13,7 +13,7 @@ interface Props {
   last?: boolean
   /** True while this pane is the one being dragged (for the fade effect). */
   dragging?: boolean
-  /** Drag started from the section header (drag-to-reorder). */
+  /** Drag started from the section's grip handle (drag-to-reorder). */
   onPaneDragStart?: (id: string) => void
   onPaneDragEnd?: () => void
   children: React.ReactNode
@@ -24,9 +24,15 @@ interface Props {
  * horizontal splitter beneath it. Dragging the splitter resizes THIS pane; the
  * panes below simply reflow and the column scrolls if needed.
  *
- * During a drag the pane's height is written straight to the DOM node for smooth,
+ * During a resize the pane's height is written straight to the DOM node for smooth,
  * re-render-free feedback; the final height is committed to the store (and saved
  * per profile) on mouse-up. Double-clicking the splitter clears the saved height.
+ *
+ * Reorder drag-and-drop is driven by the grip (⠿) in the section header only — the
+ * pane is deliberately NOT `draggable`, so body inputs, text selection, the resize
+ * splitter, and the nested key-row drags all keep working. The grip's handlers are
+ * passed down through `SectionDragContext`; the whole pane is used as the drag
+ * image so the user still sees the full section while moving it.
  */
 export function ResizablePane({
   id,
@@ -38,23 +44,29 @@ export function ResizablePane({
 }: Props): JSX.Element {
   const { activeProfile, setSectionHeight, resetSectionHeight } = useStore()
   const paneRef = useRef<HTMLDivElement>(null)
-  const drag = useRef<{ startY: number; startH: number } | null>(null)
+  const drag = useRef<{ startY: number; startH: number; moved: boolean } | null>(null)
 
   const collapsed = !!activeProfile?.collapsedSections?.[id]
   // A collapsed section is header-only, so ignore any saved height while hidden.
   const storedHeight = collapsed ? undefined : activeProfile?.sectionHeights?.[id]
 
+  // ----- Splitter resize (mouse) -----
   const onMouseMove = (e: MouseEvent): void => {
     const d = drag.current
     const el = paneRef.current
     if (!d || !el) return
+    d.moved = true
     const h = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, d.startH + (e.clientY - d.startY)))
     el.style.height = `${h}px`
   }
 
   const endDrag = (): void => {
+    const d = drag.current
     const el = paneRef.current
-    if (drag.current && el) {
+    // Only commit a height for an actual resize (the pointer moved). A bare click
+    // — including the two clicks of a double-click-to-reset — must not pin the
+    // current height, or it would fight the reset.
+    if (d?.moved && el) {
       setSectionHeight(id, Math.round(el.getBoundingClientRect().height))
     }
     drag.current = null
@@ -67,22 +79,24 @@ export function ResizablePane({
     const el = paneRef.current
     if (!el) return
     e.preventDefault()
-    drag.current = { startY: e.clientY, startH: el.getBoundingClientRect().height }
+    drag.current = { startY: e.clientY, startH: el.getBoundingClientRect().height, moved: false }
     document.body.classList.add('is-resizing')
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', endDrag)
   }
 
-  // Reorder drag (HTML5): only starts when grabbed by the section header, so
-  // inputs/buttons in the body stay usable and key-row drags aren't hijacked.
-  const onDragStart = (e: React.DragEvent): void => {
-    if (!(e.target instanceof Element) || !e.target.closest('.section__head')) {
-      e.preventDefault()
-      return
-    }
-    e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('text/plain', id)
-    onPaneDragStart?.(id)
+  // ----- Reorder drag (HTML5), initiated from the header grip only -----
+  const dragHandlers: SectionDragHandlers = {
+    draggable: true,
+    onDragStart: (e) => {
+      e.dataTransfer.effectAllowed = 'move'
+      e.dataTransfer.setData('text/plain', id)
+      // Show the whole section as the drag image for clear visual feedback.
+      const el = paneRef.current
+      if (el) e.dataTransfer.setDragImage(el, 24, 16)
+      onPaneDragStart?.(id)
+    },
+    onDragEnd: () => onPaneDragEnd?.()
   }
 
   return (
@@ -93,11 +107,10 @@ export function ResizablePane({
         style={storedHeight ? { height: storedHeight } : undefined}
         data-rs-pane
         data-section-id={id}
-        draggable
-        onDragStart={onDragStart}
-        onDragEnd={() => onPaneDragEnd?.()}
       >
-        <SectionIdContext.Provider value={id}>{children}</SectionIdContext.Provider>
+        <SectionIdContext.Provider value={id}>
+          <SectionDragContext.Provider value={dragHandlers}>{children}</SectionDragContext.Provider>
+        </SectionIdContext.Provider>
       </div>
       {!last && (
         <div

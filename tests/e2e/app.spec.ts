@@ -223,11 +223,48 @@ test('the top bar UI scale is a dropdown that double-clicks into a custom input'
   await expect(win.locator('.uiscale__select')).toBeVisible()
 })
 
-test('sections are draggable and the top bar has a Reset Layout button', async () => {
-  // Every section pane is a draggable reorder target with a stable id + grip.
-  await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(13)
+test('sections reorder via the grip handle (not the whole pane) + Reset Layout', async () => {
+  // 13 panes, each a stable reorder target...
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(13)
+  // ...but the PANE itself must NOT be draggable (that hijacks body inputs and
+  // the nested key-row drags). Only the grip handle carries draggable.
+  await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(0)
+  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(13)
   await expect(win.locator('.section__grip').first()).toBeVisible()
   await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
+})
+
+test('resizing a section still works (and survives the drag-and-drop change)', async () => {
+  // Give the window real vertical room so a grown pane isn't flex-shrunk by a
+  // short column (panes don't flex-grow, so with slack they stay where dragged).
+  await app.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0]?.setContentSize(1100, 1400)
+  })
+
+  const keysPane = win.locator('[data-rs-pane][data-section-id="keys"]')
+  // The splitter directly beneath the Keys pane.
+  const splitter = keysPane.locator('xpath=following-sibling::*[1]')
+  await expect(splitter).toHaveClass(/rs-splitter/)
+
+  const before = (await keysPane.boundingBox())!.height
+  const box = (await splitter.boundingBox())!
+  // Drag the splitter down ~120px to grow the Keys pane.
+  await win.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await win.mouse.down()
+  await win.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 120, { steps: 10 })
+  await win.mouse.up()
+
+  const after = (await keysPane.boundingBox())!.height
+  // Dragging the splitter down grew the pane...
+  expect(after).toBeGreaterThan(before + 20)
+  // ...and the new height was committed (saved per profile) as an inline style.
+  await expect(keysPane).toHaveAttribute('style', /height/)
+
+  // Double-click clears the saved height; the pane returns to its natural size.
+  await splitter.dblclick()
+  await expect(keysPane).not.toHaveAttribute('style', /height/)
+  const reset = (await keysPane.boundingBox())!.height
+  expect(reset).toBeLessThan(after)
 })
 
 test('loop mode radios are interactive', async () => {

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useStore } from '../store'
-import { useSectionId } from './sectionContext'
+import { useSectionId, useSectionDrag } from './sectionContext'
 
 interface Props {
   title: string
@@ -12,6 +12,7 @@ interface Props {
 
 export function Section({ title, children, right, dim = false }: Props): JSX.Element {
   const id = useSectionId()
+  const drag = useSectionDrag()
   const { activeProfile, toggleSectionCollapsed } = useStore()
   // Only sections rendered inside a ResizablePane (i.e. with an id) are collapsible.
   const collapsible = id !== null
@@ -20,7 +21,15 @@ export function Section({ title, children, right, dim = false }: Props): JSX.Ele
   return (
     <section className={`section${collapsed ? ' section--collapsed' : ''}`}>
       <header className="section__head">
-        <span className="section__grip" aria-hidden="true" title="Drag to move this section">
+        {/* The grip is the ONLY drag handle for reordering — the pane is not
+            draggable, so body inputs and the resize splitter keep working. */}
+        <span
+          className="section__grip"
+          title="Drag to move this section"
+          draggable={drag?.draggable ?? false}
+          onDragStart={drag?.onDragStart}
+          onDragEnd={drag?.onDragEnd}
+        >
           ⠿
         </span>
         <h2 className="section__title">{title}</h2>

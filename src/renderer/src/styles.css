@@ -321,21 +321,25 @@ body.is-resizing * {
   justify-content: space-between;
   padding: 8px 12px;
   border-bottom: 1px solid var(--border-soft);
-  /* The header is the drag handle for reordering sections. */
-  cursor: grab;
-}
-.section__head:active {
-  cursor: grabbing;
 }
 
-/* Drag-handle dots; the title sits right after it. */
+/* Drag-handle dots — the ONLY draggable part of a section. The title sits right
+   after it; everything else in the header keeps its normal cursor/behaviour. */
 .section__grip {
   margin-right: 8px;
+  padding: 2px 2px;
   color: var(--muted);
   font-size: 12px;
   line-height: 1;
   letter-spacing: -1px;
   user-select: none;
+  cursor: grab;
+}
+.section__grip:hover {
+  color: var(--text);
+}
+.section__grip:active {
+  cursor: grabbing;
 }
 
 .section__title {
