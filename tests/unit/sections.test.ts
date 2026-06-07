@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { SECTION_IDS, DEFAULT_LAYOUT, normalizeLayout, moveSection } from '@shared/sections'
+import {
+  SECTION_IDS,
+  DEFAULT_LAYOUT,
+  normalizeLayout,
+  moveSection,
+  isSectionHidden,
+  applyHiddenSections
+} from '@shared/sections'
+import { createDefaultProfile } from '@shared/defaults'
 
 describe('normalizeLayout', () => {
   it('keeps a valid layout intact', () => {
@@ -49,5 +57,41 @@ describe('moveSection', () => {
     l = moveSection(l, 'loop', 'left', 2)
     l = moveSection(l, 'keys', 'right', l.right.length)
     expect([...l.left, ...l.right].sort()).toEqual([...SECTION_IDS].sort())
+  })
+})
+
+describe('section visibility', () => {
+  it('isSectionHidden only treats === true as hidden', () => {
+    expect(isSectionHidden({ keys: true }, 'keys')).toBe(true)
+    expect(isSectionHidden({ keys: true }, 'loop')).toBe(false)
+    expect(isSectionHidden({}, 'keys')).toBe(false)
+    expect(isSectionHidden(null, 'keys')).toBe(false)
+  })
+
+  it('applyHiddenSections disables a hidden section feature without mutating flags', () => {
+    const p = createDefaultProfile()
+    p.options.enableKeys = true
+    p.options.enableClickPositions = true
+    p.textFunction.enabled = true
+    p.holdToSpam.enabled = true
+    p.periodicKey.enabled = true
+    p.hiddenSections = { keys: true, textFunction: true, holdToSpam: true, periodicKey: true }
+
+    const eff = applyHiddenSections(p)
+    // Hidden features are off in the effective profile...
+    expect(eff.options.enableKeys).toBe(false)
+    expect(eff.textFunction.enabled).toBe(false)
+    expect(eff.holdToSpam.enabled).toBe(false)
+    expect(eff.periodicKey.enabled).toBe(false)
+    // ...a visible feature is left alone...
+    expect(eff.options.enableClickPositions).toBe(true)
+    // ...and the stored profile flags are untouched (re-showing restores them).
+    expect(p.options.enableKeys).toBe(true)
+    expect(p.textFunction.enabled).toBe(true)
+  })
+
+  it('applyHiddenSections is a no-op when nothing is hidden', () => {
+    const p = createDefaultProfile()
+    expect(applyHiddenSections(p)).toBe(p)
   })
 })

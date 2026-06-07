@@ -18,7 +18,7 @@ import { AuxController } from './auxmodes'
 import { getMousePosition } from './input'
 import { pointInRect } from './geometry'
 import { parseAccelerator } from './keymap'
-import { normalizeLayout } from '@shared/sections'
+import { normalizeLayout, applyHiddenSections } from '@shared/sections'
 import { MacroRecorder, MacroPlayer } from './macro'
 import { createTray, type TrayHandle } from './tray'
 import { WINDOW_ICON_DATA_URL } from './trayicon'
@@ -34,10 +34,15 @@ let trayHandle: TrayHandle | null = null
 let isQuitting = false
 let trayHintShown = false
 
+/** The active profile with hidden sections' features disabled, for a real run. */
+function runProfile(): Profile {
+  return applyHiddenSections(activeProfile(data))
+}
+
 /** Start/stop manual spam (used by the tray menu). */
 function toggleSpam(): void {
   if (engine.isRunning()) engine.stop()
-  else engine.start(activeProfile(data), 'manual')
+  else engine.start(runProfile(), 'manual')
 }
 
 /** Arm the emergency-stop hotkey whenever anything is active. */
@@ -227,7 +232,8 @@ function sanitizeProfile(p: Profile): Profile {
       delayMs: clampInt(p.rightClickHold?.delayMs, 1, 600000, 10)
     },
     sectionHeights: sanitizeSectionHeights(p.sectionHeights),
-    collapsedSections: sanitizeCollapsedSections(p.collapsedSections),
+    collapsedSections: sanitizeSectionFlags(p.collapsedSections),
+    hiddenSections: sanitizeSectionFlags(p.hiddenSections),
     macro: sanitizeMacro(p.macro),
     sectionLayout: normalizeLayout(p.sectionLayout)
   }
@@ -285,8 +291,11 @@ function sanitizeSectionHeights(raw: unknown): Record<string, number> {
   return out
 }
 
-/** Keep only the truly-collapsed section ids (drops anything not === true). */
-function sanitizeCollapsedSections(raw: unknown): Record<string, boolean> {
+/**
+ * Keep only the section ids flagged === true (drops everything else). Shared by
+ * the per-section collapsed map and the hidden-sections map.
+ */
+function sanitizeSectionFlags(raw: unknown): Record<string, boolean> {
   if (!raw || typeof raw !== 'object') return {}
   const out: Record<string, boolean> = {}
   for (const [id, value] of Object.entries(raw as Record<string, unknown>)) {
@@ -355,7 +364,7 @@ function registerIpc(): void {
 
   ipcMain.handle(IPC.Start, () => {
     // A one-shot macro preview from the panel owns playback while it runs.
-    if (!macroPlayer.isPlaying()) engine.start(activeProfile(data), 'manual')
+    if (!macroPlayer.isPlaying()) engine.start(runProfile(), 'manual')
     return engine.getStatus()
   })
 

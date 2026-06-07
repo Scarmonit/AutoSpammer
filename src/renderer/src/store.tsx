@@ -42,6 +42,10 @@ interface Store {
   resetSectionHeight: (id: string) => void
   /** Collapse/expand a section (header-only), persisted per profile. */
   toggleSectionCollapsed: (id: string) => void
+  /** Show/hide a whole section via the Sections manager (per profile). */
+  setSectionHidden: (id: string, hidden: boolean) => void
+  /** Make every section visible again. */
+  showAllSections: () => void
   /** Persist a new drag-and-drop section layout (per profile). */
   setSectionLayout: (layout: SectionLayout) => void
   /** Restore the default section order. */
@@ -225,6 +229,22 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     },
     [updateProfile]
   )
+
+  const setSectionHidden = useCallback(
+    (id: string, hidden: boolean) => {
+      updateProfile((p) => {
+        const next = { ...(p.hiddenSections ?? {}) }
+        if (hidden) next[id] = true
+        else delete next[id]
+        return { ...p, hiddenSections: next }
+      })
+    },
+    [updateProfile]
+  )
+
+  const showAllSections = useCallback(() => {
+    updateProfile((p) => ({ ...p, hiddenSections: {} }))
+  }, [updateProfile])
 
   const setSectionLayout = useCallback(
     (layout: SectionLayout) => {
@@ -419,6 +439,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     setSectionHeight,
     resetSectionHeight,
     toggleSectionCollapsed,
+    setSectionHidden,
+    showAllSections,
     setSectionLayout,
     resetSectionLayout,
     createProfile,

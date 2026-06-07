@@ -2,6 +2,7 @@ import { globalShortcut } from 'electron'
 import { uIOhook, type UiohookKeyboardEvent, type UiohookMouseEvent } from 'uiohook-napi'
 import type { Profile, AppSettings, RecordedKey, HotkeyConflict, SpamMode } from '@shared/types'
 import type { SpamEngine } from './engine'
+import { applyHiddenSections } from '@shared/sections'
 import { consumeSyntheticUp } from './input'
 import {
   nameForKeycode,
@@ -424,7 +425,8 @@ export class GlobalInput {
     // Auto-repeat events while already holding, or activity during another run.
     if (engine.isRunning()) return
 
-    const profile = this.deps.getProfile()
+    // Hidden sections don't trigger holds (their feature is disabled).
+    const profile = applyHiddenSections(this.deps.getProfile())
 
     if (profile.focusHold.enabled && tokenFor(profile.focusHold.key) === token) {
       this.heldToken = token

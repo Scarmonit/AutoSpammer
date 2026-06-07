@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { normalizeLayout, moveSection, type SectionColumnName } from '@shared/sections'
+import {
+  normalizeLayout,
+  moveSection,
+  isSectionHidden,
+  type SectionColumnName
+} from '@shared/sections'
 import { useStore } from './store'
 import { KeyList } from './components/KeyList'
 import { OptionsPanel } from './components/OptionsPanel'
@@ -17,6 +22,7 @@ import { UiScaleControl } from './components/UiScaleControl'
 import { BottomBar } from './components/BottomBar'
 import { ResizablePane } from './components/ResizablePane'
 import { SettingsModal } from './components/SettingsModal'
+import { SectionManager } from './components/SectionManager'
 
 // Each section id maps to its rendered panel. Built once; the columns are laid
 // out from the (per-profile) drag-and-drop order.
@@ -114,6 +120,7 @@ export function App(): JSX.Element {
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null)
   const [optionsOpen, setOptionsOpen] = useState(false)
+  const [sectionsOpen, setSectionsOpen] = useState(false)
 
   // Auto-dismiss info toasts after a moment; keep errors until clicked.
   useEffect(() => {
@@ -129,8 +136,15 @@ export function App(): JSX.Element {
   }
 
   const layout = normalizeLayout(activeProfile?.sectionLayout)
+  const hidden = activeProfile?.hiddenSections
+  // The layout keeps every section (so hidden ones retain their saved position);
+  // we only render the visible ones.
+  const visible = {
+    left: layout.left.filter((id) => !isSectionHidden(hidden, id)),
+    right: layout.right.filter((id) => !isSectionHidden(hidden, id))
+  }
 
-  /** Insertion index within a column, measured against its current panes. */
+  /** Insertion index within a column, measured against its rendered panes. */
   const indexFromPointer = (e: React.DragEvent): number => {
     const panes = Array.from(
       (e.currentTarget as HTMLElement).querySelectorAll('[data-rs-pane]')
@@ -141,6 +155,21 @@ export function App(): JSX.Element {
       if (y < r.top + r.height / 2) return i
     }
     return panes.length
+  }
+
+  /**
+   * Translate a drop index measured against the *visible* panes into an index in
+   * the full (incl. hidden) column array, so dropping reorders the saved layout
+   * correctly even when some sections are hidden.
+   */
+  const fullDropIndex = (col: SectionColumnName, visibleIndex: number): number => {
+    const ids = layout[col]
+    let seen = 0
+    for (let i = 0; i < ids.length; i++) {
+      if (seen === visibleIndex) return i
+      if (!isSectionHidden(hidden, ids[i])) seen++
+    }
+    return ids.length
   }
 
   const onColumnDragOver = (col: SectionColumnName, e: React.DragEvent): void => {
@@ -154,7 +183,7 @@ export function App(): JSX.Element {
   const onColumnDrop = (col: SectionColumnName, e: React.DragEvent): void => {
     if (!dragId) return
     e.preventDefault()
-    setSectionLayout(moveSection(layout, dragId, col, indexFromPointer(e)))
+    setSectionLayout(moveSection(layout, dragId, col, fullDropIndex(col, indexFromPointer(e))))
     setDragId(null)
     setDropTarget(null)
   }
@@ -194,6 +223,15 @@ export function App(): JSX.Element {
           <button
             type="button"
             className="topbar__btn topbar__btn--icon"
+            title="Sections — show or hide sections"
+            aria-label="Sections"
+            onClick={() => setSectionsOpen(true)}
+          >
+            👁️
+          </button>
+          <button
+            type="button"
+            className="topbar__btn topbar__btn--icon"
             title="Options"
             aria-label="Options"
             onClick={() => setOptionsOpen(true)}
@@ -205,6 +243,7 @@ export function App(): JSX.Element {
       </header>
 
       {optionsOpen && <SettingsModal onClose={() => setOptionsOpen(false)} />}
+      {sectionsOpen && <SectionManager onClose={() => setSectionsOpen(false)} />}
 
       {message && (
         <div className={`toast toast--${message.kind}`} onClick={dismissMessage}>
@@ -213,8 +252,8 @@ export function App(): JSX.Element {
       )}
 
       <main className="columns">
-        <SectionColumn col="left" ids={layout.left} {...columnProps} />
-        <SectionColumn col="right" ids={layout.right} {...columnProps} />
+        <SectionColumn col="left" ids={visible.left} {...columnProps} />
+        <SectionColumn col="right" ids={visible.right} {...columnProps} />
       </main>
 
       <BottomBar />

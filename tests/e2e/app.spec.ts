@@ -313,6 +313,31 @@ test('the Options (⚙️) button opens a modal with the close-to-tray setting',
   await expect(win.locator('.modal')).toHaveCount(0)
 })
 
+test('the Sections (👁️) manager hides and restores a section', async () => {
+  // Default: all 13 sections render.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(13)
+  await expect(section('Loop')).toBeVisible()
+
+  // Open the manager and uncheck "Loop".
+  await win.getByRole('button', { name: 'Sections', exact: true }).click()
+  const manager = win.locator('.modal')
+  await expect(manager).toBeVisible()
+  const loopRow = manager.locator('.seclist__row', { hasText: 'Loop' })
+  await expect(loopRow.locator('input')).toBeChecked()
+  await loopRow.locator('input').uncheck()
+
+  // The Loop section disappears from the main UI; one fewer pane.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(12)
+  await expect(section('Loop')).toHaveCount(0)
+
+  // Re-checking via "Show all" brings it back.
+  await manager.getByRole('button', { name: 'Show all' }).click()
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(13)
+  await manager.getByRole('button', { name: 'Done' }).click()
+  await expect(win.locator('.modal')).toHaveCount(0)
+  await expect(section('Loop')).toBeVisible()
+})
+
 test('loop mode radios are interactive', async () => {
   const once = section('Loop').locator('label.radio', { hasText: 'Play Once' }).locator('input')
   await once.check()

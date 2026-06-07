@@ -1,6 +1,9 @@
 // The set of draggable UI sections and helpers for their two-column layout.
-// Pure and dependency-free so both the renderer and the main process (sanitize)
-// can keep a profile's custom order valid no matter how it was edited.
+// Pure and dependency-free (type-only Profile import) so both the renderer and
+// the main process can keep a profile's custom order/visibility valid no matter
+// how it was edited.
+
+import type { Profile } from './types'
 
 export type SectionColumnName = 'left' | 'right'
 
@@ -27,6 +30,23 @@ export const SECTION_IDS = [
 ] as const
 
 export type SectionId = (typeof SECTION_IDS)[number]
+
+/** Human-readable names, matching each section's on-screen header title. */
+export const SECTION_LABELS: Record<string, string> = {
+  keys: 'Keys to Spam',
+  options: 'Options',
+  clickPositions: 'Click Positions',
+  textFunction: 'Text Function',
+  holdKeys: 'Hold Keys Down',
+  macro: 'Macro',
+  profiles: 'Profiles',
+  loop: 'Loop',
+  hotkeys: 'Toggle Hotkey',
+  holdToSpam: 'Hold-to-Spam Key',
+  focusHold: 'Focus Hold Key',
+  rightClickHold: 'Hold for Right-Click',
+  periodicKey: 'Periodic Key'
+}
 
 /** The out-of-the-box arrangement. */
 export const DEFAULT_LAYOUT: SectionLayout = {
@@ -106,4 +126,47 @@ export function moveSection(
   arr.splice(target, 0, id)
 
   return normalizeLayout(next)
+}
+
+/** True when a section id is marked hidden in the visibility map. */
+export function isSectionHidden(
+  hidden: Record<string, boolean> | null | undefined,
+  id: string
+): boolean {
+  return !!hidden && hidden[id] === true
+}
+
+/**
+ * Return the profile with every hidden section's runtime feature forced off, so
+ * a hidden section never participates in a spam run (Start Spam / F6 / hold
+ * triggers). The stored enable flags are untouched — re-showing a section
+ * restores its original behaviour. Config-only sections (Options, Profiles, Loop,
+ * Toggle Hotkey) have no per-run feature to disable, so only the UI hides them.
+ */
+export function applyHiddenSections(profile: Profile): Profile {
+  const h = profile.hiddenSections
+  if (!h || Object.keys(h).length === 0) return profile
+  const hid = (id: string): boolean => h[id] === true
+
+  return {
+    ...profile,
+    options: {
+      ...profile.options,
+      enableKeys: profile.options.enableKeys && !hid('keys'),
+      enableClickPositions: profile.options.enableClickPositions && !hid('clickPositions')
+    },
+    textFunction: hid('textFunction')
+      ? { ...profile.textFunction, enabled: false }
+      : profile.textFunction,
+    holdKeys: hid('holdKeys') ? { ...profile.holdKeys, enabled: false } : profile.holdKeys,
+    periodicKey: hid('periodicKey')
+      ? { ...profile.periodicKey, enabled: false }
+      : profile.periodicKey,
+    macro: hid('macro') ? { ...profile.macro, enabled: false } : profile.macro,
+    holdToSpam: hid('holdToSpam') ? { ...profile.holdToSpam, enabled: false } : profile.holdToSpam,
+    focusHold: hid('focusHold') ? { ...profile.focusHold, enabled: false } : profile.focusHold,
+    rightClickHold: hid('rightClickHold')
+      ? { ...profile.rightClickHold, enabled: false }
+      : profile.rightClickHold
+  }
 }

@@ -30,6 +30,10 @@
 
 **Latest additions**
 
+- 👁️ **Sections manager** — an eye button in the top bar opens a popup listing every
+  section with a checkbox. Uncheck one to **completely hide** it from the window *and*
+  skip its feature when spamming; re-check to bring it back in its saved position.
+  All sections are visible by default and the choice is saved per profile.
 - ⚙️ **Options dialog** — a gear button in the top bar opens a settings popup. Toggle
   **"Minimize to system tray when closing the window"**: on (default) keeps Auto Spammer
   running in the tray when you hit ✕ (global hotkeys stay live); off makes ✕ fully quit
@@ -103,11 +107,11 @@
 Pick **one** — both are a single file you just run:
 
 ### ▶️ Option 1 — Portable (easiest: just run it)
-**[⬇️ Download AutoSpammer-Portable-1.21.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.21.0.exe)**
+**[⬇️ Download AutoSpammer-Portable-1.22.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.22.0.exe)**
 → double-click it and the app opens **immediately**. Nothing to install.
 
 ### 💾 Option 2 — Installer (adds Desktop + Start-menu shortcuts)
-**[⬇️ Download AutoSpammer-Setup-1.21.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.21.0.exe)**
+**[⬇️ Download AutoSpammer-Setup-1.22.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.22.0.exe)**
 → run it, click through, and launch from your Desktop / Start menu.
 
 > ℹ️ **First launch:** Windows may show a blue **"Windows protected your PC"**

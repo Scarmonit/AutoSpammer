@@ -129,6 +129,12 @@ export interface Profile {
    * `true` = collapsed; a missing id means the section is expanded.
    */
   collapsedSections: Record<string, boolean>
+  /**
+   * Sections hidden via the Sections manager, keyed by section id. `true` =
+   * hidden (removed from the UI and skipped on a run); a missing id means the
+   * section is visible. All sections are visible by default.
+   */
+  hiddenSections: Record<string, boolean>
   /** Full keyboard + mouse macro recording for this profile. */
   macro: MacroConfig
   /** Drag-and-drop section order, per column. */
