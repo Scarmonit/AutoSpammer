@@ -22,9 +22,7 @@ export const SECTION_IDS = [
   'profiles',
   'loop',
   'hotkeys',
-  'holdToSpam',
-  'focusHold',
-  'rightClickHold',
+  'holdModes',
   'periodicKey'
 ] as const
 
@@ -40,16 +38,14 @@ export const SECTION_LABELS: Record<string, string> = {
   profiles: 'Profiles',
   loop: 'Loop',
   hotkeys: 'Toggle Hotkey',
-  holdToSpam: 'Hold-to-Spam Key',
-  focusHold: 'Focus Hold Key',
-  rightClickHold: 'Hold for Right-Click',
+  holdModes: 'Hold Modes',
   periodicKey: 'Periodic Key'
 }
 
 /** The out-of-the-box arrangement. */
 export const DEFAULT_LAYOUT: SectionLayout = {
   left: ['keys', 'clickPositions', 'textFunction', 'holdKeys', 'macro'],
-  right: ['profiles', 'loop', 'hotkeys', 'holdToSpam', 'focusHold', 'rightClickHold', 'periodicKey']
+  right: ['profiles', 'loop', 'hotkeys', 'holdModes', 'periodicKey']
 }
 
 export function cloneDefaultLayout(): SectionLayout {
@@ -138,13 +134,15 @@ export function isSectionHidden(
  * Return the profile with every hidden section's runtime feature forced off, so
  * a hidden section never participates in a spam run (Start Spam / F6 / hold
  * triggers). The stored enable flags are untouched — re-showing a section
- * restores its original behaviour. Config-only sections (Options, Profiles, Loop,
- * Toggle Hotkey) have no per-run feature to disable, so only the UI hides them.
+ * restores its original behaviour. Config-only sections (Profiles, Loop, Toggle
+ * Hotkey) have no per-run feature to disable, so only the UI hides them.
  */
 export function applyHiddenSections(profile: Profile): Profile {
   const h = profile.hiddenSections
   if (!h || Object.keys(h).length === 0) return profile
   const hid = (id: string): boolean => h[id] === true
+  // The three hold modes share one section now, so hiding it disables all three.
+  const holdHidden = hid('holdModes')
 
   return {
     ...profile,
@@ -161,9 +159,9 @@ export function applyHiddenSections(profile: Profile): Profile {
       ? { ...profile.periodicKey, enabled: false }
       : profile.periodicKey,
     macro: hid('macro') ? { ...profile.macro, enabled: false } : profile.macro,
-    holdToSpam: hid('holdToSpam') ? { ...profile.holdToSpam, enabled: false } : profile.holdToSpam,
-    focusHold: hid('focusHold') ? { ...profile.focusHold, enabled: false } : profile.focusHold,
-    rightClickHold: hid('rightClickHold')
+    holdToSpam: holdHidden ? { ...profile.holdToSpam, enabled: false } : profile.holdToSpam,
+    focusHold: holdHidden ? { ...profile.focusHold, enabled: false } : profile.focusHold,
+    rightClickHold: holdHidden
       ? { ...profile.rightClickHold, enabled: false }
       : profile.rightClickHold
   }

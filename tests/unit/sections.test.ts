@@ -73,21 +73,36 @@ describe('section visibility', () => {
     p.options.enableKeys = true
     p.options.enableClickPositions = true
     p.textFunction.enabled = true
-    p.holdToSpam.enabled = true
     p.periodicKey.enabled = true
-    p.hiddenSections = { keys: true, textFunction: true, holdToSpam: true, periodicKey: true }
+    p.hiddenSections = { keys: true, textFunction: true, periodicKey: true }
 
     const eff = applyHiddenSections(p)
     // Hidden features are off in the effective profile...
     expect(eff.options.enableKeys).toBe(false)
     expect(eff.textFunction.enabled).toBe(false)
-    expect(eff.holdToSpam.enabled).toBe(false)
     expect(eff.periodicKey.enabled).toBe(false)
     // ...a visible feature is left alone...
     expect(eff.options.enableClickPositions).toBe(true)
     // ...and the stored profile flags are untouched (re-showing restores them).
     expect(p.options.enableKeys).toBe(true)
     expect(p.textFunction.enabled).toBe(true)
+  })
+
+  it('hiding the merged Hold Modes section disables all three hold modes', () => {
+    const p = createDefaultProfile()
+    p.holdToSpam.enabled = true
+    p.focusHold.enabled = true
+    p.rightClickHold.enabled = true
+    p.hiddenSections = { holdModes: true }
+
+    const eff = applyHiddenSections(p)
+    expect(eff.holdToSpam.enabled).toBe(false)
+    expect(eff.focusHold.enabled).toBe(false)
+    expect(eff.rightClickHold.enabled).toBe(false)
+    // Stored flags untouched so re-showing restores them.
+    expect(p.holdToSpam.enabled).toBe(true)
+    expect(p.focusHold.enabled).toBe(true)
+    expect(p.rightClickHold.enabled).toBe(true)
   })
 
   it('applyHiddenSections is a no-op when nothing is hidden', () => {

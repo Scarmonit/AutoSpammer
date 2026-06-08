@@ -12,7 +12,7 @@ import { ClickPositionsPanel } from './components/ClickPositionsPanel'
 import { ProfilesPanel } from './components/ProfilesPanel'
 import { LoopPanel } from './components/LoopPanel'
 import { HotkeyPanel } from './components/HotkeyPanel'
-import { HoldKeyPanel } from './components/HoldKeyPanel'
+import { HoldModesPanel } from './components/HoldModesPanel'
 import { HoldKeysPanel } from './components/HoldKeysPanel'
 import { PeriodicKeyPanel } from './components/PeriodicKeyPanel'
 import { MacroPanel } from './components/MacroPanel'
@@ -34,27 +34,7 @@ const SECTIONS: Record<string, JSX.Element> = {
   profiles: <ProfilesPanel />,
   loop: <LoopPanel />,
   hotkeys: <HotkeyPanel />,
-  holdToSpam: (
-    <HoldKeyPanel
-      field="holdToSpam"
-      title="Hold-to-Spam Key"
-      helper="Hold the key to spam your list, release to stop."
-    />
-  ),
-  focusHold: (
-    <HoldKeyPanel
-      field="focusHold"
-      title="Focus Hold Key"
-      helper="Hold to rapidly fire ONLY this key/button itself."
-    />
-  ),
-  rightClickHold: (
-    <HoldKeyPanel
-      field="rightClickHold"
-      title="Hold for Right-Click"
-      helper="Hold the set key/button to rapidly RIGHT-CLICK; release to stop."
-    />
-  ),
+  holdModes: <HoldModesPanel />,
   periodicKey: <PeriodicKeyPanel />
 }
 

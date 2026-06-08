@@ -642,6 +642,53 @@ body.is-resizing * {
   border-top: 1px solid var(--border-soft);
 }
 
+/* ---------- Hold Modes (three hold triggers grouped as cards) ---------- */
+.holdmodes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.holdmode {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.holdmode__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.holdmode__title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+}
+/* Dim a disabled mode's controls, but keep its Enabled toggle fully visible. */
+.holdmode__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.holdmode__body--off {
+  opacity: 0.45;
+}
+/* Key display + Set Key button on one row. */
+.holdmode__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.holdmode__row .field {
+  flex: 1 1 auto;
+}
+
 /* ---------- Macro ---------- */
 .macro__list {
   max-height: 220px;

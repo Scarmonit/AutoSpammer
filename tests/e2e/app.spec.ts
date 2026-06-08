@@ -47,6 +47,7 @@ test('renders all the core panels', async () => {
     'Macro',
     'Profiles',
     'Loop',
+    'Hold Modes',
     'Periodic Key'
   ]) {
     await expect(win.getByRole('heading', { name: heading, exact: true })).toBeVisible()
@@ -93,10 +94,10 @@ test('Click Positions exposes the Record Clicks button', async () => {
 })
 
 test('renders draggable splitters between sections', async () => {
-  // Two columns of 5 and 7 sections -> 4 + 6 = 10 splitters (last pane per column
+  // Two columns of 5 sections each -> 4 + 4 = 8 splitters (last pane per column
   // has none).
   const splitters = win.locator('.rs-splitter')
-  await expect(splitters).toHaveCount(10)
+  await expect(splitters).toHaveCount(8)
   await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
 })
 
@@ -205,8 +206,8 @@ test('Periodic Key is a multi-entry list with an Enabled toggle', async () => {
 })
 
 test('every section can be hidden/shown via its header toggle', async () => {
-  // 5 sections (left) + 7 sections (right) = 12 collapse buttons.
-  await expect(win.locator('.section__collapse')).toHaveCount(12)
+  // 5 sections (left) + 5 sections (right) = 10 collapse buttons.
+  await expect(win.locator('.section__collapse')).toHaveCount(10)
 
   const keys = section('Keys to Spam')
   await expect(keys.locator('.section__body')).toBeVisible()
@@ -235,12 +236,12 @@ test('the top bar UI scale is a dropdown that double-clicks into a custom input'
 })
 
 test('sections reorder via the grip handle (not the whole pane) + Reset Layout', async () => {
-  // 12 panes, each a stable reorder target...
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(12)
+  // 10 panes, each a stable reorder target...
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(10)
   // ...but the PANE itself must NOT be draggable (that hijacks body inputs and
   // the nested key-row drags). Only the grip handle carries draggable.
   await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(0)
-  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(12)
+  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(10)
   await expect(win.locator('.section__grip').first()).toBeVisible()
   await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
 })
@@ -274,26 +275,46 @@ test('drag-to-resize a section works at a normal window size', async () => {
   expect(reset).toBeLessThan(after)
 })
 
-test('Text Function and the three Hold sections have header Enabled toggles', async () => {
-  for (const heading of [
-    'Text Function',
-    'Hold-to-Spam Key',
-    'Focus Hold Key',
-    'Hold for Right-Click'
-  ]) {
-    const sec = section(heading)
-    const toggle = sec.locator('.section__toggle input')
-    const body = sec.locator('.section__body')
-    await expect(toggle).toBeVisible()
+test('Text Function has a header Enabled toggle that dims its body', async () => {
+  const sec = section('Text Function')
+  const toggle = sec.locator('.section__toggle input')
+  const body = sec.locator('.section__body')
+  await expect(toggle).toBeVisible()
 
-    // Enabling clears the dimmed-off state; disabling re-applies it.
-    if (!(await toggle.isChecked())) await toggle.check()
-    await expect(body).not.toHaveClass(/section__body--off/)
+  if (!(await toggle.isChecked())) await toggle.check()
+  await expect(body).not.toHaveClass(/section__body--off/)
 
-    await toggle.uncheck()
-    await expect(toggle).not.toBeChecked()
-    await expect(body).toHaveClass(/section__body--off/)
+  await toggle.uncheck()
+  await expect(toggle).not.toBeChecked()
+  await expect(body).toHaveClass(/section__body--off/)
+})
+
+test('Hold Modes groups the three hold modes, each with its own controls', async () => {
+  const hold = section('Hold Modes')
+  await expect(hold).toBeVisible()
+
+  // The three former sections are now cards inside one section...
+  const cards = hold.locator('.holdmode')
+  await expect(cards).toHaveCount(3)
+  for (const title of ['Hold-to-Spam Key', 'Focus Hold Key', 'Hold for Right-Click']) {
+    await expect(hold.locator('.holdmode__title', { hasText: title })).toBeVisible()
   }
+  // ...and each card keeps its own Enabled toggle and Set Key binding.
+  await expect(hold.locator('.holdmode .section__toggle input')).toHaveCount(3)
+  await expect(hold.getByRole('button', { name: 'Set Key' })).toHaveCount(3)
+
+  // Toggling one card's Enabled switch dims only that card's body.
+  const firstCard = cards.first()
+  const firstToggle = firstCard.locator('.section__toggle input')
+  if (!(await firstToggle.isChecked())) await firstToggle.check()
+  await expect(firstCard.locator('.holdmode__body')).not.toHaveClass(/holdmode__body--off/)
+  await firstToggle.uncheck()
+  await expect(firstCard.locator('.holdmode__body')).toHaveClass(/holdmode__body--off/)
+
+  // The old standalone hold-section headings no longer exist.
+  await expect(win.getByRole('heading', { name: 'Hold-to-Spam Key', exact: true })).toHaveCount(0)
+  await expect(win.getByRole('heading', { name: 'Focus Hold Key', exact: true })).toHaveCount(0)
+  await expect(win.getByRole('heading', { name: 'Hold for Right-Click', exact: true })).toHaveCount(0)
 })
 
 test('the Options (⚙️) button opens a modal with the close-to-tray setting', async () => {
@@ -325,8 +346,8 @@ test('the Options (⚙️) button opens a modal with the close-to-tray setting',
 })
 
 test('the Sections (👁️) manager hides and restores a section', async () => {
-  // Default: all 12 sections render.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(12)
+  // Default: all 10 sections render.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(10)
   await expect(section('Loop')).toBeVisible()
 
   // Open the manager and uncheck "Loop".
@@ -338,12 +359,12 @@ test('the Sections (👁️) manager hides and restores a section', async () => 
   await loopRow.locator('input').uncheck()
 
   // The Loop section disappears from the main UI; one fewer pane.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(11)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(9)
   await expect(section('Loop')).toHaveCount(0)
 
   // Re-checking via "Show all" brings it back.
   await manager.getByRole('button', { name: 'Show all' }).click()
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(12)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(10)
   await manager.getByRole('button', { name: 'Done' }).click()
   await expect(win.locator('.modal')).toHaveCount(0)
   await expect(section('Loop')).toBeVisible()
