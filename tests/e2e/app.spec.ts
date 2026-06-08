@@ -45,20 +45,34 @@ test('renders all the core panels', async () => {
     'Click Positions',
     'Hold Keys Down',
     'Macro',
-    'Profiles',
-    'Loop',
     'Hold Modes',
     'Periodic Key'
   ]) {
     await expect(win.getByRole('heading', { name: heading, exact: true })).toBeVisible()
   }
-  // The Options section was merged into Keys to Spam — no standalone heading.
+  // Merged/moved sections no longer have standalone headings.
   await expect(win.getByRole('heading', { name: 'Options', exact: true })).toHaveCount(0)
-  // The Toggle Hotkey section was moved to the top bar — no standalone heading,
-  // and the big Start Spam button was removed.
   await expect(win.getByRole('heading', { name: 'Toggle Hotkey', exact: true })).toHaveCount(0)
+  await expect(win.getByRole('heading', { name: 'Profiles', exact: true })).toHaveCount(0)
+  await expect(win.getByRole('heading', { name: 'Loop', exact: true })).toHaveCount(0)
+  // No big Start Spam button.
   await expect(win.locator('.startbtn')).toHaveCount(0)
-  await expect(win.getByRole('button', { name: 'Start Spam' })).toHaveCount(0)
+})
+
+test('the Profile and Loop controls live in the header toolbar', async () => {
+  const subbar = win.locator('.subbar')
+  // Profile picker + actions.
+  const profile = subbar.locator('.subbar__group').filter({ hasText: 'Profile' })
+  await expect(profile.locator('select')).toBeVisible()
+  for (const name of ['New', 'Rename', 'Save', 'Delete']) {
+    await expect(profile.getByRole('button', { name, exact: true })).toBeVisible()
+  }
+  await expect(profile.locator('select option')).toContainText(['Default'])
+
+  // Loop mode dropdown with the three modes.
+  const loopSelect = subbar.locator('.subbar__group').filter({ hasText: 'Loop' }).locator('select')
+  await expect(loopSelect).toBeVisible()
+  await expect(loopSelect.locator('option')).toHaveCount(3)
 })
 
 test('the merged Options controls live inside Keys to Spam', async () => {
@@ -98,10 +112,10 @@ test('Click Positions exposes the Record Clicks button', async () => {
 })
 
 test('renders draggable splitters between sections', async () => {
-  // Columns of 5 (left) and 4 (right) sections -> 4 + 3 = 7 splitters (last pane
+  // Columns of 5 (left) and 2 (right) sections -> 4 + 1 = 5 splitters (last pane
   // per column has none).
   const splitters = win.locator('.rs-splitter')
-  await expect(splitters).toHaveCount(7)
+  await expect(splitters).toHaveCount(5)
   await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
 })
 
@@ -204,8 +218,8 @@ test('Periodic Key is a multi-entry list with an Enabled toggle', async () => {
 })
 
 test('every section can be hidden/shown via its header toggle', async () => {
-  // 5 sections (left) + 4 sections (right) = 9 collapse buttons.
-  await expect(win.locator('.section__collapse')).toHaveCount(9)
+  // 5 sections (left) + 2 sections (right) = 7 collapse buttons.
+  await expect(win.locator('.section__collapse')).toHaveCount(7)
 
   const keys = section('Keys to Spam')
   await expect(keys.locator('.section__body')).toBeVisible()
@@ -234,12 +248,12 @@ test('the top bar UI scale is a dropdown that double-clicks into a custom input'
 })
 
 test('sections reorder via the grip handle (not the whole pane) + Reset Layout', async () => {
-  // 9 panes, each a stable reorder target...
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(9)
+  // 7 panes, each a stable reorder target...
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
   // ...but the PANE itself must NOT be draggable (that hijacks body inputs and
   // the nested key-row drags). Only the grip handle carries draggable.
   await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(0)
-  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(9)
+  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(7)
   await expect(win.locator('.section__grip').first()).toBeVisible()
   await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
 })
@@ -344,32 +358,46 @@ test('the Options (⚙️) button opens a modal with the close-to-tray setting',
 })
 
 test('the Sections (👁️) manager hides and restores a section', async () => {
-  // Default: all 9 sections render.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(9)
-  await expect(section('Loop')).toBeVisible()
+  // Default: all 7 sections render.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
+  await expect(section('Periodic Key')).toBeVisible()
 
-  // Open the manager and uncheck "Loop".
+  // Open the manager and uncheck "Periodic Key".
   await win.getByRole('button', { name: 'Sections', exact: true }).click()
   const manager = win.locator('.modal')
   await expect(manager).toBeVisible()
-  const loopRow = manager.locator('.seclist__row', { hasText: 'Loop' })
-  await expect(loopRow.locator('input')).toBeChecked()
-  await loopRow.locator('input').uncheck()
+  const row = manager.locator('.seclist__row', { hasText: 'Periodic Key' })
+  await expect(row.locator('input')).toBeChecked()
+  await row.locator('input').uncheck()
 
-  // The Loop section disappears from the main UI; one fewer pane.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(8)
-  await expect(section('Loop')).toHaveCount(0)
+  // The section disappears from the main UI; one fewer pane.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(6)
+  await expect(section('Periodic Key')).toHaveCount(0)
 
   // Re-checking via "Show all" brings it back.
   await manager.getByRole('button', { name: 'Show all' }).click()
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(9)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
   await manager.getByRole('button', { name: 'Done' }).click()
   await expect(win.locator('.modal')).toHaveCount(0)
-  await expect(section('Loop')).toBeVisible()
+  await expect(section('Periodic Key')).toBeVisible()
 })
 
-test('loop mode radios are interactive', async () => {
-  const once = section('Loop').locator('label.radio', { hasText: 'Play Once' }).locator('input')
-  await once.check()
-  await expect(once).toBeChecked()
+test('the top-bar Loop control changes mode (and persists the count field)', async () => {
+  const loop = win.locator('.subbar__group').filter({ hasText: 'Loop' })
+  const select = loop.locator('select')
+
+  // Default is "Forever" with no count field shown.
+  await expect(select).toHaveValue('forever')
+  await expect(loop.locator('.subbar__count')).toHaveCount(0)
+
+  // Switching to "Loop X times" reveals the count input.
+  await select.selectOption('count')
+  await expect(loop.locator('.subbar__count')).toBeVisible()
+  await loop.locator('.subbar__count').fill('7')
+  await expect(loop.locator('.subbar__count')).toHaveValue('7')
+
+  // "Play Once" hides the count again.
+  await select.selectOption('once')
+  await expect(select).toHaveValue('once')
+  await expect(loop.locator('.subbar__count')).toHaveCount(0)
 })

@@ -9,8 +9,6 @@ import { useStore } from './store'
 import { KeyList } from './components/KeyList'
 import { TextFunctionPanel } from './components/TextFunctionPanel'
 import { ClickPositionsPanel } from './components/ClickPositionsPanel'
-import { ProfilesPanel } from './components/ProfilesPanel'
-import { LoopPanel } from './components/LoopPanel'
 import { HoldModesPanel } from './components/HoldModesPanel'
 import { HoldKeysPanel } from './components/HoldKeysPanel'
 import { PeriodicKeyPanel } from './components/PeriodicKeyPanel'
@@ -18,6 +16,8 @@ import { MacroPanel } from './components/MacroPanel'
 import { StatusIndicator } from './components/StatusIndicator'
 import { UiScaleControl } from './components/UiScaleControl'
 import { TopBarHotkeys } from './components/TopBarHotkeys'
+import { ProfileBar } from './components/ProfileBar'
+import { LoopBar } from './components/LoopBar'
 import { ResizablePane } from './components/ResizablePane'
 import { SettingsModal } from './components/SettingsModal'
 import { SectionManager } from './components/SectionManager'
@@ -30,8 +30,6 @@ const SECTIONS: Record<string, JSX.Element> = {
   textFunction: <TextFunctionPanel />,
   holdKeys: <HoldKeysPanel />,
   macro: <MacroPanel />,
-  profiles: <ProfilesPanel />,
-  loop: <LoopPanel />,
   holdModes: <HoldModesPanel />,
   periodicKey: <PeriodicKeyPanel />
 }
@@ -218,6 +216,11 @@ export function App(): JSX.Element {
           <StatusIndicator />
         </div>
       </header>
+
+      <div className="subbar">
+        <ProfileBar />
+        <LoopBar />
+      </div>
 
       {optionsOpen && <SettingsModal onClose={() => setOptionsOpen(false)} />}
       {sectionsOpen && <SectionManager onClose={() => setSectionsOpen(false)} />}

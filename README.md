@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.25.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.26.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.25.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.25.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.25.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.25.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.26.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.26.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.26.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.26.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -80,6 +80,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 ### Highlights
 
 - **Top-bar hotkey controls** — the global **Toggle** and **Emergency-stop** hotkeys live right in the top bar; click either to rebind it. Start and stop with the Toggle Hotkey (default **F6**), the Hold Modes keys, or the system tray — there's no separate Start button to hunt for.
+- **Profile and Loop toolbar** — a compact second row in the header holds the **Profile** picker (with New / Rename / Save / Delete) and the **Loop** control (Forever / Play Once / Loop X times), so they're always one click away without taking up a panel.
 - **Sections manager** — an eye button in the top bar opens a popup listing every section with a checkbox. Uncheck one to completely hide it from the window *and* skip its feature when spamming; re-check to bring it back in its saved position. Saved per profile.
 - **Options dialog** — a gear button opens app settings. Toggle *"Minimize to system tray when closing the window"*: on (default) keeps Auto Spammer running in the tray when you press the close button; off makes the close button fully quit the app.
 - **Full macro recording and playback** — capture everything (keys, clicks, and mouse movement) with the exact timing between events, edit any delay, then replay it on a loop.
@@ -96,10 +97,10 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 - **Spam any keys** — letters, digits, function keys, punctuation, and numpad, each with its own delay, in parallel or one-at-a-time **Sequence Mode**.
 - **Click positions** — move to and click exact screen spots (left or right) every cycle.
-- **Loop** — repeat forever, once, or a set number of times.
+- **Loop** — repeat forever, once, or a set number of times (in the header toolbar).
 - **Hold Modes** — Hold-to-Spam, Focus Hold, and Hold for Right-Click, grouped in one section; each runs only while you physically hold its chosen key or button.
 - **Hold Keys Down and Periodic Key** — for walk-keys and timed presses.
-- **Profiles** — save and switch between different setups; everything is remembered.
+- **Profiles** — save and switch between different setups from the header toolbar; everything is remembered.
 - **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
 - **System tray** — runs in the background with close-to-tray.
 - **Hardened Electron build** (sandbox, context isolation, fuses) — open source, no telemetry.
@@ -113,7 +114,8 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
     <td width="50%" valign="top">
       <img src="docs/showcase-1.png" alt="Main overview" /><br/>
       <sub><b>Main window</b> — Keys to Spam (with its inline options and a live
-      "Will spam" preview), Click Positions, Profiles, Loop, and rebindable hotkeys.</sub>
+      "Will spam" preview) and Click Positions, with the Profile picker, Loop control,
+      and rebindable hotkeys in the header toolbar.</sub>
     </td>
     <td width="50%" valign="top">
       <img src="docs/showcase-2.png" alt="Macro section and triggers" /><br/>
@@ -171,7 +173,7 @@ The **Macro** section records everything — every keystroke, every mouse click,
 1. *(Optional)* Click **Set Record Hotkey** to choose a key (default **F10**) that starts and stops recording from anywhere, even while a game is focused.
 2. Click **Record** (or press the hotkey), do your actions, then press the hotkey again (or **Stop Recording**). The key you press to stop is never included, and clicks on the Auto Spammer window are ignored.
 3. The captured events are listed with the delay before each one. Edit any delay to speed a step up or slow it down.
-4. Run it like any other spam: flip the section's **Enabled** switch, then start a run with your **Toggle Hotkey** (**F6**). The macro plays back with your exact timings and repeats according to the **Loop** panel.
+4. Run it like any other spam: flip the section's **Enabled** switch, then start a run with your **Toggle Hotkey** (**F6**). The macro plays back with your exact timings and repeats according to the **Loop** control in the header toolbar.
 5. The panel's **Play once** button is a quick one-shot preview; **Stop** cancels it, **Clear** wipes the recording, and **Save** writes it to the current profile.
 
 Macro is mutually exclusive with Keys to Spam and Click Positions: enabling Macro turns those two off, and turning either back on turns Macro off. The recording is saved with the profile.

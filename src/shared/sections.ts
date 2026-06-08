@@ -19,8 +19,6 @@ export const SECTION_IDS = [
   'textFunction',
   'holdKeys',
   'macro',
-  'profiles',
-  'loop',
   'holdModes',
   'periodicKey'
 ] as const
@@ -34,8 +32,6 @@ export const SECTION_LABELS: Record<string, string> = {
   textFunction: 'Text Function',
   holdKeys: 'Hold Keys Down',
   macro: 'Macro',
-  profiles: 'Profiles',
-  loop: 'Loop',
   holdModes: 'Hold Modes',
   periodicKey: 'Periodic Key'
 }
@@ -43,7 +39,7 @@ export const SECTION_LABELS: Record<string, string> = {
 /** The out-of-the-box arrangement. */
 export const DEFAULT_LAYOUT: SectionLayout = {
   left: ['keys', 'clickPositions', 'textFunction', 'holdKeys', 'macro'],
-  right: ['profiles', 'loop', 'holdModes', 'periodicKey']
+  right: ['holdModes', 'periodicKey']
 }
 
 export function cloneDefaultLayout(): SectionLayout {

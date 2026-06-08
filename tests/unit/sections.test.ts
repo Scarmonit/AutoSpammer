@@ -16,7 +16,7 @@ describe('normalizeLayout', () => {
   })
 
   it('drops unknowns, removes duplicates, and appends missing sections', () => {
-    const out = normalizeLayout({ left: ['keys', 'keys', 'bogus'], right: ['loop'] })
+    const out = normalizeLayout({ left: ['keys', 'keys', 'bogus'], right: ['periodicKey'] })
     const all = [...out.left, ...out.right]
     // every known section appears exactly once
     expect([...all].sort()).toEqual([...SECTION_IDS].sort())
@@ -24,7 +24,7 @@ describe('normalizeLayout', () => {
     expect(all).not.toContain('bogus')
     // explicitly placed ones keep their column/position
     expect(out.left[0]).toBe('keys')
-    expect(out.right[0]).toBe('loop')
+    expect(out.right[0]).toBe('periodicKey')
   })
 
   it('falls back to a full default-shaped layout for null/empty input', () => {
@@ -54,7 +54,7 @@ describe('moveSection', () => {
   it('keeps the layout complete and unique after several moves', () => {
     let l = normalizeLayout(DEFAULT_LAYOUT)
     l = moveSection(l, 'macro', 'right', 0)
-    l = moveSection(l, 'loop', 'left', 2)
+    l = moveSection(l, 'periodicKey', 'left', 2)
     l = moveSection(l, 'keys', 'right', l.right.length)
     expect([...l.left, ...l.right].sort()).toEqual([...SECTION_IDS].sort())
   })
@@ -63,7 +63,7 @@ describe('moveSection', () => {
 describe('section visibility', () => {
   it('isSectionHidden only treats === true as hidden', () => {
     expect(isSectionHidden({ keys: true }, 'keys')).toBe(true)
-    expect(isSectionHidden({ keys: true }, 'loop')).toBe(false)
+    expect(isSectionHidden({ keys: true }, 'periodicKey')).toBe(false)
     expect(isSectionHidden({}, 'keys')).toBe(false)
     expect(isSectionHidden(null, 'keys')).toBe(false)
   })
