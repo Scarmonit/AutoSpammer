@@ -7,7 +7,6 @@ import {
 } from '@shared/sections'
 import { useStore } from './store'
 import { KeyList } from './components/KeyList'
-import { OptionsPanel } from './components/OptionsPanel'
 import { TextFunctionPanel } from './components/TextFunctionPanel'
 import { ClickPositionsPanel } from './components/ClickPositionsPanel'
 import { ProfilesPanel } from './components/ProfilesPanel'
@@ -28,7 +27,6 @@ import { SectionManager } from './components/SectionManager'
 // out from the (per-profile) drag-and-drop order.
 const SECTIONS: Record<string, JSX.Element> = {
   keys: <KeyList />,
-  options: <OptionsPanel />,
   clickPositions: <ClickPositionsPanel />,
   textFunction: <TextFunctionPanel />,
   holdKeys: <HoldKeysPanel />,

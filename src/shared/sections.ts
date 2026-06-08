@@ -15,7 +15,6 @@ export interface SectionLayout {
 /** Every section id the app knows about (used to reconcile saved layouts). */
 export const SECTION_IDS = [
   'keys',
-  'options',
   'clickPositions',
   'textFunction',
   'holdKeys',
@@ -34,7 +33,6 @@ export type SectionId = (typeof SECTION_IDS)[number]
 /** Human-readable names, matching each section's on-screen header title. */
 export const SECTION_LABELS: Record<string, string> = {
   keys: 'Keys to Spam',
-  options: 'Options',
   clickPositions: 'Click Positions',
   textFunction: 'Text Function',
   holdKeys: 'Hold Keys Down',
@@ -50,7 +48,7 @@ export const SECTION_LABELS: Record<string, string> = {
 
 /** The out-of-the-box arrangement. */
 export const DEFAULT_LAYOUT: SectionLayout = {
-  left: ['keys', 'options', 'clickPositions', 'textFunction', 'holdKeys', 'macro'],
+  left: ['keys', 'clickPositions', 'textFunction', 'holdKeys', 'macro'],
   right: ['profiles', 'loop', 'hotkeys', 'holdToSpam', 'focusHold', 'rightClickHold', 'periodicKey']
 }
 

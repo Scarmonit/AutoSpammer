@@ -61,7 +61,7 @@ export function KeyList(): JSX.Element {
         <SectionToggle
           checked={enabled}
           onChange={(v) => patchOptions({ enableKeys: v })}
-          title="Spam the keys in this list (and the Options spacebar/click toggles)"
+          title="Spam the keys in this list (and the spacebar/click toggles below)"
         />
       }
     >
@@ -92,6 +92,59 @@ export function KeyList(): JSX.Element {
         >
           {recording ? '● Stop Recording' : 'Record'}
         </button>
+      </div>
+
+      {/* Options merged in from the former standalone Options section. */}
+      <div className="keylist__options">
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={o.spacebar}
+            onChange={(e) => patchOptions({ spacebar: e.target.checked })}
+          />
+          <span>Spacebar</span>
+        </label>
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={o.leftClick}
+            onChange={(e) => patchOptions({ leftClick: e.target.checked })}
+          />
+          <span>Left Mouse Click</span>
+        </label>
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={o.rightClick}
+            onChange={(e) => patchOptions({ rightClick: e.target.checked })}
+          />
+          <span>Right Mouse Click</span>
+        </label>
+
+        <div className="field">
+          <label>Default Delay</label>
+          <div className="field__input">
+            <input
+              className="input"
+              type="number"
+              min={0}
+              value={o.defaultDelayMs}
+              onChange={(e) =>
+                patchOptions({ defaultDelayMs: Math.max(0, Number(e.target.value) || 0) })
+              }
+            />
+            <span className="keyrow__unit">ms</span>
+          </div>
+        </div>
+
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={o.sequenceMode}
+            onChange={(e) => patchOptions({ sequenceMode: e.target.checked })}
+          />
+          <span>Sequence Mode (fire keys one at a time)</span>
+        </label>
       </div>
 
       <div className="keylist__summary">

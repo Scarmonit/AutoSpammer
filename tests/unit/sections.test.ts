@@ -35,10 +35,10 @@ describe('normalizeLayout', () => {
 
 describe('moveSection', () => {
   it('reorders within a column (downward, with the off-by-one handled)', () => {
-    // Move "options" to the very end of the default left column.
+    // Move "clickPositions" to the very end of the default left column.
     const l = normalizeLayout(DEFAULT_LAYOUT)
-    const out = moveSection(l, 'options', 'left', l.left.length)
-    expect(out.left[out.left.length - 1]).toBe('options')
+    const out = moveSection(l, 'clickPositions', 'left', l.left.length)
+    expect(out.left[out.left.length - 1]).toBe('clickPositions')
     expect([...out.left, ...out.right].sort()).toEqual([...SECTION_IDS].sort())
   })
 

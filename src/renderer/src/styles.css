@@ -632,6 +632,16 @@ body.is-resizing * {
   flex-wrap: wrap;
 }
 
+/* Options merged into the Keys to Spam section, just under the action buttons. */
+.keylist__options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+}
+
 /* ---------- Macro ---------- */
 .macro__list {
   max-height: 220px;

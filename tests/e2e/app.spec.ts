@@ -42,7 +42,6 @@ test('main process is reachable via evaluate()', async () => {
 test('renders all the core panels', async () => {
   for (const heading of [
     'Keys to Spam',
-    'Options',
     'Click Positions',
     'Hold Keys Down',
     'Macro',
@@ -53,6 +52,18 @@ test('renders all the core panels', async () => {
     await expect(win.getByRole('heading', { name: heading, exact: true })).toBeVisible()
   }
   await expect(win.getByRole('button', { name: 'Start Spam' })).toBeVisible()
+  // The Options section was merged into Keys to Spam — no standalone heading.
+  await expect(win.getByRole('heading', { name: 'Options', exact: true })).toHaveCount(0)
+})
+
+test('the merged Options controls live inside Keys to Spam', async () => {
+  const keys = section('Keys to Spam')
+  // Spacebar / clicks, Default Delay, and Sequence Mode now sit in this section.
+  await expect(keys.locator('.check', { hasText: 'Spacebar' })).toBeVisible()
+  await expect(keys.locator('.check', { hasText: 'Left Mouse Click' })).toBeVisible()
+  await expect(keys.locator('.check', { hasText: 'Right Mouse Click' })).toBeVisible()
+  await expect(keys.locator('.check', { hasText: 'Sequence Mode' })).toBeVisible()
+  await expect(keys.locator('.field', { hasText: 'Default Delay' })).toBeVisible()
 })
 
 test('seeds the default profile keys and a "Will spam" summary', async () => {
@@ -82,10 +93,10 @@ test('Click Positions exposes the Record Clicks button', async () => {
 })
 
 test('renders draggable splitters between sections', async () => {
-  // Two columns of 6 and 7 sections -> 5 + 6 = 11 splitters (last pane per column
+  // Two columns of 5 and 7 sections -> 4 + 6 = 10 splitters (last pane per column
   // has none).
   const splitters = win.locator('.rs-splitter')
-  await expect(splitters).toHaveCount(11)
+  await expect(splitters).toHaveCount(10)
   await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
 })
 
@@ -194,8 +205,8 @@ test('Periodic Key is a multi-entry list with an Enabled toggle', async () => {
 })
 
 test('every section can be hidden/shown via its header toggle', async () => {
-  // 6 sections (left) + 7 sections (right) = 13 collapse buttons.
-  await expect(win.locator('.section__collapse')).toHaveCount(13)
+  // 5 sections (left) + 7 sections (right) = 12 collapse buttons.
+  await expect(win.locator('.section__collapse')).toHaveCount(12)
 
   const keys = section('Keys to Spam')
   await expect(keys.locator('.section__body')).toBeVisible()
@@ -224,12 +235,12 @@ test('the top bar UI scale is a dropdown that double-clicks into a custom input'
 })
 
 test('sections reorder via the grip handle (not the whole pane) + Reset Layout', async () => {
-  // 13 panes, each a stable reorder target...
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(13)
+  // 12 panes, each a stable reorder target...
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(12)
   // ...but the PANE itself must NOT be draggable (that hijacks body inputs and
   // the nested key-row drags). Only the grip handle carries draggable.
   await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(0)
-  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(13)
+  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(12)
   await expect(win.locator('.section__grip').first()).toBeVisible()
   await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
 })
@@ -314,8 +325,8 @@ test('the Options (⚙️) button opens a modal with the close-to-tray setting',
 })
 
 test('the Sections (👁️) manager hides and restores a section', async () => {
-  // Default: all 13 sections render.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(13)
+  // Default: all 12 sections render.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(12)
   await expect(section('Loop')).toBeVisible()
 
   // Open the manager and uncheck "Loop".
@@ -327,12 +338,12 @@ test('the Sections (👁️) manager hides and restores a section', async () => 
   await loopRow.locator('input').uncheck()
 
   // The Loop section disappears from the main UI; one fewer pane.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(12)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(11)
   await expect(section('Loop')).toHaveCount(0)
 
   // Re-checking via "Show all" brings it back.
   await manager.getByRole('button', { name: 'Show all' }).click()
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(13)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(12)
   await manager.getByRole('button', { name: 'Done' }).click()
   await expect(win.locator('.modal')).toHaveCount(0)
   await expect(section('Loop')).toBeVisible()
