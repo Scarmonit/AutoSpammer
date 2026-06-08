@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.26.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.27.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.26.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.26.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.26.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.26.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.27.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.27.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.27.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.27.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -98,7 +98,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Spam any keys** — letters, digits, function keys, punctuation, and numpad, each with its own delay, in parallel or one-at-a-time **Sequence Mode**.
 - **Click positions** — move to and click exact screen spots (left or right) every cycle.
 - **Loop** — repeat forever, once, or a set number of times (in the header toolbar).
-- **Hold Modes** — Hold-to-Spam, Focus Hold, and Hold for Right-Click, grouped in one section; each runs only while you physically hold its chosen key or button.
+- **Hold Modes** — Hold-to-Spam, Focus Hold, and Hold for Right-Click in one tabbed section; each runs only while you physically hold its chosen key or button.
 - **Hold Keys Down and Periodic Key** — for walk-keys and timed presses.
 - **Profiles** — save and switch between different setups from the header toolbar; everything is remembered.
 - **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
@@ -158,11 +158,11 @@ Press any number of keys or mouse buttons on their own independent timers — fo
 
 ### Hold Modes
 
-The **Hold Modes** section groups three independent hold triggers as cards. Each has its own **Enabled** switch, **Set Key** binding, and delay, and you can turn on any combination:
+The **Hold Modes** section holds three independent hold triggers behind **tabs**, so you see one at a time instead of three stacked panels. Pick a tab to configure that mode; a small dot marks any tab whose mode is enabled. Each mode keeps its own **Enabled** switch, **Set Key** binding, and delay, and you can turn on any combination:
 
-- **Hold-to-Spam Key** — while you hold the chosen key, it runs the whole spam system (every enabled section) and stops the moment you release.
-- **Focus Hold Key** — hold a key to rapidly fire only that same key or button.
-- **Hold for Right-Click** — hold the trigger to rapidly right-click; release to stop.
+- **Hold-to-Spam** — while you hold the chosen key, it runs the whole spam system (every enabled section) and stops the moment you release.
+- **Focus Hold** — hold a key to rapidly fire only that same key or button.
+- **Right-Click Hold** — hold the trigger to rapidly right-click; release to stop.
 
 Each watches its key or mouse button globally, so they work even while a game is focused.
 

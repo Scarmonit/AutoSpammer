@@ -301,27 +301,38 @@ test('Text Function has a header Enabled toggle that dims its body', async () =>
   await expect(body).toHaveClass(/section__body--off/)
 })
 
-test('Hold Modes groups the three hold modes, each with its own controls', async () => {
+test('Hold Modes is tabbed; each mode keeps Enable + Set Key + delay', async () => {
   const hold = section('Hold Modes')
   await expect(hold).toBeVisible()
 
-  // The three former sections are now cards inside one section...
-  const cards = hold.locator('.holdmode')
-  await expect(cards).toHaveCount(3)
-  for (const title of ['Hold-to-Spam Key', 'Focus Hold Key', 'Hold for Right-Click']) {
-    await expect(hold.locator('.holdmode__title', { hasText: title })).toBeVisible()
+  // Three tabs, one mode shown at a time.
+  const tabs = hold.locator('.holdtab')
+  await expect(tabs).toHaveCount(3)
+  for (const label of ['Hold-to-Spam', 'Focus Hold', 'Right-Click']) {
+    await expect(hold.locator('.holdtab', { hasText: label })).toBeVisible()
   }
-  // ...and each card keeps its own Enabled toggle and Set Key binding.
-  await expect(hold.locator('.holdmode .section__toggle input')).toHaveCount(3)
-  await expect(hold.getByRole('button', { name: 'Set Key' })).toHaveCount(3)
+  // Only the active mode's controls are rendered (one Enable toggle, one Set Key).
+  await expect(hold.locator('.holdmode .section__toggle input')).toHaveCount(1)
+  await expect(hold.getByRole('button', { name: 'Set Key' })).toHaveCount(1)
+  await expect(hold.locator('.holdmode .input--mini')).toHaveCount(1) // delay field
 
-  // Toggling one card's Enabled switch dims only that card's body.
-  const firstCard = cards.first()
-  const firstToggle = firstCard.locator('.section__toggle input')
-  if (!(await firstToggle.isChecked())) await firstToggle.check()
-  await expect(firstCard.locator('.holdmode__body')).not.toHaveClass(/holdmode__body--off/)
-  await firstToggle.uncheck()
-  await expect(firstCard.locator('.holdmode__body')).toHaveClass(/holdmode__body--off/)
+  // Switch to the Focus Hold tab.
+  await hold.locator('.holdtab', { hasText: 'Focus Hold' }).click()
+  await expect(hold.locator('.holdtab--active')).toHaveText(/Focus Hold/)
+
+  // Enabling a mode marks its tab with an "on" dot, and the state persists when
+  // you switch tabs and come back (it's stored per mode in the profile).
+  const toggle = hold.locator('.holdmode .section__toggle input')
+  if (!(await toggle.isChecked())) await toggle.check()
+  await expect(hold.locator('.holdtab--active .holdtab__dot')).toBeVisible()
+
+  await hold.locator('.holdtab', { hasText: 'Right-Click' }).click()
+  await expect(hold.locator('.holdmode .section__toggle input')).not.toBeChecked()
+  await hold.locator('.holdtab', { hasText: 'Focus Hold' }).click()
+  await expect(hold.locator('.holdmode .section__toggle input')).toBeChecked()
+
+  // Leave it disabled so later tests start clean.
+  await hold.locator('.holdmode .section__toggle input').uncheck()
 
   // The old standalone hold-section headings no longer exist.
   await expect(win.getByRole('heading', { name: 'Hold-to-Spam Key', exact: true })).toHaveCount(0)

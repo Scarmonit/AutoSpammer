@@ -716,51 +716,69 @@ body.is-resizing * {
   border-top: 1px solid var(--border-soft);
 }
 
-/* ---------- Hold Modes (three hold triggers grouped as cards) ---------- */
-.holdmodes {
+/* ---------- Hold Modes (tabbed: one mode shown at a time) ---------- */
+.holdtabs {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  margin-bottom: 10px;
+  background: #15171c;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.holdtab {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.holdtab:hover {
+  color: var(--text);
+}
+.holdtab--active {
+  background: var(--panel-2);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+/* Dot marking a mode that's currently enabled (visible on every tab). */
+.holdtab__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.7);
+  flex: none;
+}
+
+.holdmode {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.holdmode {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--panel-2);
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.holdmode__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.holdmode__title {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.holdmode__desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--text-dim);
 }
-/* Dim a disabled mode's controls, but keep its Enabled toggle fully visible. */
-.holdmode__body {
+/* Key display + Set Key button, right-aligned in the Key field row. */
+.holdmode__keyset {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
-}
-.holdmode__body--off {
-  opacity: 0.45;
-}
-/* Key display + Set Key button on one row. */
-.holdmode__row {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-}
-.holdmode__row .field {
-  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* ---------- Macro ---------- */
