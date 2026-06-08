@@ -68,8 +68,8 @@ export function MacroPanel(): JSX.Element {
       <p className="helper">
         Records <strong>everything</strong> — keys, clicks, and mouse movement with exact timing — then
         replays it. Enabling Macro turns off Keys to Spam and Click Positions (and vice-versa). When
-        enabled, the main <strong>Start Spam</strong> button and the toggle hotkey (F6) play it on a
-        loop per your <strong>Loop</strong> setting; <strong>Play</strong> below is a one-shot preview.
+        enabled, your <strong>Toggle Hotkey</strong> (F6) plays it on a loop per your{' '}
+        <strong>Loop</strong> setting; <strong>Play</strong> below is a one-shot preview.
       </p>
 
       <div className="keylist__actions">
@@ -115,7 +115,7 @@ export function MacroPanel(): JSX.Element {
         <button
           type="button"
           className="btn btn--primary"
-          title="Play the macro once (preview). Use Start Spam / F6 to loop it."
+          title="Play the macro once (preview). Use your Toggle Hotkey (F6) to loop it."
           disabled={events.length === 0 || macroRecording || macroPlaying || spamming}
           onClick={() => void playMacro()}
         >

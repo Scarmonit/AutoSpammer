@@ -19,13 +19,13 @@ export function TextFunctionPanel(): JSX.Element {
         <SectionToggle
           checked={tf.enabled}
           onChange={(value) => patch({ enabled: value })}
-          title="Type this string each cycle while Start Spam (or F6) is running"
+          title="Type this string each cycle while a run (F6) is active"
         />
       }
     >
       <p className="helper">
-        When <strong>Enabled</strong>, types this string once per cycle alongside{' '}
-        <strong>Start Spam</strong> / <strong>F6</strong>.
+        When <strong>Enabled</strong>, types this string once per cycle while a run is active
+        (your <strong>Toggle Hotkey</strong> / <strong>F6</strong>).
       </p>
 
       <div className="field">
