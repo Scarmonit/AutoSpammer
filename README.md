@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.27.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.28.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.27.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.27.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.27.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.27.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.28.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.28.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.28.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.28.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -87,7 +87,8 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Drag-and-drop sections** — grab any section header to reorder it, even across the two columns. A **Reset Layout** button restores the default order.
 - **Resizable sections** — drag the splitter between two panels to resize them; double-click to reset.
 - **Collapsible sections** — collapse any panel to just its title bar with the header chevron.
-- **Independent enabling** — Keys to Spam, Click Positions, Text Function, Hold Keys Down, Periodic Key, and Macro each have their own *Enabled* switch in their header, and the three Hold Modes each have their own switch too. A disabled feature greys out and is skipped on the next run.
+- **Keys to Spam tabs** — the key list, **Hold Keys** (hold-down keys/buttons), and **Periodic** (timed presses) now live behind tabs in one section, so it's tidy instead of three stacked panels. A dot marks any tab whose feature is enabled.
+- **Independent enabling** — the three Keys to Spam tabs, Click Positions, Text Function, Macro, and each of the three Hold Modes all have their own *Enabled* switch. A disabled feature greys out and is skipped on the next run.
 - **UI scale** — a top-bar dropdown zooms the whole app (100–200%) for readability; double-click to type a custom percentage.
 - **Remembers window size and position** — the app reopens exactly where and how big you left it.
 - **Mouse buttons everywhere** — every key binding accepts a keyboard key *or* a mouse button (LMB, RMB, MMB, MB4, MB5).
@@ -99,7 +100,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Click positions** — move to and click exact screen spots (left or right) every cycle.
 - **Loop** — repeat forever, once, or a set number of times (in the header toolbar).
 - **Hold Modes** — Hold-to-Spam, Focus Hold, and Hold for Right-Click in one tabbed section; each runs only while you physically hold its chosen key or button.
-- **Hold Keys Down and Periodic Key** — for walk-keys and timed presses.
+- **Hold Keys Down and Periodic Key** — for walk-keys and timed presses (tabs inside Keys to Spam).
 - **Profiles** — save and switch between different setups from the header toolbar; everything is remembered.
 - **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
 - **System tray** — runs in the background with close-to-tray.
@@ -148,13 +149,15 @@ To click exact places on screen rather than just where your cursor is, add spots
 
 When a run starts, the cursor moves to each recorded spot and clicks it, in order, every cycle. The single-spot record hotkey (default **F7**) can be changed in that panel.
 
-### Hold Keys Down
+### Keys to Spam tabs: Spam Keys, Hold Keys, Periodic
 
-Hold keys *or* mouse buttons down continuously (not tapped) — for example hold **W** to keep walking, or hold **Left Click**. Use **+ Add Key** for a keyboard key, or **+ Left Click** / **+ Right Click** for a mouse button. With the section enabled, they are held automatically whenever you start a run (Toggle Hotkey / **F6**) and released when you stop. You can also hold them standalone with the panel's **Hold** button or **F8**.
+The **Keys to Spam** section has three tabs so it stays compact; pick a tab to configure it, and a small dot marks any tab whose feature is enabled.
 
-### Periodic Key
+**Spam Keys** — the key list itself, the Spacebar / Left Click / Right Click options, Default Delay, and Sequence Mode, with the live "Will spam" preview.
 
-Press any number of keys or mouse buttons on their own independent timers — for example **F** every 5 seconds *and* **MB4** every 2 seconds. Use **+ Add Periodic Key** to add a row, **Set Key** to bind it, and set its own interval. With the section enabled, all entries run alongside a normal run (Toggle Hotkey / **F6**). You can also run them standalone with the panel button or **F9**.
+**Hold Keys** — hold keys *or* mouse buttons down continuously (not tapped) — for example hold **W** to keep walking, or hold **Left Click**. Use **+ Add Key** for a keyboard key, or **+ Left Click** / **+ Right Click** for a mouse button. When enabled they're held automatically whenever you start a run (Toggle Hotkey / **F6**) and released when you stop. You can also hold them standalone with the **Hold** button or **F8**.
+
+**Periodic** — press any number of keys or mouse buttons on their own independent timers — for example **F** every 5 seconds *and* **MB4** every 2 seconds. Use **+ Add Periodic Key** to add a row, **Set Key** to bind it, and set its own interval. When enabled they run alongside a normal run; you can also run them standalone with the button or **F9**.
 
 ### Hold Modes
 

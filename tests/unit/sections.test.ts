@@ -16,7 +16,7 @@ describe('normalizeLayout', () => {
   })
 
   it('drops unknowns, removes duplicates, and appends missing sections', () => {
-    const out = normalizeLayout({ left: ['keys', 'keys', 'bogus'], right: ['periodicKey'] })
+    const out = normalizeLayout({ left: ['keys', 'keys', 'bogus'], right: ['holdModes'] })
     const all = [...out.left, ...out.right]
     // every known section appears exactly once
     expect([...all].sort()).toEqual([...SECTION_IDS].sort())
@@ -24,7 +24,7 @@ describe('normalizeLayout', () => {
     expect(all).not.toContain('bogus')
     // explicitly placed ones keep their column/position
     expect(out.left[0]).toBe('keys')
-    expect(out.right[0]).toBe('periodicKey')
+    expect(out.right[0]).toBe('holdModes')
   })
 
   it('falls back to a full default-shaped layout for null/empty input', () => {
@@ -54,7 +54,7 @@ describe('moveSection', () => {
   it('keeps the layout complete and unique after several moves', () => {
     let l = normalizeLayout(DEFAULT_LAYOUT)
     l = moveSection(l, 'macro', 'right', 0)
-    l = moveSection(l, 'periodicKey', 'left', 2)
+    l = moveSection(l, 'holdModes', 'left', 2)
     l = moveSection(l, 'keys', 'right', l.right.length)
     expect([...l.left, ...l.right].sort()).toEqual([...SECTION_IDS].sort())
   })
@@ -63,28 +63,33 @@ describe('moveSection', () => {
 describe('section visibility', () => {
   it('isSectionHidden only treats === true as hidden', () => {
     expect(isSectionHidden({ keys: true }, 'keys')).toBe(true)
-    expect(isSectionHidden({ keys: true }, 'periodicKey')).toBe(false)
+    expect(isSectionHidden({ keys: true }, 'clickPositions')).toBe(false)
     expect(isSectionHidden({}, 'keys')).toBe(false)
     expect(isSectionHidden(null, 'keys')).toBe(false)
   })
 
-  it('applyHiddenSections disables a hidden section feature without mutating flags', () => {
+  it('hiding "Keys to Spam" disables its three tabs (keys, hold keys, periodic)', () => {
     const p = createDefaultProfile()
     p.options.enableKeys = true
     p.options.enableClickPositions = true
     p.textFunction.enabled = true
+    p.holdKeys.enabled = true
     p.periodicKey.enabled = true
-    p.hiddenSections = { keys: true, textFunction: true, periodicKey: true }
+    // Hiding "Keys to Spam" disables all three of its tabs; hiding Text Function
+    // disables that.
+    p.hiddenSections = { keys: true, textFunction: true }
 
     const eff = applyHiddenSections(p)
-    // Hidden features are off in the effective profile...
     expect(eff.options.enableKeys).toBe(false)
-    expect(eff.textFunction.enabled).toBe(false)
+    expect(eff.holdKeys.enabled).toBe(false)
     expect(eff.periodicKey.enabled).toBe(false)
-    // ...a visible feature is left alone...
+    expect(eff.textFunction.enabled).toBe(false)
+    // A visible feature is left alone.
     expect(eff.options.enableClickPositions).toBe(true)
-    // ...and the stored profile flags are untouched (re-showing restores them).
+    // Stored profile flags are untouched (re-showing restores them).
     expect(p.options.enableKeys).toBe(true)
+    expect(p.holdKeys.enabled).toBe(true)
+    expect(p.periodicKey.enabled).toBe(true)
     expect(p.textFunction.enabled).toBe(true)
   })
 

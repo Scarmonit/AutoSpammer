@@ -716,8 +716,9 @@ body.is-resizing * {
   border-top: 1px solid var(--border-soft);
 }
 
-/* ---------- Hold Modes (tabbed: one mode shown at a time) ---------- */
-.holdtabs {
+/* ---------- Tab strips (Hold Modes + Keys to Spam) ---------- */
+.holdtabs,
+.keystabs {
   display: flex;
   gap: 3px;
   padding: 3px;
@@ -726,7 +727,8 @@ body.is-resizing * {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 }
-.holdtab {
+.holdtab,
+.keytab {
   flex: 1 1 0;
   min-width: 0;
   display: inline-flex;
@@ -744,22 +746,36 @@ body.is-resizing * {
   white-space: nowrap;
   transition: background 0.12s ease, color 0.12s ease;
 }
-.holdtab:hover {
+.holdtab:hover,
+.keytab:hover {
   color: var(--text);
 }
-.holdtab--active {
+.holdtab--active,
+.keytab--active {
   background: var(--panel-2);
   color: var(--text);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
-/* Dot marking a mode that's currently enabled (visible on every tab). */
-.holdtab__dot {
+/* Dot marking a mode/tab that's currently enabled (visible on every tab). */
+.holdtab__dot,
+.keytab__dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--blue);
   box-shadow: 0 0 5px rgba(59, 130, 246, 0.7);
   flex: none;
+}
+
+/* A tab's content; dim its controls (but not the Enable toggle) when off. */
+.keystab,
+.keystab__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.keystab__body--off {
+  opacity: 0.45;
 }
 
 .holdmode {

@@ -40,23 +40,34 @@ test('main process is reachable via evaluate()', async () => {
 })
 
 test('renders all the core panels', async () => {
-  for (const heading of [
-    'Keys to Spam',
-    'Click Positions',
-    'Hold Keys Down',
-    'Macro',
-    'Hold Modes',
-    'Periodic Key'
-  ]) {
+  for (const heading of ['Keys to Spam', 'Click Positions', 'Macro', 'Hold Modes']) {
     await expect(win.getByRole('heading', { name: heading, exact: true })).toBeVisible()
   }
   // Merged/moved sections no longer have standalone headings.
-  await expect(win.getByRole('heading', { name: 'Options', exact: true })).toHaveCount(0)
-  await expect(win.getByRole('heading', { name: 'Toggle Hotkey', exact: true })).toHaveCount(0)
-  await expect(win.getByRole('heading', { name: 'Profiles', exact: true })).toHaveCount(0)
-  await expect(win.getByRole('heading', { name: 'Loop', exact: true })).toHaveCount(0)
+  for (const gone of [
+    'Options',
+    'Toggle Hotkey',
+    'Profiles',
+    'Loop',
+    'Hold Keys Down',
+    'Periodic Key'
+  ]) {
+    await expect(win.getByRole('heading', { name: gone, exact: true })).toHaveCount(0)
+  }
   // No big Start Spam button.
   await expect(win.locator('.startbtn')).toHaveCount(0)
+})
+
+test('Keys to Spam has Spam / Hold / Periodic tabs', async () => {
+  const keys = section('Keys to Spam')
+  const tabs = keys.locator('.keytab')
+  await expect(tabs).toHaveCount(3)
+  for (const label of ['Spam Keys', 'Hold Keys', 'Periodic']) {
+    await expect(keys.locator('.keytab', { hasText: label })).toBeVisible()
+  }
+  // The Spam Keys tab is active by default (its key list + summary are shown).
+  await expect(keys.locator('.keytab--active')).toHaveText(/Spam Keys/)
+  await expect(keys.locator('.keylist__summary')).toBeVisible()
 })
 
 test('the Profile and Loop controls live in the header toolbar', async () => {
@@ -112,10 +123,10 @@ test('Click Positions exposes the Record Clicks button', async () => {
 })
 
 test('renders draggable splitters between sections', async () => {
-  // Columns of 5 (left) and 2 (right) sections -> 4 + 1 = 5 splitters (last pane
+  // Columns of 3 (left) and 2 (right) sections -> 2 + 1 = 3 splitters (last pane
   // per column has none).
   const splitters = win.locator('.rs-splitter')
-  await expect(splitters).toHaveCount(5)
+  await expect(splitters).toHaveCount(3)
   await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
 })
 
@@ -181,45 +192,45 @@ test('the Escape key can be bound to the top-bar toggle hotkey', async () => {
   await expect(bar.getByRole('button', { name: 'Toggle: Escape' })).toBeVisible()
 })
 
-test('Hold Keys Down: has an Enabled toggle and "+ Add Key" adds a row', async () => {
-  const hold = section('Hold Keys Down')
-  await expect(hold.locator('.section__toggle input')).toBeVisible()
+test('Keys to Spam → Hold Keys tab: Enable toggle, + Add Key, and mouse-button chip', async () => {
+  const keys = section('Keys to Spam')
+  await keys.locator('.keytab', { hasText: 'Hold Keys' }).click()
+  await expect(keys.locator('.keystab .section__toggle input')).toBeVisible()
 
-  const rows = hold.locator('.keyrow')
+  const rows = keys.locator('.keyrow')
   const before = await rows.count()
-  await hold.getByRole('button', { name: '+ Add Key' }).click()
+  await keys.getByRole('button', { name: '+ Add Key' }).click()
   await expect(rows).toHaveCount(before + 1)
 
   // Type into the new row and confirm it sticks.
-  const newKey = hold.locator('.keyrow__key').last()
+  const newKey = keys.locator('.keyrow__key').last()
   await newKey.fill('w')
   await expect(newKey).toHaveValue('w')
+
+  // A mouse button can be added as a static chip.
+  await keys.getByRole('button', { name: '+ Left Click' }).click()
+  await expect(keys.locator('.keyrow__static', { hasText: 'LMB' })).toBeVisible()
 })
 
-test('Hold Keys Down can add a mouse button as a chip', async () => {
-  const hold = section('Hold Keys Down')
-  const rows = hold.locator('.keyrow')
-  const before = await rows.count()
-  await hold.getByRole('button', { name: '+ Left Click' }).click()
-  await expect(rows).toHaveCount(before + 1)
-  await expect(hold.locator('.keyrow__static', { hasText: 'LMB' })).toBeVisible()
-})
+test('Keys to Spam → Periodic tab: multi-entry list with an Enable toggle', async () => {
+  const keys = section('Keys to Spam')
+  await keys.locator('.keytab', { hasText: 'Periodic' }).click()
+  await expect(keys.locator('.keystab .section__toggle input')).toBeVisible()
 
-test('Periodic Key is a multi-entry list with an Enabled toggle', async () => {
-  const periodic = section('Periodic Key')
-  await expect(periodic.locator('.section__toggle input')).toBeVisible()
-
-  const rows = periodic.locator('.periodicrow')
+  const rows = keys.locator('.periodicrow')
   const before = await rows.count()
-  await periodic.getByRole('button', { name: '+ Add Periodic Key' }).click()
+  await keys.getByRole('button', { name: '+ Add Periodic Key' }).click()
   await expect(rows).toHaveCount(before + 1)
   // Each row has its own interval field.
   await expect(rows.last().locator('.periodicrow__interval')).toBeVisible()
+
+  // Back to the Spam Keys tab so later tests start on the default tab.
+  await keys.locator('.keytab', { hasText: 'Spam Keys' }).click()
 })
 
 test('every section can be hidden/shown via its header toggle', async () => {
-  // 5 sections (left) + 2 sections (right) = 7 collapse buttons.
-  await expect(win.locator('.section__collapse')).toHaveCount(7)
+  // 3 sections (left) + 2 sections (right) = 5 collapse buttons.
+  await expect(win.locator('.section__collapse')).toHaveCount(5)
 
   const keys = section('Keys to Spam')
   await expect(keys.locator('.section__body')).toBeVisible()
@@ -248,12 +259,12 @@ test('the top bar UI scale is a dropdown that double-clicks into a custom input'
 })
 
 test('sections reorder via the grip handle (not the whole pane) + Reset Layout', async () => {
-  // 7 panes, each a stable reorder target...
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
+  // 5 panes, each a stable reorder target...
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(5)
   // ...but the PANE itself must NOT be draggable (that hijacks body inputs and
   // the nested key-row drags). Only the grip handle carries draggable.
   await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(0)
-  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(7)
+  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(5)
   await expect(win.locator('.section__grip').first()).toBeVisible()
   await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
 })
@@ -369,28 +380,28 @@ test('the Options (⚙️) button opens a modal with the close-to-tray setting',
 })
 
 test('the Sections (👁️) manager hides and restores a section', async () => {
-  // Default: all 7 sections render.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
-  await expect(section('Periodic Key')).toBeVisible()
+  // Default: all 5 sections render.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(5)
+  await expect(section('Macro')).toBeVisible()
 
-  // Open the manager and uncheck "Periodic Key".
+  // Open the manager and uncheck "Macro".
   await win.getByRole('button', { name: 'Sections', exact: true }).click()
   const manager = win.locator('.modal')
   await expect(manager).toBeVisible()
-  const row = manager.locator('.seclist__row', { hasText: 'Periodic Key' })
+  const row = manager.locator('.seclist__row', { hasText: 'Macro' })
   await expect(row.locator('input')).toBeChecked()
   await row.locator('input').uncheck()
 
   // The section disappears from the main UI; one fewer pane.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(6)
-  await expect(section('Periodic Key')).toHaveCount(0)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(4)
+  await expect(section('Macro')).toHaveCount(0)
 
   // Re-checking via "Show all" brings it back.
   await manager.getByRole('button', { name: 'Show all' }).click()
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(5)
   await manager.getByRole('button', { name: 'Done' }).click()
   await expect(win.locator('.modal')).toHaveCount(0)
-  await expect(section('Periodic Key')).toBeVisible()
+  await expect(section('Macro')).toBeVisible()
 })
 
 test('the top-bar Loop control changes mode (and persists the count field)', async () => {

@@ -6,12 +6,10 @@ import {
   type SectionColumnName
 } from '@shared/sections'
 import { useStore } from './store'
-import { KeyList } from './components/KeyList'
+import { KeysSection } from './components/KeysSection'
 import { TextFunctionPanel } from './components/TextFunctionPanel'
 import { ClickPositionsPanel } from './components/ClickPositionsPanel'
 import { HoldModesPanel } from './components/HoldModesPanel'
-import { HoldKeysPanel } from './components/HoldKeysPanel'
-import { PeriodicKeyPanel } from './components/PeriodicKeyPanel'
 import { MacroPanel } from './components/MacroPanel'
 import { StatusIndicator } from './components/StatusIndicator'
 import { UiScaleControl } from './components/UiScaleControl'
@@ -25,13 +23,11 @@ import { SectionManager } from './components/SectionManager'
 // Each section id maps to its rendered panel. Built once; the columns are laid
 // out from the (per-profile) drag-and-drop order.
 const SECTIONS: Record<string, JSX.Element> = {
-  keys: <KeyList />,
+  keys: <KeysSection />,
   clickPositions: <ClickPositionsPanel />,
   textFunction: <TextFunctionPanel />,
-  holdKeys: <HoldKeysPanel />,
   macro: <MacroPanel />,
-  holdModes: <HoldModesPanel />,
-  periodicKey: <PeriodicKeyPanel />
+  holdModes: <HoldModesPanel />
 }
 
 interface DropTarget {

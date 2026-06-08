@@ -17,10 +17,8 @@ export const SECTION_IDS = [
   'keys',
   'clickPositions',
   'textFunction',
-  'holdKeys',
   'macro',
-  'holdModes',
-  'periodicKey'
+  'holdModes'
 ] as const
 
 export type SectionId = (typeof SECTION_IDS)[number]
@@ -30,16 +28,14 @@ export const SECTION_LABELS: Record<string, string> = {
   keys: 'Keys to Spam',
   clickPositions: 'Click Positions',
   textFunction: 'Text Function',
-  holdKeys: 'Hold Keys Down',
   macro: 'Macro',
-  holdModes: 'Hold Modes',
-  periodicKey: 'Periodic Key'
+  holdModes: 'Hold Modes'
 }
 
 /** The out-of-the-box arrangement. */
 export const DEFAULT_LAYOUT: SectionLayout = {
-  left: ['keys', 'clickPositions', 'textFunction', 'holdKeys', 'macro'],
-  right: ['holdModes', 'periodicKey']
+  left: ['keys', 'clickPositions', 'textFunction'],
+  right: ['macro', 'holdModes']
 }
 
 export function cloneDefaultLayout(): SectionLayout {
@@ -135,23 +131,23 @@ export function applyHiddenSections(profile: Profile): Profile {
   const h = profile.hiddenSections
   if (!h || Object.keys(h).length === 0) return profile
   const hid = (id: string): boolean => h[id] === true
-  // The three hold modes share one section now, so hiding it disables all three.
+  // "Keys to Spam" now contains the Spam Keys, Hold Keys, and Periodic tabs, so
+  // hiding it disables all three. "Hold Modes" likewise covers its three modes.
+  const keysHidden = hid('keys')
   const holdHidden = hid('holdModes')
 
   return {
     ...profile,
     options: {
       ...profile.options,
-      enableKeys: profile.options.enableKeys && !hid('keys'),
+      enableKeys: profile.options.enableKeys && !keysHidden,
       enableClickPositions: profile.options.enableClickPositions && !hid('clickPositions')
     },
     textFunction: hid('textFunction')
       ? { ...profile.textFunction, enabled: false }
       : profile.textFunction,
-    holdKeys: hid('holdKeys') ? { ...profile.holdKeys, enabled: false } : profile.holdKeys,
-    periodicKey: hid('periodicKey')
-      ? { ...profile.periodicKey, enabled: false }
-      : profile.periodicKey,
+    holdKeys: keysHidden ? { ...profile.holdKeys, enabled: false } : profile.holdKeys,
+    periodicKey: keysHidden ? { ...profile.periodicKey, enabled: false } : profile.periodicKey,
     macro: hid('macro') ? { ...profile.macro, enabled: false } : profile.macro,
     holdToSpam: holdHidden ? { ...profile.holdToSpam, enabled: false } : profile.holdToSpam,
     focusHold: holdHidden ? { ...profile.focusHold, enabled: false } : profile.focusHold,
