@@ -11,14 +11,13 @@ import { TextFunctionPanel } from './components/TextFunctionPanel'
 import { ClickPositionsPanel } from './components/ClickPositionsPanel'
 import { ProfilesPanel } from './components/ProfilesPanel'
 import { LoopPanel } from './components/LoopPanel'
-import { HotkeyPanel } from './components/HotkeyPanel'
 import { HoldModesPanel } from './components/HoldModesPanel'
 import { HoldKeysPanel } from './components/HoldKeysPanel'
 import { PeriodicKeyPanel } from './components/PeriodicKeyPanel'
 import { MacroPanel } from './components/MacroPanel'
 import { StatusIndicator } from './components/StatusIndicator'
 import { UiScaleControl } from './components/UiScaleControl'
-import { BottomBar } from './components/BottomBar'
+import { TopBarHotkeys } from './components/TopBarHotkeys'
 import { ResizablePane } from './components/ResizablePane'
 import { SettingsModal } from './components/SettingsModal'
 import { SectionManager } from './components/SectionManager'
@@ -33,7 +32,6 @@ const SECTIONS: Record<string, JSX.Element> = {
   macro: <MacroPanel />,
   profiles: <ProfilesPanel />,
   loop: <LoopPanel />,
-  hotkeys: <HotkeyPanel />,
   holdModes: <HoldModesPanel />,
   periodicKey: <PeriodicKeyPanel />
 }
@@ -189,6 +187,7 @@ export function App(): JSX.Element {
           <h1>Auto Spammer</h1>
         </div>
         <div className="topbar__tools">
+          <TopBarHotkeys />
           <UiScaleControl />
           <button
             type="button"
@@ -233,8 +232,6 @@ export function App(): JSX.Element {
         <SectionColumn col="left" ids={visible.left} {...columnProps} />
         <SectionColumn col="right" ids={visible.right} {...columnProps} />
       </main>
-
-      <BottomBar />
     </div>
   )
 }

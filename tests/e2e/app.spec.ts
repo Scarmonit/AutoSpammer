@@ -52,9 +52,13 @@ test('renders all the core panels', async () => {
   ]) {
     await expect(win.getByRole('heading', { name: heading, exact: true })).toBeVisible()
   }
-  await expect(win.getByRole('button', { name: 'Start Spam' })).toBeVisible()
   // The Options section was merged into Keys to Spam — no standalone heading.
   await expect(win.getByRole('heading', { name: 'Options', exact: true })).toHaveCount(0)
+  // The Toggle Hotkey section was moved to the top bar — no standalone heading,
+  // and the big Start Spam button was removed.
+  await expect(win.getByRole('heading', { name: 'Toggle Hotkey', exact: true })).toHaveCount(0)
+  await expect(win.locator('.startbtn')).toHaveCount(0)
+  await expect(win.getByRole('button', { name: 'Start Spam' })).toHaveCount(0)
 })
 
 test('the merged Options controls live inside Keys to Spam', async () => {
@@ -94,10 +98,10 @@ test('Click Positions exposes the Record Clicks button', async () => {
 })
 
 test('renders draggable splitters between sections', async () => {
-  // Two columns of 5 sections each -> 4 + 4 = 8 splitters (last pane per column
-  // has none).
+  // Columns of 5 (left) and 4 (right) sections -> 4 + 3 = 7 splitters (last pane
+  // per column has none).
   const splitters = win.locator('.rs-splitter')
-  await expect(splitters).toHaveCount(8)
+  await expect(splitters).toHaveCount(7)
   await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
 })
 
@@ -126,47 +130,41 @@ test('enabling Macro disables Keys to Spam and Click Positions', async () => {
   await expect(macro.locator('.section__toggle input')).not.toBeChecked()
 })
 
-test('the main Start button reflects Macro mode', async () => {
-  const startBtn = win.locator('.startbtn')
-  await expect(startBtn).toHaveText('Start Spam')
-
-  await section('Macro').locator('.section__toggle input').check()
-  await expect(startBtn).toHaveText('Start Macro')
-
-  // Restore: re-enabling a spam source turns Macro off again.
-  await section('Keys to Spam').locator('.section__toggle input').check()
-  await expect(startBtn).toHaveText('Start Spam')
+test('the global Toggle and Emergency hotkeys live in the top bar', async () => {
+  const bar = win.locator('.topbar__hotkeys')
+  await expect(bar.getByRole('button', { name: /^Toggle:/ })).toBeVisible()
+  await expect(bar.getByRole('button', { name: /^Stop:/ })).toBeVisible()
 })
 
-test('only one Set Key listener is active at a time', async () => {
-  const hk = section('Toggle Hotkey')
-  await hk.getByRole('button', { name: 'Change Key' }).click()
-  await expect(hk.locator('.btn--listening')).toHaveCount(1)
+test('only one hotkey capture is active at a time (top bar)', async () => {
+  const bar = win.locator('.topbar__hotkeys')
+
+  await bar.getByRole('button', { name: /^Toggle:/ }).click()
+  await expect(bar.locator('.btn--listening')).toHaveCount(1)
   // Listening state tells the user mouse buttons are accepted too.
-  await expect(hk.locator('.btn--listening')).toHaveText('Press a key or mouse button…')
+  await expect(bar.locator('.btn--listening')).toHaveText('Press a key or mouse button…')
 
   // Starting the Emergency capture must cancel the first one (not bind to both).
-  await hk.getByRole('button', { name: 'Change Emergency Key' }).click()
-  await expect(hk.locator('.btn--listening')).toHaveCount(1)
+  await bar.getByRole('button', { name: /^Stop:/ }).click()
+  await expect(bar.locator('.btn--listening')).toHaveCount(1)
 
   // Clicking the active button again cancels capture.
-  await hk.locator('.btn--listening').click()
-  await expect(hk.locator('.btn--listening')).toHaveCount(0)
+  await bar.locator('.btn--listening').click()
+  await expect(bar.locator('.btn--listening')).toHaveCount(0)
 })
 
-test('the Escape key can be bound to a hotkey', async () => {
-  const hk = section('Toggle Hotkey')
-  const caps = hk.locator('.keycap') // [0] = toggle current, [1] = emergency current
+test('the Escape key can be bound to the top-bar toggle hotkey', async () => {
+  const bar = win.locator('.topbar__hotkeys')
 
   // Move Emergency off Escape (to F1) so Escape is free to assign.
-  await hk.getByRole('button', { name: 'Change Emergency Key' }).click()
+  await bar.getByRole('button', { name: /^Stop:/ }).click()
   await win.keyboard.press('F1')
-  await expect(caps.nth(1)).toHaveText('F1')
+  await expect(bar.getByRole('button', { name: 'Stop: F1' })).toBeVisible()
 
-  // Escape now binds normally instead of cancelling the capture.
-  await hk.getByRole('button', { name: 'Change Key' }).click()
+  // Escape now binds to the toggle normally instead of cancelling the capture.
+  await bar.getByRole('button', { name: /^Toggle:/ }).click()
   await win.keyboard.press('Escape')
-  await expect(caps.nth(0)).toHaveText('Escape')
+  await expect(bar.getByRole('button', { name: 'Toggle: Escape' })).toBeVisible()
 })
 
 test('Hold Keys Down: has an Enabled toggle and "+ Add Key" adds a row', async () => {
@@ -206,8 +204,8 @@ test('Periodic Key is a multi-entry list with an Enabled toggle', async () => {
 })
 
 test('every section can be hidden/shown via its header toggle', async () => {
-  // 5 sections (left) + 5 sections (right) = 10 collapse buttons.
-  await expect(win.locator('.section__collapse')).toHaveCount(10)
+  // 5 sections (left) + 4 sections (right) = 9 collapse buttons.
+  await expect(win.locator('.section__collapse')).toHaveCount(9)
 
   const keys = section('Keys to Spam')
   await expect(keys.locator('.section__body')).toBeVisible()
@@ -236,12 +234,12 @@ test('the top bar UI scale is a dropdown that double-clicks into a custom input'
 })
 
 test('sections reorder via the grip handle (not the whole pane) + Reset Layout', async () => {
-  // 10 panes, each a stable reorder target...
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(10)
+  // 9 panes, each a stable reorder target...
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(9)
   // ...but the PANE itself must NOT be draggable (that hijacks body inputs and
   // the nested key-row drags). Only the grip handle carries draggable.
   await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(0)
-  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(10)
+  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(9)
   await expect(win.locator('.section__grip').first()).toBeVisible()
   await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
 })
@@ -346,8 +344,8 @@ test('the Options (⚙️) button opens a modal with the close-to-tray setting',
 })
 
 test('the Sections (👁️) manager hides and restores a section', async () => {
-  // Default: all 10 sections render.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(10)
+  // Default: all 9 sections render.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(9)
   await expect(section('Loop')).toBeVisible()
 
   // Open the manager and uncheck "Loop".
@@ -359,12 +357,12 @@ test('the Sections (👁️) manager hides and restores a section', async () => 
   await loopRow.locator('input').uncheck()
 
   // The Loop section disappears from the main UI; one fewer pane.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(9)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(8)
   await expect(section('Loop')).toHaveCount(0)
 
   // Re-checking via "Show all" brings it back.
   await manager.getByRole('button', { name: 'Show all' }).click()
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(10)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(9)
   await manager.getByRole('button', { name: 'Done' }).click()
   await expect(win.locator('.modal')).toHaveCount(0)
   await expect(section('Loop')).toBeVisible()

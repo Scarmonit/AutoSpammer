@@ -6,7 +6,7 @@
 
 <p align="center">
   A fast, dark-themed <strong>auto key-presser, clicker &amp; macro recorder</strong> for Windows.<br/>
-  Pick what to repeat and how fast, then press <strong>Start</strong> — or record a full
+  Pick what to repeat and how fast, then hit your <strong>hotkey</strong> — or record a full
   keyboard&nbsp;+&nbsp;mouse macro and play it back on a loop.
 </p>
 
@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.24.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.25.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.24.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.24.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.24.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.24.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.25.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.25.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.25.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.25.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -70,8 +70,8 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 2. In **Keys to Spam**, type a key to repeat — for example `a`, `space`, `1`, `f6`, or `numpad5`. Add more with **+ Add Key**, or click **Record** and press keys to capture them automatically.
 3. *(Optional)* Set the speed under **Default Delay** — a lower number is faster (10 ms is very fast). Each key can have its own delay too.
 4. **Click into the game or app** you want the input sent to, so it is the active window.
-5. Press **Start Spam**, or tap **F6** anywhere — even while a game is focused.
-6. To stop: press **F6** again, click **Stop Spam**, or hit **Esc** for an emergency stop.
+5. Press your **Toggle Hotkey** (default **F6**) anywhere — even while a game is focused — to start. The current hotkey is shown in the top bar; click it to rebind.
+6. To stop: press the **Toggle Hotkey** again, or hit **Esc** for an emergency stop. You can also Start/Stop from the system-tray menu.
 
 ---
 
@@ -79,6 +79,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 ### Highlights
 
+- **Top-bar hotkey controls** — the global **Toggle** and **Emergency-stop** hotkeys live right in the top bar; click either to rebind it. Start and stop with the Toggle Hotkey (default **F6**), the Hold Modes keys, or the system tray — there's no separate Start button to hunt for.
 - **Sections manager** — an eye button in the top bar opens a popup listing every section with a checkbox. Uncheck one to completely hide it from the window *and* skip its feature when spamming; re-check to bring it back in its saved position. Saved per profile.
 - **Options dialog** — a gear button opens app settings. Toggle *"Minimize to system tray when closing the window"*: on (default) keeps Auto Spammer running in the tray when you press the close button; off makes the close button fully quit the app.
 - **Full macro recording and playback** — capture everything (keys, clicks, and mouse movement) with the exact timing between events, edit any delay, then replay it on a loop.
@@ -133,7 +134,7 @@ Both **Keys to Spam** and **Click Positions** have their own **Enabled** switch 
 - The **Keys to Spam** switch controls the key list (plus the Spacebar, Left Click, and Right Click options).
 - The **Click Positions** switch controls the recorded click spots.
 
-This lets you spam only keys, only click positions, or both. If you turn both off, Start Spam does nothing and shows a quick warning. These switches are saved per profile.
+This lets you spam only keys, only click positions, or both. If you turn both off, starting a run does nothing and shows a quick warning. These switches are saved per profile.
 
 ### Click Positions (record and click specific spots)
 
@@ -143,15 +144,15 @@ To click exact places on screen rather than just where your cursor is, add spots
 2. **Record Clicks** — click **Record Clicks**, and every left or right click anywhere on screen is saved automatically as a position with the correct button. Click **Stop Recording** when done. Clicks on the Auto Spammer window itself are ignored.
 3. Each recorded spot shows its coordinates and an **L/R** button to switch between left and right click. Give it its own delay, or remove it.
 
-When you press **Start Spam**, the cursor moves to each recorded spot and clicks it, in order, every cycle. The single-spot record hotkey (default **F7**) can be changed in that panel.
+When a run starts, the cursor moves to each recorded spot and clicks it, in order, every cycle. The single-spot record hotkey (default **F7**) can be changed in that panel.
 
 ### Hold Keys Down
 
-Hold keys *or* mouse buttons down continuously (not tapped) — for example hold **W** to keep walking, or hold **Left Click**. Use **+ Add Key** for a keyboard key, or **+ Left Click** / **+ Right Click** for a mouse button. With the section enabled, they are held automatically whenever you press **Start Spam** / **F6** and released when you stop. You can also hold them standalone with the panel's **Hold** button or **F8**.
+Hold keys *or* mouse buttons down continuously (not tapped) — for example hold **W** to keep walking, or hold **Left Click**. Use **+ Add Key** for a keyboard key, or **+ Left Click** / **+ Right Click** for a mouse button. With the section enabled, they are held automatically whenever you start a run (Toggle Hotkey / **F6**) and released when you stop. You can also hold them standalone with the panel's **Hold** button or **F8**.
 
 ### Periodic Key
 
-Press any number of keys or mouse buttons on their own independent timers — for example **F** every 5 seconds *and* **MB4** every 2 seconds. Use **+ Add Periodic Key** to add a row, **Set Key** to bind it, and set its own interval. With the section enabled, all entries run alongside **Start Spam** / **F6**. You can also run them standalone with the panel button or **F9**.
+Press any number of keys or mouse buttons on their own independent timers — for example **F** every 5 seconds *and* **MB4** every 2 seconds. Use **+ Add Periodic Key** to add a row, **Set Key** to bind it, and set its own interval. With the section enabled, all entries run alongside a normal run (Toggle Hotkey / **F6**). You can also run them standalone with the panel button or **F9**.
 
 ### Hold Modes
 
@@ -170,7 +171,7 @@ The **Macro** section records everything — every keystroke, every mouse click,
 1. *(Optional)* Click **Set Record Hotkey** to choose a key (default **F10**) that starts and stops recording from anywhere, even while a game is focused.
 2. Click **Record** (or press the hotkey), do your actions, then press the hotkey again (or **Stop Recording**). The key you press to stop is never included, and clicks on the Auto Spammer window are ignored.
 3. The captured events are listed with the delay before each one. Edit any delay to speed a step up or slow it down.
-4. Run it like any other spam: flip the section's **Enabled** switch, then press **Start Spam** (now labelled **Start Macro**) or **F6**. The macro plays back with your exact timings and repeats according to the **Loop** panel.
+4. Run it like any other spam: flip the section's **Enabled** switch, then start a run with your **Toggle Hotkey** (**F6**). The macro plays back with your exact timings and repeats according to the **Loop** panel.
 5. The panel's **Play once** button is a quick one-shot preview; **Stop** cancels it, **Clear** wipes the recording, and **Save** writes it to the current profile.
 
 Macro is mutually exclusive with Keys to Spam and Click Positions: enabling Macro turns those two off, and turning either back on turns Macro off. The recording is saved with the profile.
@@ -200,16 +201,16 @@ All layout choices — sizes, collapsed state, hidden state, and order — are s
 
 ## Keyboard Shortcuts
 
-All shortcuts are rebindable in the app.
+All shortcuts are rebindable in the app. The **Toggle** and **Emergency-stop** keys are shown in the top bar — click either to rebind; the rest live in their own sections.
 
 | Key | Action |
 | --- | --- |
-| **F6** | Start / stop spamming |
+| **F6** | Toggle Hotkey — start / stop spamming (rebind in the top bar) |
 | **F7** | Record current mouse position |
 | **F8** | Toggle Hold Keys Down |
 | **F9** | Toggle Periodic Key |
 | **F10** | Start / stop macro recording |
-| **Esc** | Emergency stop (stops everything and releases held keys) |
+| **Esc** | Emergency stop — stops everything and releases held keys (rebind in the top bar) |
 
 > **No double-binding:** every hotkey and hold-trigger key shares one pool, so a key or mouse button can only drive one action. If you try to assign one that's already in use, the change is rejected with a clear message such as *"The key F is already bound to Focus Hold Key."*
 
@@ -225,7 +226,7 @@ Auto Spammer sends real keyboard and mouse input to whatever window is focused. 
 
 - **"Windows protected your PC" popup** — click **More info**, then **Run anyway**. This only appears because the app isn't signed with a paid certificate.
 - **Keys go to the wrong window** — click into the target window first; Auto Spammer sends input to whatever is focused.
-- **It won't stop** — press **Esc**, press **F6**, or click **Stop Spam**.
+- **It won't stop** — press **Esc**, or press your **Toggle Hotkey** (**F6**), or use the tray's Stop.
 - **Antivirus flags it** — key-pressers look like automation tools to antivirus software, so false positives can happen. The full source is in this repository if you'd prefer to build it yourself.
 
 ---
