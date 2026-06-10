@@ -9,7 +9,6 @@ import { useStore } from './store'
 import { KeysSection } from './components/KeysSection'
 import { TextFunctionPanel } from './components/TextFunctionPanel'
 import { ClickPositionsPanel } from './components/ClickPositionsPanel'
-import { HoldModesPanel } from './components/HoldModesPanel'
 import { MacroPanel } from './components/MacroPanel'
 import { StatusIndicator } from './components/StatusIndicator'
 import { UiScaleControl } from './components/UiScaleControl'
@@ -26,8 +25,7 @@ const SECTIONS: Record<string, JSX.Element> = {
   keys: <KeysSection />,
   clickPositions: <ClickPositionsPanel />,
   textFunction: <TextFunctionPanel />,
-  macro: <MacroPanel />,
-  holdModes: <HoldModesPanel />
+  macro: <MacroPanel />
 }
 
 interface DropTarget {

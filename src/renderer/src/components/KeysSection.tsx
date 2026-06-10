@@ -1,59 +1,63 @@
 import React, { useState } from 'react'
 import { useStore } from '../store'
 import { Section } from './Section'
+import { Accordion } from './Accordion'
 import { SpamKeysTab } from './SpamKeysTab'
-import { HoldKeysTab } from './HoldKeysTab'
+import { HoldActionsGroup } from './HoldActionsGroup'
 import { PeriodicTab } from './PeriodicTab'
 
-type KeysTab = 'spam' | 'hold' | 'periodic'
-
-const TABS: { id: KeysTab; label: string }[] = [
-  { id: 'spam', label: 'Spam Keys' },
-  { id: 'hold', label: 'Hold Keys' },
-  { id: 'periodic', label: 'Periodic' }
-]
+type Pane = 'spam' | 'hold' | 'periodic'
 
 /**
- * "Keys to Spam" — the main keys container. The former standalone "Hold Keys
- * Down" and "Periodic Key" sections are now tabs inside it, shown one at a time
- * to keep the section uncluttered. A dot marks any tab whose feature is enabled,
- * so what's armed is visible at a glance. Each tab keeps all of its original
- * controls; the underlying data (entries / holdKeys / periodicKey) is unchanged.
+ * "Keys & Actions" — one section that gathers everything you fire during a run,
+ * organised into collapsible sub-sections (accordions):
+ *   • Spam Keys (open by default): the key list, quick options, and preview.
+ *   • Hold Actions (collapsed): Hold Keys Down + the three hold-trigger modes.
+ *   • Periodic Actions (collapsed): the periodic key list with per-key timers.
+ * Each part keeps its own Enabled switch; a dot on an accordion header shows when
+ * something inside it is enabled. The underlying data is unchanged.
  */
 export function KeysSection(): JSX.Element {
   const { activeProfile } = useStore()
-  const [tab, setTab] = useState<KeysTab>('spam')
+  const [open, setOpen] = useState<Record<Pane, boolean>>({
+    spam: true,
+    hold: false,
+    periodic: false
+  })
   if (!activeProfile) return <></>
+  const p = activeProfile
 
-  const on: Record<KeysTab, boolean> = {
-    spam: activeProfile.options.enableKeys,
-    hold: activeProfile.holdKeys.enabled,
-    periodic: activeProfile.periodicKey.enabled
-  }
+  const spamOn = p.options.enableKeys
+  const holdOn =
+    p.holdKeys.enabled || p.holdToSpam.enabled || p.focusHold.enabled || p.rightClickHold.enabled
+  const periodicOn = p.periodicKey.enabled
+
+  const toggle = (k: Pane): void => setOpen((o) => ({ ...o, [k]: !o[k] }))
 
   return (
-    <Section title="Keys to Spam">
-      <div className="keystabs" role="tablist" aria-label="Keys">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            role="tab"
-            aria-selected={t.id === tab}
-            className={`keytab${t.id === tab ? ' keytab--active' : ''}${on[t.id] ? ' keytab--on' : ''}`}
-            title={on[t.id] ? `${t.label} — enabled` : t.label}
-            onClick={() => setTab(t.id)}
-          >
-            {on[t.id] && <span className="keytab__dot" aria-hidden="true" />}
-            {t.label}
-          </button>
-        ))}
-      </div>
+    <Section title="Keys & Actions">
+      <div className="accgroup">
+        <Accordion title="Spam Keys" open={open.spam} on={spamOn} onToggle={() => toggle('spam')}>
+          <SpamKeysTab />
+        </Accordion>
 
-      <div role="tabpanel">
-        {tab === 'spam' && <SpamKeysTab />}
-        {tab === 'hold' && <HoldKeysTab />}
-        {tab === 'periodic' && <PeriodicTab />}
+        <Accordion
+          title="Hold Actions"
+          open={open.hold}
+          on={holdOn}
+          onToggle={() => toggle('hold')}
+        >
+          <HoldActionsGroup />
+        </Accordion>
+
+        <Accordion
+          title="Periodic Actions"
+          open={open.periodic}
+          on={periodicOn}
+          onToggle={() => toggle('periodic')}
+        >
+          <PeriodicTab />
+        </Accordion>
       </div>
     </Section>
   )

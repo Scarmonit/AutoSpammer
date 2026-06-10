@@ -716,49 +716,55 @@ body.is-resizing * {
   border-top: 1px solid var(--border-soft);
 }
 
-/* ---------- Tab strips (Hold Modes + Keys to Spam) ---------- */
-.holdtabs,
-.keystabs {
+/* ---------- Keys & Actions accordions ---------- */
+.accgroup {
   display: flex;
-  gap: 3px;
-  padding: 3px;
-  margin-bottom: 10px;
-  background: #15171c;
+  flex-direction: column;
+  gap: 8px;
+}
+.acc {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  overflow: hidden;
 }
-.holdtab,
-.keytab {
-  flex: 1 1 0;
-  min-width: 0;
-  display: inline-flex;
+.acc__head {
+  width: 100%;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 5px 6px;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-dim);
-  background: transparent;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   transition: background 0.12s ease, color 0.12s ease;
 }
-.holdtab:hover,
-.keytab:hover {
+.acc__head:hover {
+  background: #313640;
   color: var(--text);
 }
-.holdtab--active,
-.keytab--active {
-  background: var(--panel-2);
+.acc--open .acc__head {
   color: var(--text);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
-/* Dot marking a mode/tab that's currently enabled (visible on every tab). */
-.holdtab__dot,
-.keytab__dot {
+.acc__chevron {
+  flex: none;
+  color: var(--text-dim);
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease;
+}
+.acc--open .acc__chevron {
+  transform: none;
+}
+.acc__title {
+  flex: 1 1 auto;
+  text-align: left;
+}
+.acc__dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -766,8 +772,15 @@ body.is-resizing * {
   box-shadow: 0 0 5px rgba(59, 130, 246, 0.7);
   flex: none;
 }
+.acc__body {
+  padding: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-/* A tab's content; dim its controls (but not the Enable toggle) when off. */
+/* Shared content wrapper used by each accordion's controls; dim when off. */
 .keystab,
 .keystab__body {
   display: flex;
@@ -778,10 +791,49 @@ body.is-resizing * {
   opacity: 0.45;
 }
 
+/* Hold Actions: the Hold Keys Down block + the three hold-trigger mode cards. */
+.holdactions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.holdactions__label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.holdmodes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .holdmode {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+.holdmode--card {
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+}
+.holdmode__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.holdmode__title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
 }
 .holdmode__desc {
   margin: 0;
