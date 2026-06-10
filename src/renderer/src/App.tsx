@@ -7,6 +7,7 @@ import {
 } from '@shared/sections'
 import { useStore } from './store'
 import { KeysSection } from './components/KeysSection'
+import { HoldActionsSection } from './components/HoldActionsSection'
 import { TextFunctionPanel } from './components/TextFunctionPanel'
 import { ClickPositionsPanel } from './components/ClickPositionsPanel'
 import { MacroPanel } from './components/MacroPanel'
@@ -23,6 +24,7 @@ import { SectionManager } from './components/SectionManager'
 // out from the (per-profile) drag-and-drop order.
 const SECTIONS: Record<string, JSX.Element> = {
   keys: <KeysSection />,
+  holdActions: <HoldActionsSection />,
   clickPositions: <ClickPositionsPanel />,
   textFunction: <TextFunctionPanel />,
   macro: <MacroPanel />

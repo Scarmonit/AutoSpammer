@@ -40,7 +40,13 @@ test('main process is reachable via evaluate()', async () => {
 })
 
 test('renders all the core panels', async () => {
-  for (const heading of ['Keys & Actions', 'Click Positions', 'Text Function', 'Macro']) {
+  for (const heading of [
+    'Keys to Spam',
+    'Hold Actions',
+    'Click Positions',
+    'Text Function',
+    'Macro'
+  ]) {
     await expect(win.getByRole('heading', { name: heading, exact: true })).toBeVisible()
   }
   // Merged/moved sections no longer have standalone headings.
@@ -49,7 +55,7 @@ test('renders all the core panels', async () => {
     'Toggle Hotkey',
     'Profiles',
     'Loop',
-    'Keys to Spam',
+    'Keys & Actions',
     'Hold Modes',
     'Hold Keys Down',
     'Periodic Key'
@@ -60,19 +66,34 @@ test('renders all the core panels', async () => {
   await expect(win.locator('.startbtn')).toHaveCount(0)
 })
 
-test('Keys & Actions has Spam Keys / Hold Actions / Periodic Actions accordions', async () => {
-  const keys = section('Keys & Actions')
+test('Keys to Spam has Spam Keys + Periodic Actions accordions (no Hold Actions inside)', async () => {
+  const keys = section('Keys to Spam')
   const accs = keys.locator('.acc')
-  await expect(accs).toHaveCount(3)
-  for (const label of ['Spam Keys', 'Hold Actions', 'Periodic Actions']) {
-    await expect(keys.locator('.acc__title', { hasText: label })).toBeVisible()
-  }
-  // Spam Keys is expanded by default (its body + "Will spam" preview show);
-  // the other two are collapsed.
+  await expect(accs).toHaveCount(2)
+  await expect(keys.locator('.acc__title', { hasText: 'Spam Keys' })).toBeVisible()
+  await expect(keys.locator('.acc__title', { hasText: 'Periodic Actions' })).toBeVisible()
+  // Hold Actions is no longer an accordion inside Keys to Spam.
+  await expect(keys.locator('.acc__title', { hasText: 'Hold Actions' })).toHaveCount(0)
+  // Spam Keys is expanded by default; Periodic is collapsed.
   await expect(keys.locator('.acc', { hasText: 'Spam Keys' })).toHaveClass(/acc--open/)
   await expect(keys.locator('.keylist__summary')).toBeVisible()
-  await expect(keys.locator('.acc', { hasText: 'Hold Actions' })).not.toHaveClass(/acc--open/)
   await expect(keys.locator('.acc', { hasText: 'Periodic Actions' })).not.toHaveClass(/acc--open/)
+})
+
+test('Hold Actions is its own top-level section with Hold Keys + the three modes', async () => {
+  const hold = section('Hold Actions')
+  await expect(hold).toBeVisible()
+  // Hold Keys Down list controls.
+  await expect(hold.getByRole('button', { name: '+ Add Key' })).toBeVisible()
+  await expect(hold.getByRole('button', { name: '+ Left Click' })).toBeVisible()
+  await expect(hold.getByRole('button', { name: 'Hold', exact: true })).toBeVisible()
+  // The three hold-trigger mode cards, each with its own Set Key + Enable toggle.
+  await expect(hold.locator('.holdmode--card')).toHaveCount(3)
+  await expect(hold.getByRole('button', { name: 'Set Key' })).toHaveCount(3)
+  await expect(hold.locator('.holdmode .section__toggle input')).toHaveCount(3)
+  for (const t of ['Hold-to-Spam', 'Focus Hold', 'Hold for Right-Click']) {
+    await expect(hold.locator('.holdmode__title', { hasText: t })).toBeVisible()
+  }
 })
 
 test('the Profile and Loop controls live in the header toolbar', async () => {
@@ -91,8 +112,8 @@ test('the Profile and Loop controls live in the header toolbar', async () => {
   await expect(loopSelect.locator('option')).toHaveCount(3)
 })
 
-test('the merged Options controls live inside Keys & Actions (Spam Keys)', async () => {
-  const keys = section('Keys & Actions')
+test('the merged Options controls live inside Keys to Spam (Spam Keys)', async () => {
+  const keys = section('Keys to Spam')
   // Spacebar / clicks, Default Delay, and Sequence Mode now sit in this section.
   await expect(keys.locator('.check', { hasText: 'Spacebar' })).toBeVisible()
   await expect(keys.locator('.check', { hasText: 'Left Mouse Click' })).toBeVisible()
@@ -102,13 +123,13 @@ test('the merged Options controls live inside Keys & Actions (Spam Keys)', async
 })
 
 test('seeds the default profile keys and a "Will spam" summary', async () => {
-  const keys = section('Keys & Actions')
+  const keys = section('Keys to Spam')
   await expect(keys.locator('.keyrow__key').first()).toHaveValue('space')
   await expect(keys.locator('.keylist__summary')).toContainText('Will spam:')
 })
 
 test('can add and edit a key row (reflected in the summary)', async () => {
-  const keys = section('Keys & Actions')
+  const keys = section('Keys to Spam')
   const rows = keys.locator('.keyrow')
   const before = await rows.count()
 
@@ -128,10 +149,10 @@ test('Click Positions exposes the Record Clicks button', async () => {
 })
 
 test('renders draggable splitters between sections', async () => {
-  // Columns of 2 (left) and 2 (right) sections -> 1 + 1 = 2 splitters (last pane
+  // Columns of 2 (left) and 3 (right) sections -> 1 + 2 = 3 splitters (last pane
   // per column has none).
   const splitters = win.locator('.rs-splitter')
-  await expect(splitters).toHaveCount(2)
+  await expect(splitters).toHaveCount(3)
   await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
 })
 
@@ -145,7 +166,7 @@ test('Macro section exposes record + set-hotkey controls', async () => {
 test('enabling Macro disables Keys to Spam and Click Positions', async () => {
   const macro = section('Macro')
   // The Spam Keys accordion (open by default) holds the enable-keys toggle.
-  const keysToggle = section('Keys & Actions')
+  const keysToggle = section('Keys to Spam')
     .locator('.acc', { hasText: 'Spam Keys' })
     .locator('.section__toggle input')
   const posToggle = section('Click Positions').locator('.section__toggle input')
@@ -200,37 +221,25 @@ test('the Escape key can be bound to the top-bar toggle hotkey', async () => {
   await expect(bar.getByRole('button', { name: 'Toggle: Escape' })).toBeVisible()
 })
 
-test('Keys & Actions → Hold Actions accordion: Hold Keys + the three hold modes', async () => {
-  const keys = section('Keys & Actions')
-  const holdAcc = keys.locator('.acc', { hasText: 'Hold Actions' })
-  await holdAcc.locator('.acc__head').click()
-  await expect(holdAcc).toHaveClass(/acc--open/)
+test('Hold Actions section: Hold Keys Down + Add Key adds a row and a mouse chip', async () => {
+  const hold = section('Hold Actions')
 
-  // Hold Keys Down: enable toggle, + Add Key adds a row, and a mouse-button chip.
-  const rows = holdAcc.locator('.keyrow')
+  // Hold Keys Down: + Add Key adds a row that accepts a key...
+  const rows = hold.locator('.keyrow')
   const before = await rows.count()
-  await holdAcc.getByRole('button', { name: '+ Add Key' }).click()
+  await hold.getByRole('button', { name: '+ Add Key' }).click()
   await expect(rows).toHaveCount(before + 1)
-  const newKey = holdAcc.locator('.keyrow__key').last()
+  const newKey = hold.locator('.keyrow__key').last()
   await newKey.fill('w')
   await expect(newKey).toHaveValue('w')
-  await holdAcc.getByRole('button', { name: '+ Left Click' }).click()
-  await expect(holdAcc.locator('.keyrow__static', { hasText: 'LMB' })).toBeVisible()
 
-  // The three hold-trigger modes are laid out as cards, each with Set Key + Enable.
-  await expect(holdAcc.locator('.holdmode--card')).toHaveCount(3)
-  await expect(holdAcc.getByRole('button', { name: 'Set Key' })).toHaveCount(3)
-  for (const t of ['Hold-to-Spam', 'Focus Hold', 'Hold for Right-Click']) {
-    await expect(holdAcc.locator('.holdmode__title', { hasText: t })).toBeVisible()
-  }
-
-  // Collapse it again so later tests start from the default layout.
-  await holdAcc.locator('.acc__head').click()
-  await expect(holdAcc).not.toHaveClass(/acc--open/)
+  // ...and a mouse button can be added as a static chip.
+  await hold.getByRole('button', { name: '+ Left Click' }).click()
+  await expect(hold.locator('.keyrow__static', { hasText: 'LMB' })).toBeVisible()
 })
 
-test('Keys & Actions → Periodic Actions accordion: multi-entry list with timers', async () => {
-  const keys = section('Keys & Actions')
+test('Keys to Spam → Periodic Actions accordion: multi-entry list with timers', async () => {
+  const keys = section('Keys to Spam')
   const perAcc = keys.locator('.acc', { hasText: 'Periodic Actions' })
   await perAcc.locator('.acc__head').click()
   await expect(perAcc).toHaveClass(/acc--open/)
@@ -247,10 +256,10 @@ test('Keys & Actions → Periodic Actions accordion: multi-entry list with timer
 })
 
 test('every section can be hidden/shown via its header toggle', async () => {
-  // 2 sections (left) + 2 sections (right) = 4 collapse buttons.
-  await expect(win.locator('.section__collapse')).toHaveCount(4)
+  // 2 sections (left) + 3 sections (right) = 5 collapse buttons.
+  await expect(win.locator('.section__collapse')).toHaveCount(5)
 
-  const keys = section('Keys & Actions')
+  const keys = section('Keys to Spam')
   await expect(keys.locator('.section__body')).toBeVisible()
 
   await keys.locator('.section__collapse').click()
@@ -277,12 +286,12 @@ test('the top bar UI scale is a dropdown that double-clicks into a custom input'
 })
 
 test('sections reorder via the grip handle (not the whole pane) + Reset Layout', async () => {
-  // 4 panes, each a stable reorder target...
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(4)
+  // 5 panes, each a stable reorder target...
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(5)
   // ...but the PANE itself must NOT be draggable (that hijacks body inputs and
   // the nested key-row drags). Only the grip handle carries draggable.
   await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(0)
-  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(4)
+  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(5)
   await expect(win.locator('.section__grip').first()).toBeVisible()
   await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
 })
@@ -359,8 +368,8 @@ test('the Options (⚙️) button opens a modal with the close-to-tray setting',
 })
 
 test('the Sections (👁️) manager hides and restores a section', async () => {
-  // Default: all 4 sections render.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(4)
+  // Default: all 5 sections render.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(5)
   await expect(section('Macro')).toBeVisible()
 
   // Open the manager and uncheck "Macro".
@@ -372,12 +381,12 @@ test('the Sections (👁️) manager hides and restores a section', async () => 
   await row.locator('input').uncheck()
 
   // The section disappears from the main UI; one fewer pane.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(3)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(4)
   await expect(section('Macro')).toHaveCount(0)
 
   // Re-checking via "Show all" brings it back.
   await manager.getByRole('button', { name: 'Show all' }).click()
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(4)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(5)
   await manager.getByRole('button', { name: 'Done' }).click()
   await expect(win.locator('.modal')).toHaveCount(0)
   await expect(section('Macro')).toBeVisible()

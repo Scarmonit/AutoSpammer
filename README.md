@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.29.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.30.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.29.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.29.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.29.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.29.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.30.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.30.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.30.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.30.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -67,7 +67,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 ## Quick Start
 
 1. **Open Auto Spammer** from the Desktop or Start-menu shortcut.
-2. In **Keys & Actions → Spam Keys**, type a key to repeat — for example `a`, `space`, `1`, `f6`, or `numpad5`. Add more with **+ Add Key**, or click **Record** and press keys to capture them automatically.
+2. In **Keys to Spam**, type a key to repeat — for example `a`, `space`, `1`, `f6`, or `numpad5`. Add more with **+ Add Key**, or click **Record** and press keys to capture them automatically.
 3. *(Optional)* Set the speed under **Default Delay** — a lower number is faster (10 ms is very fast). Each key can have its own delay too.
 4. **Click into the game or app** you want the input sent to, so it is the active window.
 5. Press your **Toggle Hotkey** (default **F6**) anywhere — even while a game is focused — to start. The current hotkey is shown in the top bar; click it to rebind.
@@ -87,7 +87,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Drag-and-drop sections** — grab any section header to reorder it, even across the two columns. A **Reset Layout** button restores the default order.
 - **Resizable sections** — drag the splitter between two panels to resize them; double-click to reset.
 - **Collapsible sections** — collapse any panel to just its title bar with the header chevron.
-- **Keys & Actions in one section** — the key list, **Hold Actions** (Hold Keys Down + the three hold-trigger modes), and **Periodic Actions** (timed presses) are gathered into one section with clean collapsible accordions, so it's tidy instead of several stacked panels. A dot on a header marks any group with something enabled.
+- **Keys to Spam** — the key list with its quick options, plus a collapsible **Periodic Actions** accordion for timed presses. **Hold Actions** is its own separate section (Hold Keys Down + the three hold-trigger modes). A dot on an accordion / mode header marks anything that's enabled.
 - **Independent enabling** — Spam Keys, every Hold Action, Periodic Actions, Click Positions, Text Function, and Macro each have their own *Enabled* switch. A disabled feature greys out and is skipped on the next run.
 - **UI scale** — a top-bar dropdown zooms the whole app (100–200%) for readability; double-click to type a custom percentage.
 - **Remembers window size and position** — the app reopens exactly where and how big you left it.
@@ -99,8 +99,8 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Spam any keys** — letters, digits, function keys, punctuation, and numpad, each with its own delay, in parallel or one-at-a-time **Sequence Mode**.
 - **Click positions** — move to and click exact screen spots (left or right) every cycle.
 - **Loop** — repeat forever, once, or a set number of times (in the header toolbar).
-- **Hold actions** — Hold-to-Spam, Focus Hold, and Hold for Right-Click; each runs only while you physically hold its chosen key or button (in the Keys & Actions section).
-- **Hold Keys Down and Periodic** — for walk-keys and timed presses (accordions inside Keys & Actions).
+- **Hold Actions** — its own section: Hold Keys Down plus Hold-to-Spam, Focus Hold, and Hold for Right-Click; each hold trigger runs only while you physically hold its chosen key or button.
+- **Periodic** — keys/buttons on their own timers (a collapsible accordion inside Keys to Spam).
 - **Profiles** — save and switch between different setups from the header toolbar; everything is remembered.
 - **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
 - **System tray** — runs in the background with close-to-tray.
@@ -114,8 +114,8 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
   <tr>
     <td width="50%" valign="top">
       <img src="docs/showcase-1.png" alt="Main overview" /><br/>
-      <sub><b>Main window</b> — the Keys &amp; Actions section (Spam Keys / Hold Actions /
-      Periodic Actions accordions) and Click Positions, with the Profile picker, Loop
+      <sub><b>Main window</b> — Keys to Spam (with a Periodic Actions accordion), the
+      separate Hold Actions section, and Click Positions, with the Profile picker, Loop
       control, and rebindable hotkeys in the header toolbar.</sub>
     </td>
     <td width="50%" valign="top">
@@ -130,26 +130,26 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 ## Usage Guide
 
-### Keys & Actions (one section, three accordions)
+### Keys to Spam
 
-Everything you fire during a run lives in the **Keys & Actions** section, split into three collapsible sub-sections so it stays tidy. Click a header (with its chevron) to expand or collapse it; a small dot on a header means something inside it is enabled. Each part keeps its own **Enabled** switch.
+The **Keys to Spam** section holds the key list itself, the Spacebar / Left Click / Right Click options, **Default Delay**, **Sequence Mode**, and the live **"Will spam"** preview. Its **Enabled** switch controls whether the key list spams.
 
-**Spam Keys** *(expanded by default)* — the key list itself, the Spacebar / Left Click / Right Click options, **Default Delay**, **Sequence Mode**, and the live **"Will spam"** preview. The Enabled switch here controls whether the key list spams.
+Tucked into a collapsible **Periodic Actions** accordion below it: press any number of keys or mouse buttons on their **own independent timers** (e.g. **F** every 5s *and* **MB4** every 2s). Use **+ Add Periodic Key**, **Set Key** to bind each, and set its interval. Runs alongside a normal run, or standalone with the button / **F9**.
 
-**Hold Actions** *(collapsed by default)* — all the "hold a key to do something" features:
+### Hold Actions
+
+The **Hold Actions** section gathers everything you trigger by *holding* a key or button. Each part has its own **Enabled** switch and is watched globally, so it works even while a game is focused.
 
 - **Hold Keys Down** — hold keys *or* mouse buttons down continuously (not tapped), e.g. hold **W** to keep walking. Use **+ Add Key**, or **+ Left Click** / **+ Right Click** for a mouse button. Held automatically during a run, or standalone with the **Hold** button / **F8**.
 - **Hold-to-Spam** — while you hold the chosen key, it runs the whole spam system and stops when you release.
 - **Focus Hold** — hold a key to rapidly fire only that same key or button.
 - **Hold for Right-Click** — hold the trigger to rapidly right-click; release to stop.
 
-Each hold trigger has its own **Set Key**, delay, and Enabled switch, and is watched globally so it works even while a game is focused.
-
-**Periodic Actions** *(collapsed by default)* — press any number of keys or mouse buttons on their **own independent timers** (e.g. **F** every 5s *and* **MB4** every 2s). Use **+ Add Periodic Key**, **Set Key** to bind each, and set its interval. Runs alongside a normal run, or standalone with the button / **F9**.
+Each hold trigger has its own **Set Key** and delay.
 
 ### Enable or disable Keys and Click Positions independently
 
-**Spam Keys** (inside Keys & Actions) and **Click Positions** each have their own **Enabled** switch, so you can spam only keys, only click positions, or both. If you turn both off, starting a run does nothing and shows a quick warning. These switches are saved per profile.
+**Keys to Spam** and **Click Positions** each have their own **Enabled** switch, so you can spam only keys, only click positions, or both. If you turn both off, starting a run does nothing and shows a quick warning. These switches are saved per profile.
 
 ### Click Positions (record and click specific spots)
 

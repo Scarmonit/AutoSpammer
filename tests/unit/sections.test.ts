@@ -68,35 +68,34 @@ describe('section visibility', () => {
     expect(isSectionHidden(null, 'keys')).toBe(false)
   })
 
-  it('hiding "Keys & Actions" disables every feature it contains', () => {
+  it('hiding "Keys to Spam" / "Hold Actions" disables what each one contains', () => {
     const p = createDefaultProfile()
     p.options.enableKeys = true
     p.options.enableClickPositions = true
-    p.textFunction.enabled = true
-    p.holdKeys.enabled = true
     p.periodicKey.enabled = true
+    p.holdKeys.enabled = true
     p.holdToSpam.enabled = true
     p.focusHold.enabled = true
     p.rightClickHold.enabled = true
-    // "Keys & Actions" holds Spam Keys, Hold Actions (Hold Keys Down + the three
-    // hold modes), and Periodic Actions; hiding Text Function disables that.
-    p.hiddenSections = { keys: true, textFunction: true }
+    // "Keys to Spam" holds Spam Keys + Periodic; "Hold Actions" holds Hold Keys
+    // Down + the three hold modes.
+    p.hiddenSections = { keys: true, holdActions: true }
 
     const eff = applyHiddenSections(p)
+    // Keys to Spam features...
     expect(eff.options.enableKeys).toBe(false)
-    expect(eff.holdKeys.enabled).toBe(false)
     expect(eff.periodicKey.enabled).toBe(false)
+    // Hold Actions features...
+    expect(eff.holdKeys.enabled).toBe(false)
     expect(eff.holdToSpam.enabled).toBe(false)
     expect(eff.focusHold.enabled).toBe(false)
     expect(eff.rightClickHold.enabled).toBe(false)
-    expect(eff.textFunction.enabled).toBe(false)
     // A visible feature is left alone.
     expect(eff.options.enableClickPositions).toBe(true)
     // Stored profile flags are untouched (re-showing restores them).
     expect(p.options.enableKeys).toBe(true)
     expect(p.holdKeys.enabled).toBe(true)
     expect(p.holdToSpam.enabled).toBe(true)
-    expect(p.textFunction.enabled).toBe(true)
   })
 
   it('applyHiddenSections is a no-op when nothing is hidden', () => {
