@@ -135,6 +135,13 @@ export interface Profile {
    * section is visible. All sections are visible by default.
    */
   hiddenSections: Record<string, boolean>
+  /**
+   * Master enable for whole "container" sections (Keys to Spam, Hold Actions),
+   * keyed by section id. `true` = the section is disabled (its features are
+   * skipped on a run and its body is dimmed); a missing id means enabled. The
+   * individual feature toggles inside still work when the section is enabled.
+   */
+  disabledSections: Record<string, boolean>
   /** Full keyboard + mouse macro recording for this profile. */
   macro: MacroConfig
   /** Drag-and-drop section order, per column. */

@@ -98,7 +98,30 @@ describe('section visibility', () => {
     expect(p.holdToSpam.enabled).toBe(true)
   })
 
-  it('applyHiddenSections is a no-op when nothing is hidden', () => {
+  it('a master-disabled section skips its features on a run (like hidden)', () => {
+    const p = createDefaultProfile()
+    p.options.enableKeys = true
+    p.periodicKey.enabled = true
+    p.holdKeys.enabled = true
+    p.holdToSpam.enabled = true
+    p.focusHold.enabled = true
+    p.rightClickHold.enabled = true
+    // The sections are still visible, but their master Enabled switch is off.
+    p.disabledSections = { keys: true, holdActions: true }
+
+    const eff = applyHiddenSections(p)
+    expect(eff.options.enableKeys).toBe(false)
+    expect(eff.periodicKey.enabled).toBe(false)
+    expect(eff.holdKeys.enabled).toBe(false)
+    expect(eff.holdToSpam.enabled).toBe(false)
+    expect(eff.focusHold.enabled).toBe(false)
+    expect(eff.rightClickHold.enabled).toBe(false)
+    // Stored flags untouched (re-enabling the section restores them).
+    expect(p.options.enableKeys).toBe(true)
+    expect(p.holdKeys.enabled).toBe(true)
+  })
+
+  it('applyHiddenSections is a no-op when nothing is hidden or disabled', () => {
     const p = createDefaultProfile()
     expect(applyHiddenSections(p)).toBe(p)
   })

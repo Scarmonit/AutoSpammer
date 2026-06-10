@@ -63,6 +63,7 @@ export function createDefaultProfile(name = 'Default'): Profile {
     sectionHeights: {},
     collapsedSections: {},
     hiddenSections: {},
+    disabledSections: {},
     macro: {
       enabled: false,
       events: []

@@ -96,6 +96,30 @@ test('Hold Actions is its own top-level section with Hold Keys + the three modes
   }
 })
 
+test('Keys to Spam and Hold Actions show a header Enabled toggle, even collapsed', async () => {
+  for (const name of ['Keys to Spam', 'Hold Actions']) {
+    const sec = section(name)
+    // A single master toggle in the section header (not the inner feature toggles).
+    const headToggle = sec.locator('.section__head-actions .section__toggle input')
+    await expect(headToggle).toHaveCount(1)
+    await expect(headToggle).toBeVisible()
+    await expect(headToggle).toBeChecked() // sections are enabled by default
+
+    // Collapse the section — the header toggle stays visible and usable.
+    await sec.locator('.section__collapse').click()
+    await expect(sec).toHaveClass(/section--collapsed/)
+    await expect(headToggle).toBeVisible()
+
+    // Toggling it off (while collapsed) dims the body once re-expanded; toggle back on.
+    await headToggle.uncheck()
+    await expect(headToggle).not.toBeChecked()
+    await sec.locator('.section__collapse').click() // expand
+    await expect(sec.locator('.section__body')).toHaveClass(/section__body--off/)
+    await headToggle.check()
+    await expect(sec.locator('.section__body')).not.toHaveClass(/section__body--off/)
+  }
+})
+
 test('the Profile and Loop controls live in the header toolbar', async () => {
   const subbar = win.locator('.subbar')
   // Profile picker + actions.

@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.30.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.30.1.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.30.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.30.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.30.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.30.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.30.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.30.1.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.30.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.30.1.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -88,7 +88,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Resizable sections** — drag the splitter between two panels to resize them; double-click to reset.
 - **Collapsible sections** — collapse any panel to just its title bar with the header chevron.
 - **Keys to Spam** — the key list with its quick options, plus a collapsible **Periodic Actions** accordion for timed presses. **Hold Actions** is its own separate section (Hold Keys Down + the three hold-trigger modes). A dot on an accordion / mode header marks anything that's enabled.
-- **Independent enabling** — Spam Keys, every Hold Action, Periodic Actions, Click Positions, Text Function, and Macro each have their own *Enabled* switch. A disabled feature greys out and is skipped on the next run.
+- **Independent enabling** — *every* section has an **Enabled** switch in its header (shown even when the section is collapsed). Keys to Spam and Hold Actions add one too, as a master switch for the whole group, while their inner parts keep their own toggles. A disabled feature greys out and is skipped on the next run.
 - **UI scale** — a top-bar dropdown zooms the whole app (100–200%) for readability; double-click to type a custom percentage.
 - **Remembers window size and position** — the app reopens exactly where and how big you left it.
 - **Mouse buttons everywhere** — every key binding accepts a keyboard key *or* a mouse button (LMB, RMB, MMB, MB4, MB5).

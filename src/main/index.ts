@@ -234,6 +234,7 @@ function sanitizeProfile(p: Profile): Profile {
     sectionHeights: sanitizeSectionHeights(p.sectionHeights),
     collapsedSections: sanitizeSectionFlags(p.collapsedSections),
     hiddenSections: sanitizeSectionFlags(p.hiddenSections),
+    disabledSections: sanitizeSectionFlags(p.disabledSections),
     macro: sanitizeMacro(p.macro),
     sectionLayout: normalizeLayout(p.sectionLayout)
   }

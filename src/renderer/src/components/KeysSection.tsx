@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useStore } from '../store'
 import { Section } from './Section'
+import { SectionToggle } from './SectionToggle'
 import { Accordion } from './Accordion'
 import { SpamKeysTab } from './SpamKeysTab'
 import { PeriodicTab } from './PeriodicTab'
@@ -14,16 +15,27 @@ type Pane = 'spam' | 'periodic'
  * on an accordion header shows when its feature is enabled.
  */
 export function KeysSection(): JSX.Element {
-  const { activeProfile } = useStore()
+  const { activeProfile, setSectionDisabled } = useStore()
   const [open, setOpen] = useState<Record<Pane, boolean>>({ spam: true, periodic: false })
   if (!activeProfile) return <></>
 
+  const sectionEnabled = activeProfile.disabledSections?.['keys'] !== true
   const spamOn = activeProfile.options.enableKeys
   const periodicOn = activeProfile.periodicKey.enabled
   const toggle = (k: Pane): void => setOpen((o) => ({ ...o, [k]: !o[k] }))
 
   return (
-    <Section title="Keys to Spam">
+    <Section
+      title="Keys to Spam"
+      dim={!sectionEnabled}
+      right={
+        <SectionToggle
+          checked={sectionEnabled}
+          onChange={(v) => setSectionDisabled('keys', !v)}
+          title="Enable Keys to Spam (Spam Keys + Periodic) for runs"
+        />
+      }
+    >
       <div className="accgroup">
         <Accordion title="Spam Keys" open={open.spam} on={spamOn} onToggle={() => toggle('spam')}>
           <SpamKeysTab />

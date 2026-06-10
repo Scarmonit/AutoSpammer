@@ -46,6 +46,8 @@ interface Store {
   setSectionHidden: (id: string, hidden: boolean) => void
   /** Make every section visible again. */
   showAllSections: () => void
+  /** Master enable/disable a whole container section (e.g. Keys to Spam). */
+  setSectionDisabled: (id: string, disabled: boolean) => void
   /** Persist a new drag-and-drop section layout (per profile). */
   setSectionLayout: (layout: SectionLayout) => void
   /** Restore the default section order. */
@@ -246,6 +248,18 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     updateProfile((p) => ({ ...p, hiddenSections: {} }))
   }, [updateProfile])
 
+  const setSectionDisabled = useCallback(
+    (id: string, disabled: boolean) => {
+      updateProfile((p) => {
+        const next = { ...(p.disabledSections ?? {}) }
+        if (disabled) next[id] = true
+        else delete next[id]
+        return { ...p, disabledSections: next }
+      })
+    },
+    [updateProfile]
+  )
+
   const setSectionLayout = useCallback(
     (layout: SectionLayout) => {
       updateProfile((p) => ({ ...p, sectionLayout: normalizeLayout(layout) }))
@@ -441,6 +455,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     toggleSectionCollapsed,
     setSectionHidden,
     showAllSections,
+    setSectionDisabled,
     setSectionLayout,
     resetSectionLayout,
     createProfile,

@@ -75,6 +75,8 @@ function migrate(data: PersistedData): PersistedData {
     if (!p.collapsedSections || typeof p.collapsedSections !== 'object') p.collapsedSections = {}
     // Section visibility was added later; older saves start with all visible.
     if (!p.hiddenSections || typeof p.hiddenSections !== 'object') p.hiddenSections = {}
+    // Per-section master enable was added later; older saves start all enabled.
+    if (!p.disabledSections || typeof p.disabledSections !== 'object') p.disabledSections = {}
     // The macro recorder was added later; older saves start with an empty macro.
     if (!p.macro || typeof p.macro !== 'object') p.macro = { enabled: false, events: [] }
     if (!Array.isArray(p.macro.events)) p.macro.events = []

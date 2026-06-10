@@ -129,30 +129,34 @@ export function isSectionHidden(
  */
 export function applyHiddenSections(profile: Profile): Profile {
   const h = profile.hiddenSections
-  if (!h || Object.keys(h).length === 0) return profile
-  const hid = (id: string): boolean => h[id] === true
-  // "Keys to Spam" holds the Spam Keys list and Periodic Actions; "Hold Actions"
-  // holds Hold Keys Down + the three hold-trigger modes. Hiding either disables
-  // everything it contains.
-  const keysHidden = hid('keys')
-  const holdHidden = hid('holdActions')
+  const d = profile.disabledSections
+  const noHidden = !h || Object.keys(h).length === 0
+  const noDisabled = !d || Object.keys(d).length === 0
+  if (noHidden && noDisabled) return profile
+
+  // A section's features don't run if it's hidden (Sections manager) OR its
+  // master Enabled switch is off. "Keys to Spam" holds the Spam Keys list and
+  // Periodic Actions; "Hold Actions" holds Hold Keys Down + the three hold modes.
+  const off = (id: string): boolean => h?.[id] === true || d?.[id] === true
+  const keysOff = off('keys')
+  const holdOff = off('holdActions')
 
   return {
     ...profile,
     options: {
       ...profile.options,
-      enableKeys: profile.options.enableKeys && !keysHidden,
-      enableClickPositions: profile.options.enableClickPositions && !hid('clickPositions')
+      enableKeys: profile.options.enableKeys && !keysOff,
+      enableClickPositions: profile.options.enableClickPositions && !off('clickPositions')
     },
-    textFunction: hid('textFunction')
+    textFunction: off('textFunction')
       ? { ...profile.textFunction, enabled: false }
       : profile.textFunction,
-    holdKeys: holdHidden ? { ...profile.holdKeys, enabled: false } : profile.holdKeys,
-    periodicKey: keysHidden ? { ...profile.periodicKey, enabled: false } : profile.periodicKey,
-    macro: hid('macro') ? { ...profile.macro, enabled: false } : profile.macro,
-    holdToSpam: holdHidden ? { ...profile.holdToSpam, enabled: false } : profile.holdToSpam,
-    focusHold: holdHidden ? { ...profile.focusHold, enabled: false } : profile.focusHold,
-    rightClickHold: holdHidden
+    holdKeys: holdOff ? { ...profile.holdKeys, enabled: false } : profile.holdKeys,
+    periodicKey: keysOff ? { ...profile.periodicKey, enabled: false } : profile.periodicKey,
+    macro: off('macro') ? { ...profile.macro, enabled: false } : profile.macro,
+    holdToSpam: holdOff ? { ...profile.holdToSpam, enabled: false } : profile.holdToSpam,
+    focusHold: holdOff ? { ...profile.focusHold, enabled: false } : profile.focusHold,
+    rightClickHold: holdOff
       ? { ...profile.rightClickHold, enabled: false }
       : profile.rightClickHold
   }
