@@ -267,6 +267,31 @@ test('Hold Actions section: Hold Keys Down + Add Key adds a row and a mouse chip
   await expect(hold.locator('.keyrow__static', { hasText: 'LMB' })).toBeVisible()
 })
 
+test('Hold Actions master toggle greys out and disables its contents, keeping inner state', async () => {
+  const hold = section('Hold Actions')
+  const master = hold.locator('.section__head-actions .section__toggle input')
+  const body = hold.locator('.section__body')
+  // The Hold Keys Down feature toggle inside the body.
+  const inner = hold.locator('.keystab__head .section__toggle input')
+
+  if (!(await master.isChecked())) await master.check()
+  if (!(await inner.isChecked())) await inner.check()
+  await expect(body).not.toHaveClass(/section__body--off/)
+
+  // Master off: body dims and becomes non-interactive...
+  await master.uncheck()
+  await expect(body).toHaveClass(/section__body--off/)
+  await expect(body).toHaveCSS('pointer-events', 'none')
+  // ...while the inner toggle keeps its checked state (not reset).
+  await expect(inner).toBeChecked()
+
+  // Master back on: body is interactive again with the inner state intact.
+  await master.check()
+  await expect(body).not.toHaveClass(/section__body--off/)
+  await expect(body).toHaveCSS('pointer-events', 'auto')
+  await expect(inner).toBeChecked()
+})
+
 test('Keys to Spam → inlined periodic presses: multi-entry list with timers', async () => {
   const keys = section('Keys to Spam')
   const per = keys.locator('.keystab__periodic')

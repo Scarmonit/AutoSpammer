@@ -252,7 +252,9 @@ export class GlobalInput {
     if (this.deps.engine.isRunning()) {
       this.deps.engine.stop()
     } else {
-      this.deps.engine.start(this.deps.getProfile(), 'manual')
+      // Filter like every other start path, so hidden sections and master
+      // Enabled switches (e.g. Hold Actions) are honoured on hotkey starts too.
+      this.deps.engine.start(applyHiddenSections(this.deps.getProfile()), 'manual')
     }
   }
 

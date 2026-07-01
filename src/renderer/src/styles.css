@@ -608,8 +608,12 @@ body.is-resizing * {
 }
 
 /* Greyed-out body when a section is toggled off. */
+/* Master-toggled-off section: greyed out AND non-interactive, so the inner
+   controls keep their state but can't be used until the section is re-enabled. */
 .section__body--off {
   opacity: 0.45;
+  pointer-events: none;
+  user-select: none;
 }
 
 .section__body {
