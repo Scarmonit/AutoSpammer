@@ -165,8 +165,6 @@ export interface AppSettings {
   recordPositionHotkey: string
   /** Global hotkey to toggle the hold-keys-down mode, e.g. "F8". */
   holdKeysHotkey: string
-  /** Global hotkey to toggle the periodic key press, e.g. "F9". */
-  periodicKeyHotkey: string
   /** Global hotkey to start/stop macro recording, e.g. "F10". */
   macroRecordHotkey: string
   /** Whole-window UI scale (zoom factor), e.g. 1 = 100%, 1.5 = 150%. */
@@ -206,7 +204,6 @@ export type HotkeyField =
   | 'emergencyHotkey'
   | 'recordPositionHotkey'
   | 'holdKeysHotkey'
-  | 'periodicKeyHotkey'
 
 export interface HotkeyConflict {
   field: HotkeyField

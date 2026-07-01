@@ -17,7 +17,6 @@ export type AcceleratorField =
   | 'emergencyHotkey'
   | 'recordPositionHotkey'
   | 'holdKeysHotkey'
-  | 'periodicKeyHotkey'
   | 'macroRecordHotkey'
 
 /** Per-profile hold-trigger keys (their `.key` field). */
@@ -30,7 +29,6 @@ export const ACCELERATOR_FIELDS: AcceleratorField[] = [
   'emergencyHotkey',
   'recordPositionHotkey',
   'holdKeysHotkey',
-  'periodicKeyHotkey',
   'macroRecordHotkey'
 ]
 
@@ -42,7 +40,6 @@ export const FEATURE_NAMES: Record<BindingField, string> = {
   emergencyHotkey: 'Emergency Stop',
   recordPositionHotkey: 'Record Position Hotkey',
   holdKeysHotkey: 'Hold Keys Down Hotkey',
-  periodicKeyHotkey: 'Periodic Key Hotkey',
   macroRecordHotkey: 'Macro Record Hotkey',
   holdToSpam: 'Hold-to-Spam Key',
   focusHold: 'Focus Hold Key',

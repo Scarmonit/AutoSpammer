@@ -1,7 +1,6 @@
 import React from 'react'
 import type { PeriodicEntry } from '@shared/types'
 import { makeId } from '@shared/defaults'
-import { prettyBindingLabel } from '@shared/bindings'
 import { useStore } from '../store'
 import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
@@ -9,13 +8,12 @@ import { prettyName } from '../keycapture'
 
 /** "Periodic" tab: keys/buttons pressed on their own timers (formerly its own section). */
 export function PeriodicTab(): JSX.Element {
-  const { data, activeProfile, aux, updateProfile, assignBinding, togglePeriodic } = useStore()
+  const { data, activeProfile, aux, updateProfile, togglePeriodic } = useStore()
   if (!data || !activeProfile) return <></>
 
   const pk = activeProfile.periodicKey
   const entries = pk.entries
   const enabled = pk.enabled
-  const hotkey = data.settings.periodicKeyHotkey
 
   const setEntries = (next: PeriodicEntry[]): void =>
     updateProfile((p) => ({ ...p, periodicKey: { ...p.periodicKey, entries: next } }))
@@ -45,8 +43,7 @@ export function PeriodicTab(): JSX.Element {
         <p className="helper">
           Presses each key / mouse button on its <strong>own timer</strong> (e.g. F every 5s, MB4 every
           2s). When enabled they run alongside the spam; you can also run them standalone with the
-          button or{' '}
-          <code className="keycap keycap--inline">{hotkey ? prettyBindingLabel(hotkey) : '—'}</code>.
+          button below.
         </p>
 
         <div className="keylist">
@@ -95,16 +92,6 @@ export function PeriodicTab(): JSX.Element {
           >
             {aux.periodicActive ? '● Stop Periodic' : 'Start Periodic Press'}
           </button>
-        </div>
-
-        <div className="field" style={{ marginTop: 8 }}>
-          <label>Toggle hotkey</label>
-          <CaptureButton
-            label={`Change (${hotkey ? prettyBindingLabel(hotkey) : 'unset'})`}
-            mode="accelerator"
-            className="btn--ghost"
-            onCapture={(accel) => void assignBinding('periodicKeyHotkey', accel)}
-          />
         </div>
       </div>
     </div>

@@ -78,7 +78,6 @@ export function createDefaultSettings(activeProfileId: string): AppSettings {
     emergencyHotkey: 'Escape',
     recordPositionHotkey: 'F7',
     holdKeysHotkey: 'F8',
-    periodicKeyHotkey: 'F9',
     macroRecordHotkey: 'F10',
     uiScale: 1,
     minimizeToTrayOnClose: true,

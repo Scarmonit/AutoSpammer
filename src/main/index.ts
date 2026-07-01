@@ -524,7 +524,6 @@ if (!gotLock) {
       },
       onRecordPositionAt: (x, y, button) => appendClickPosition(x, y, button),
       onToggleHold: () => aux.toggleHold(),
-      onTogglePeriodic: () => aux.togglePeriodic(),
       onEmergencyStop: () => {
         engine.stop()
         aux.stopAll()
