@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.31.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.32.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.31.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.31.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.31.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.31.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.32.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.32.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.32.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.32.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -87,7 +87,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Drag-and-drop sections** — grab any section header to reorder it, even across the two columns. A **Reset Layout** button restores the default order.
 - **Resizable sections** — drag the splitter between two panels to resize them; double-click to reset.
 - **Collapsible sections** — collapse any panel to just its title bar with the header chevron.
-- **Keys to Spam** — the key list with its quick options, plus a collapsible **Periodic Actions** accordion for timed presses. **Hold Actions** is its own separate section (Hold Keys Down + the three hold-trigger modes). A dot on an accordion / mode header marks anything that's enabled.
+- **Keys to Spam** — the key list with its quick options, plus the **periodic press list** inlined right below them for timed presses. **Hold Actions** is its own separate section (Hold Keys Down + the three hold-trigger modes). A dot on an accordion / mode header marks anything that's enabled.
 - **Independent enabling** — *every* section has an **Enabled** switch in its header (shown even when the section is collapsed). Keys to Spam and Hold Actions add one too, as a master switch for the whole group, while their inner parts keep their own toggles. A disabled feature greys out and is skipped on the next run.
 - **UI scale** — a top-bar dropdown zooms the whole app (100–200%) for readability; double-click to type a custom percentage.
 - **Remembers window size and position** — the app reopens exactly where and how big you left it.
@@ -100,7 +100,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Click positions** — move to and click exact screen spots (left or right) every cycle.
 - **Loop** — repeat forever, once, or a set number of times (in the header toolbar).
 - **Hold Actions** — its own section: Hold Keys Down plus Hold-to-Spam, Focus Hold, and Hold for Right-Click; each hold trigger runs only while you physically hold its chosen key or button.
-- **Periodic** — keys/buttons on their own timers (a collapsible accordion inside Keys to Spam).
+- **Periodic** — keys/buttons on their own timers (inlined in Keys to Spam, below the spam options).
 - **Profiles** — save and switch between different setups from the header toolbar; everything is remembered.
 - **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
 - **System tray** — runs in the background with close-to-tray.
@@ -134,13 +134,13 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 The **Keys to Spam** section holds the key list itself, the Spacebar / Left Click / Right Click options, **Default Delay**, **Sequence Mode**, and the live **"Will spam"** preview. Its **Enabled** switch controls whether the key list spams.
 
-Tucked into a collapsible **Periodic Actions** accordion below it: press any number of keys or mouse buttons on their **own independent timers** (e.g. **F** every 5s *and* **MB4** every 2s). Use **+ Add Periodic Key**, **Set Key** to bind each, and set its interval. Runs alongside a normal run, or standalone with the button / **F9**.
+Directly below those options sits the **periodic press list**: press any number of keys or mouse buttons on their **own independent timers** (e.g. **F** every 5s *and* **MB4** every 2s). Use **+ Add Periodic Key**, **Set Key** to bind each, and set its interval. It has its own **Enabled** switch and runs alongside a normal run.
 
 ### Hold Actions
 
 The **Hold Actions** section gathers everything you trigger by *holding* a key or button. Each part has its own **Enabled** switch and is watched globally, so it works even while a game is focused.
 
-- **Hold Keys Down** — hold keys *or* mouse buttons down continuously (not tapped), e.g. hold **W** to keep walking. Use **+ Add Key**, or **+ Left Click** / **+ Right Click** for a mouse button. Held automatically during a run, or standalone with the **Hold** button / **F8**.
+- **Hold Keys Down** — hold keys *or* mouse buttons down continuously (not tapped), e.g. hold **W** to keep walking. Use **+ Add Key**, or **+ Left Click** / **+ Right Click** for a mouse button. Held automatically for the whole run.
 - **Hold-to-Spam** — while you hold the chosen key, it runs the whole spam system and stops when you release.
 - **Focus Hold** — hold a key to rapidly fire only that same key or button.
 - **Hold for Right-Click** — hold the trigger to rapidly right-click; release to stop.
@@ -204,8 +204,6 @@ All shortcuts are rebindable in the app. The **Toggle** and **Emergency-stop** k
 | --- | --- |
 | **F6** | Toggle Hotkey — start / stop spamming (rebind in the top bar) |
 | **F7** | Record current mouse position |
-| **F8** | Toggle Hold Keys Down |
-| **F9** | Toggle Periodic Key |
 | **F10** | Start / stop macro recording |
 | **Esc** | Emergency stop — stops everything and releases held keys (rebind in the top bar) |
 

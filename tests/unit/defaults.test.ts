@@ -26,8 +26,7 @@ describe('defaults', () => {
     for (const k of [
       'toggleHotkey',
       'emergencyHotkey',
-      'recordPositionHotkey',
-      'holdKeysHotkey'
+      'recordPositionHotkey'
     ] as const) {
       expect(typeof s[k]).toBe('string')
       expect(s[k].length).toBeGreaterThan(0)

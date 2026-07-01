@@ -6,8 +6,7 @@ import type {
   StatusPayload,
   Options,
   SpamEntry,
-  ClickPosition,
-  AuxStatus
+  ClickPosition
 } from '@shared/types'
 import { makeId } from '@shared/defaults'
 import { cloneDefaultLayout, normalizeLayout, type SectionLayout } from '@shared/sections'
@@ -26,7 +25,6 @@ interface Store {
   data: PersistedData | null
   activeProfile: Profile | null
   status: StatusPayload
-  aux: AuxStatus
   recording: boolean
   recordingPositions: boolean
   macroRecording: boolean
@@ -72,8 +70,6 @@ interface Store {
   toggleRecording: () => Promise<void>
   toggleRecordingPositions: () => Promise<void>
   addCurrentPosition: () => Promise<void>
-  toggleHold: () => Promise<void>
-  togglePeriodic: () => Promise<void>
 
   /** Enable/disable the macro (mutually exclusive with Keys to Spam / Click Positions). */
   setMacroEnabled: (enabled: boolean) => void
@@ -92,7 +88,6 @@ const IDLE: StatusPayload = { status: 'idle', mode: null, cyclesDone: 0 }
 export function StoreProvider({ children }: { children: React.ReactNode }): JSX.Element {
   const [data, setData] = useState<PersistedData | null>(null)
   const [status, setStatus] = useState<StatusPayload>(IDLE)
-  const [aux, setAux] = useState<AuxStatus>({ holdActive: false, periodicActive: false })
   const [recording, setRecording] = useState(false)
   const [recordingPositions, setRecordingPositions] = useState(false)
   const [macroRecording, setMacroRecording] = useState(false)
@@ -118,9 +113,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     )
     // The global record-position hotkey mutates data in the main process.
     const offData = window.api.onDataUpdated(setData)
-    // Hold-keys / periodic toggles can change from global hotkeys too.
-    const offAux = window.api.onAuxStatus(setAux)
-    void window.api.getAuxStatus().then(setAux)
     const offRecorded = window.api.onKeyRecorded((rk) => {
       const entry: SpamEntry = {
         id: makeId('key'),
@@ -149,7 +141,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
       offError()
       offConflict()
       offData()
-      offAux()
       offRecorded()
       offMacroRec()
       offMacroPlay()
@@ -352,13 +343,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     updateProfile((p) => ({ ...p, clickPositions: [...p.clickPositions, pos] }))
   }, [updateProfile])
 
-  const toggleHold = useCallback(async () => {
-    setAux(await window.api.toggleHold())
-  }, [])
-  const togglePeriodic = useCallback(async () => {
-    setAux(await window.api.togglePeriodic())
-  }, [])
-
   const toggleRecording = useCallback(async () => {
     if (recording) {
       await window.api.recordStop()
@@ -441,7 +425,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     data,
     activeProfile,
     status,
-    aux,
     recording,
     recordingPositions,
     macroRecording,
@@ -471,8 +454,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     toggleRecording,
     toggleRecordingPositions,
     addCurrentPosition,
-    toggleHold,
-    togglePeriodic,
     setMacroEnabled,
     toggleMacroRecording,
     playMacro,

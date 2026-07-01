@@ -38,8 +38,10 @@ function migrate(data: PersistedData): PersistedData {
   const defaultProfile = defaults.profiles[0]
   // Backfill fields added in newer versions so older saves stay valid.
   data.settings = { ...defaults.settings, ...data.settings }
-  // The periodic toggle hotkey was removed; drop it from older saves.
+  // The periodic (F9) and hold-keys (F8) toggle hotkeys were removed; drop them
+  // from older saves.
   delete (data.settings as unknown as Record<string, unknown>).periodicKeyHotkey
+  delete (data.settings as unknown as Record<string, unknown>).holdKeysHotkey
   // UI scale was added later; keep it a sane zoom factor.
   data.settings.uiScale = Math.min(2.5, Math.max(1, Number(data.settings.uiScale) || 1))
   // Close-to-tray toggle was added later; default older saves to "minimize to tray".

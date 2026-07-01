@@ -8,13 +8,12 @@ import type {
   RecordedKey,
   HotkeyConflict
 } from '@shared/types'
-import type { ClickPosition, AuxStatus, MacroConfig, MacroEvent, WindowBounds } from '@shared/types'
+import type { ClickPosition, MacroConfig, MacroEvent, WindowBounds } from '@shared/types'
 import { IPC } from '@shared/ipc'
 import { createDefaultProfile, makeId } from '@shared/defaults'
 import { loadData, saveData, flushDataSync, activeProfile } from './persistence'
 import { SpamEngine } from './engine'
 import { GlobalInput } from './hotkeys'
-import { AuxController } from './auxmodes'
 import { getMousePosition } from './input'
 import { pointInRect } from './geometry'
 import { parseAccelerator } from './keymap'
@@ -27,7 +26,6 @@ let mainWindow: BrowserWindow | null = null
 let data: PersistedData
 let engine: SpamEngine
 let globalInput: GlobalInput
-let aux: AuxController
 let macroRecorder: MacroRecorder
 let macroPlayer: MacroPlayer
 let trayHandle: TrayHandle | null = null
@@ -45,10 +43,9 @@ function toggleSpam(): void {
   else engine.start(runProfile(), 'manual')
 }
 
-/** Arm the emergency-stop hotkey whenever anything is active. */
+/** Arm the emergency-stop hotkey whenever a run is active. */
 function updateEmergencyArmed(): void {
-  const s = aux.getStatus()
-  globalInput.setEmergencyArmed(engine.isRunning() || s.holdActive || s.periodicActive)
+  globalInput.setEmergencyArmed(engine.isRunning())
 }
 
 // ---------------------------------------------------------------------------
@@ -394,18 +391,6 @@ function registerIpc(): void {
 
   ipcMain.handle(IPC.GetMousePosition, () => getMousePosition())
 
-  ipcMain.handle(IPC.ToggleHold, () => {
-    aux.toggleHold()
-    return aux.getStatus()
-  })
-
-  ipcMain.handle(IPC.TogglePeriodic, () => {
-    aux.togglePeriodic()
-    return aux.getStatus()
-  })
-
-  ipcMain.handle(IPC.GetAuxStatus, () => aux.getStatus())
-
   ipcMain.handle(IPC.MacroRecordStart, () => startMacroRecording())
   ipcMain.handle(IPC.MacroRecordStop, () => stopMacroRecording())
 
@@ -503,16 +488,6 @@ if (!gotLock) {
       onError: (message: string) => send(IPC.ErrorEvent, message)
     })
 
-    aux = new AuxController({
-      getProfile: () => activeProfile(data),
-      onStatus: (s: AuxStatus) => {
-        send(IPC.AuxStatusChanged, s)
-        updateEmergencyArmed()
-        trayHandle?.update()
-      },
-      onError: (message: string) => send(IPC.ErrorEvent, message)
-    })
-
     globalInput = new GlobalInput({
       getProfile: () => activeProfile(data),
       getSettings: () => data.settings,
@@ -523,11 +498,7 @@ if (!gotLock) {
         void recordCurrentPosition()
       },
       onRecordPositionAt: (x, y, button) => appendClickPosition(x, y, button),
-      onToggleHold: () => aux.toggleHold(),
-      onEmergencyStop: () => {
-        engine.stop()
-        aux.stopAll()
-      },
+      onEmergencyStop: () => engine.stop(),
       isAppFocused: () => isMainWindowFocused(),
       isPointInAppWindow: (x, y) => isPointInMainWindow(x, y),
       onMacroToggleHotkey: () => toggleMacroRecording(),
@@ -557,12 +528,9 @@ if (!gotLock) {
 
     trayHandle = createTray({
       getWindow: () => mainWindow,
-      isSpamming: () => engine.isRunning() || aux.getStatus().holdActive || aux.getStatus().periodicActive,
+      isSpamming: () => engine.isRunning(),
       onToggleSpam: toggleSpam,
-      onPanic: () => {
-        engine.stop()
-        aux.stopAll()
-      },
+      onPanic: () => engine.stop(),
       onQuit: () => {
         isQuitting = true
         app.quit()
@@ -597,11 +565,6 @@ if (!gotLock) {
     }
     try {
       engine?.stop()
-    } catch {
-      /* ignore */
-    }
-    try {
-      aux?.stopAll() // release any held keys / stop the periodic timer
     } catch {
       /* ignore */
     }

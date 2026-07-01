@@ -8,7 +8,6 @@ import type {
   RecordedKey,
   HotkeyConflict,
   MousePoint,
-  AuxStatus,
   MacroEvent
 } from '@shared/types'
 
@@ -42,9 +41,6 @@ const api = {
   recordPositionsStart: (): Promise<void> => ipcRenderer.invoke(IPC.RecordPositionsStart),
   recordPositionsStop: (): Promise<void> => ipcRenderer.invoke(IPC.RecordPositionsStop),
   getMousePosition: (): Promise<MousePoint> => ipcRenderer.invoke(IPC.GetMousePosition),
-  toggleHold: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.ToggleHold),
-  togglePeriodic: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.TogglePeriodic),
-  getAuxStatus: (): Promise<AuxStatus> => ipcRenderer.invoke(IPC.GetAuxStatus),
 
   /** Scale the whole renderer (text, padding, buttons) like browser zoom. */
   setZoomFactor: (factor: number): void => webFrame.setZoomFactor(factor),
@@ -59,7 +55,6 @@ const api = {
   onError: (cb: (message: string) => void) => on<string>(IPC.ErrorEvent, cb),
   onHotkeyConflict: (cb: (c: HotkeyConflict) => void) => on<HotkeyConflict>(IPC.HotkeyConflict, cb),
   onDataUpdated: (cb: (data: PersistedData) => void) => on<PersistedData>(IPC.DataUpdated, cb),
-  onAuxStatus: (cb: (s: AuxStatus) => void) => on<AuxStatus>(IPC.AuxStatusChanged, cb),
   onMacroRecording: (cb: (recording: boolean) => void) => on<boolean>(IPC.MacroRecording, cb),
   onMacroPlaying: (cb: (playing: boolean) => void) => on<boolean>(IPC.MacroPlaying, cb)
 }

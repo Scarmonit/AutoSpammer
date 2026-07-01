@@ -66,18 +66,18 @@ test('renders all the core panels', async () => {
   await expect(win.locator('.startbtn')).toHaveCount(0)
 })
 
-test('Keys to Spam has Spam Keys + Periodic Actions accordions (no Hold Actions inside)', async () => {
+test('Keys to Spam has one Spam Keys accordion with the periodic list inlined', async () => {
   const keys = section('Keys to Spam')
   const accs = keys.locator('.acc')
-  await expect(accs).toHaveCount(2)
+  await expect(accs).toHaveCount(1)
   await expect(keys.locator('.acc__title', { hasText: 'Spam Keys' })).toBeVisible()
-  await expect(keys.locator('.acc__title', { hasText: 'Periodic Actions' })).toBeVisible()
-  // Hold Actions is no longer an accordion inside Keys to Spam.
+  // Periodic Actions is no longer its own accordion — its controls live inline
+  // below the spam options; Hold Actions stays a separate top-level section.
+  await expect(keys.locator('.acc__title', { hasText: 'Periodic Actions' })).toHaveCount(0)
   await expect(keys.locator('.acc__title', { hasText: 'Hold Actions' })).toHaveCount(0)
-  // Spam Keys is expanded by default; Periodic is collapsed.
   await expect(keys.locator('.acc', { hasText: 'Spam Keys' })).toHaveClass(/acc--open/)
+  await expect(keys.locator('.keystab__periodic')).toBeVisible()
   await expect(keys.locator('.keylist__summary')).toBeVisible()
-  await expect(keys.locator('.acc', { hasText: 'Periodic Actions' })).not.toHaveClass(/acc--open/)
 })
 
 test('Hold Actions is its own top-level section with Hold Keys + the three modes', async () => {
@@ -86,7 +86,10 @@ test('Hold Actions is its own top-level section with Hold Keys + the three modes
   // Hold Keys Down list controls.
   await expect(hold.getByRole('button', { name: '+ Add Key' })).toBeVisible()
   await expect(hold.getByRole('button', { name: '+ Left Click' })).toBeVisible()
-  await expect(hold.getByRole('button', { name: 'Hold', exact: true })).toBeVisible()
+  await expect(hold.getByRole('button', { name: '+ Right Click' })).toBeVisible()
+  // The standalone Hold toggle button and its hotkey row were removed.
+  await expect(hold.getByRole('button', { name: 'Hold', exact: true })).toHaveCount(0)
+  await expect(hold.getByText('Toggle hotkey')).toHaveCount(0)
   // The three hold-trigger mode cards, each with its own Set Key + Enable toggle.
   await expect(hold.locator('.holdmode--card')).toHaveCount(3)
   await expect(hold.getByRole('button', { name: 'Set Key' })).toHaveCount(3)
@@ -189,10 +192,12 @@ test('Macro section exposes record + set-hotkey controls', async () => {
 
 test('enabling Macro disables Keys to Spam and Click Positions', async () => {
   const macro = section('Macro')
-  // The Spam Keys accordion (open by default) holds the enable-keys toggle.
+  // The Spam Keys accordion (open by default) holds the enable-keys toggle
+  // first; the inlined periodic block below it has its own toggle.
   const keysToggle = section('Keys to Spam')
     .locator('.acc', { hasText: 'Spam Keys' })
     .locator('.section__toggle input')
+    .first()
   const posToggle = section('Click Positions').locator('.section__toggle input')
 
   // Make sure the spam sources start enabled.
@@ -262,21 +267,17 @@ test('Hold Actions section: Hold Keys Down + Add Key adds a row and a mouse chip
   await expect(hold.locator('.keyrow__static', { hasText: 'LMB' })).toBeVisible()
 })
 
-test('Keys to Spam → Periodic Actions accordion: multi-entry list with timers', async () => {
+test('Keys to Spam → inlined periodic presses: multi-entry list with timers', async () => {
   const keys = section('Keys to Spam')
-  const perAcc = keys.locator('.acc', { hasText: 'Periodic Actions' })
-  await perAcc.locator('.acc__head').click()
-  await expect(perAcc).toHaveClass(/acc--open/)
-  await expect(perAcc.locator('.section__toggle input')).toBeVisible()
+  const per = keys.locator('.keystab__periodic')
+  await expect(per).toBeVisible()
+  await expect(per.locator('.section__toggle input')).toBeVisible()
 
-  const rows = perAcc.locator('.periodicrow')
+  const rows = per.locator('.periodicrow')
   const before = await rows.count()
-  await perAcc.getByRole('button', { name: '+ Add Periodic Key' }).click()
+  await per.getByRole('button', { name: '+ Add Periodic Key' }).click()
   await expect(rows).toHaveCount(before + 1)
   await expect(rows.last().locator('.periodicrow__interval')).toBeVisible()
-
-  await perAcc.locator('.acc__head').click()
-  await expect(perAcc).not.toHaveClass(/acc--open/)
 })
 
 test('every section can be hidden/shown via its header toggle', async () => {
@@ -327,6 +328,9 @@ test('drag-to-resize a section works at a normal window size', async () => {
   await expect(splitter).toHaveClass(/rs-splitter/)
   await expect(splitter).toHaveCSS('cursor', 'ns-resize')
 
+  // The Keys pane can be taller than the window; bring the splitter on-screen
+  // so the mouse drag lands inside the viewport.
+  await splitter.scrollIntoViewIfNeeded()
   const before = (await keysPane.boundingBox())!.height
   const box = (await splitter.boundingBox())!
   // Drag the splitter down 100px. Panes no longer flex-shrink, so the pane

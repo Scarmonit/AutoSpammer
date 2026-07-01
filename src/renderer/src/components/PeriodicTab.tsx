@@ -6,10 +6,10 @@ import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
 import { prettyName } from '../keycapture'
 
-/** "Periodic" tab: keys/buttons pressed on their own timers (formerly its own section). */
+/** Periodic key presses (keys/buttons on their own timers), shown inside Keys to Spam. */
 export function PeriodicTab(): JSX.Element {
-  const { data, activeProfile, aux, updateProfile, togglePeriodic } = useStore()
-  if (!data || !activeProfile) return <></>
+  const { activeProfile, updateProfile } = useStore()
+  if (!activeProfile) return <></>
 
   const pk = activeProfile.periodicKey
   const entries = pk.entries
@@ -42,8 +42,7 @@ export function PeriodicTab(): JSX.Element {
       <div className={`keystab__body${enabled ? '' : ' keystab__body--off'}`}>
         <p className="helper">
           Presses each key / mouse button on its <strong>own timer</strong> (e.g. F every 5s, MB4 every
-          2s). When enabled they run alongside the spam; you can also run them standalone with the
-          button below.
+          2s). When enabled they run alongside the spam.
         </p>
 
         <div className="keylist">
@@ -84,13 +83,6 @@ export function PeriodicTab(): JSX.Element {
         <div className="keylist__actions">
           <button type="button" className="btn btn--ghost" onClick={addEntry}>
             + Add Periodic Key
-          </button>
-          <button
-            type="button"
-            className={`btn ${aux.periodicActive ? 'btn--danger' : 'btn--primary'}`}
-            onClick={() => void togglePeriodic()}
-          >
-            {aux.periodicActive ? '● Stop Periodic' : 'Start Periodic Press'}
           </button>
         </div>
       </div>

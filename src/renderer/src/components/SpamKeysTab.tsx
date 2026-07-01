@@ -4,6 +4,7 @@ import { makeId } from '@shared/defaults'
 import { useStore } from '../store'
 import { SectionToggle } from './SectionToggle'
 import { KeyRow } from './KeyRow'
+import { PeriodicTab } from './PeriodicTab'
 import { prettyName } from '../keycapture'
 
 /** "Spam Keys" tab: the key list, quick options, and live "Will spam" preview. */
@@ -145,19 +146,25 @@ export function SpamKeysTab(): JSX.Element {
             <span>Sequence Mode (fire keys one at a time)</span>
           </label>
         </div>
+      </div>
 
-        <div className="keylist__summary">
-          <span className="keylist__summary-label">Will spam:</span>{' '}
-          {summary.length > 0 ? (
-            summary.map((s, i) => (
-              <span key={i} className="chip">
-                {s}
-              </span>
-            ))
-          ) : (
-            <span className="muted">nothing yet</span>
-          )}
-        </div>
+      {/* Periodic key presses — its own Enabled switch, independent of the
+          spam-keys toggle above (so it isn't dimmed along with the key list). */}
+      <div className="keystab__periodic">
+        <PeriodicTab />
+      </div>
+
+      <div className={`keylist__summary${enabled ? '' : ' keystab__body--off'}`}>
+        <span className="keylist__summary-label">Will spam:</span>{' '}
+        {summary.length > 0 ? (
+          summary.map((s, i) => (
+            <span key={i} className="chip">
+              {s}
+            </span>
+          ))
+        ) : (
+          <span className="muted">nothing yet</span>
+        )}
       </div>
     </div>
   )

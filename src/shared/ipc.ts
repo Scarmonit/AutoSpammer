@@ -18,9 +18,6 @@ export const IPC = {
   RecordPositionsStart: 'record-positions:start',
   RecordPositionsStop: 'record-positions:stop',
   GetMousePosition: 'mouse:get-position',
-  ToggleHold: 'aux:toggle-hold',
-  TogglePeriodic: 'aux:toggle-periodic',
-  GetAuxStatus: 'aux:status',
   MacroRecordStart: 'macro:record-start',
   MacroRecordStop: 'macro:record-stop',
   MacroPlay: 'macro:play',
@@ -32,7 +29,6 @@ export const IPC = {
   ErrorEvent: 'event:error',
   HotkeyConflict: 'event:hotkey-conflict',
   DataUpdated: 'event:data-updated',
-  AuxStatusChanged: 'event:aux-status',
   MacroRecording: 'event:macro-recording',
   MacroPlaying: 'event:macro-playing'
 } as const

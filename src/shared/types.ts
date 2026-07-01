@@ -163,8 +163,6 @@ export interface AppSettings {
   emergencyHotkey: string
   /** Global hotkey to record the current mouse position, e.g. "F7". */
   recordPositionHotkey: string
-  /** Global hotkey to toggle the hold-keys-down mode, e.g. "F8". */
-  holdKeysHotkey: string
   /** Global hotkey to start/stop macro recording, e.g. "F10". */
   macroRecordHotkey: string
   /** Whole-window UI scale (zoom factor), e.g. 1 = 100%, 1.5 = 150%. */
@@ -203,7 +201,6 @@ export type HotkeyField =
   | 'toggleHotkey'
   | 'emergencyHotkey'
   | 'recordPositionHotkey'
-  | 'holdKeysHotkey'
 
 export interface HotkeyConflict {
   field: HotkeyField
@@ -214,10 +211,4 @@ export interface HotkeyConflict {
 export interface MousePoint {
   x: number
   y: number
-}
-
-/** Runtime on/off state of the auxiliary modes (not persisted). */
-export interface AuxStatus {
-  holdActive: boolean
-  periodicActive: boolean
 }

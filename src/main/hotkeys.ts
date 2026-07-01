@@ -28,7 +28,6 @@ interface Deps {
   onRecordPosition: () => void
   /** A live click captured while click-recording mode is on. */
   onRecordPositionAt: (x: number, y: number, button: 'left' | 'right') => void
-  onToggleHold: () => void
   onEmergencyStop: () => void
   /** Is the Auto Spammer window the focused window right now? */
   isAppFocused: () => boolean
@@ -62,7 +61,7 @@ export class GlobalInput {
   // hotkey's own press, so it never leaks into a recording).
   private suppressUpCodes = new Set<number>()
   private suppressUpButtons = new Set<number>()
-  /** Mouse-button hotkeys (toggle / record-position / hold-keys). */
+  /** Mouse-button hotkeys (toggle / record-position). */
   private mouseHotkeys = new Map<number, () => void>()
   /** Emergency hotkey when bound to a mouse button, plus whether it's armed. */
   private emergencyButton: number | null = null
@@ -148,8 +147,6 @@ export class GlobalInput {
     this.registerTrigger('recordPositionHotkey', s.recordPositionHotkey, taken, () =>
       this.deps.onRecordPosition()
     )
-    this.registerTrigger('holdKeysHotkey', s.holdKeysHotkey, taken, () => this.deps.onToggleHold())
-
     this.applyEmergency()
   }
 
@@ -384,7 +381,7 @@ export class GlobalInput {
       return
     }
 
-    // Mouse-button hotkeys (toggle / record-position / hold-keys).
+    // Mouse-button hotkeys (toggle / record-position).
     const hotkey = this.mouseHotkeys.get(button)
     if (hotkey) {
       hotkey()
