@@ -94,6 +94,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Remembers window size and position** — the app reopens exactly where and how big you left it.
 - **Mouse buttons everywhere** — every key binding accepts a keyboard key *or* a mouse button (Left/Right Click, MMB, MB4, MB5).
 - **Hotkey conflict prevention** — a key or mouse button can only drive one action; duplicate bindings are rejected with a clear message.
+- **Full-screen key capture** — changing any binding dims and blurs the whole app and waits for your next key or mouse button (**Esc** cancels). Every hotkey is suspended while capturing, so pressing e.g. the start/stop key binds it instead of starting a run.
 
 ### Core
 
