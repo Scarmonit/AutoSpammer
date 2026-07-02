@@ -20,8 +20,8 @@ export function SummaryBar(): JSX.Element | null {
     const keys = [
       ...p.entries.map((e) => (e.kind === 'key' ? (e.key.trim() ? prettyName(e.key) : '') : prettyName(e.kind))),
       ...(p.options.spacebar ? ['Space'] : []),
-      ...(p.options.leftClick ? ['LMB'] : []),
-      ...(p.options.rightClick ? ['RMB'] : [])
+      ...(p.options.leftClick ? ['Left Click'] : []),
+      ...(p.options.rightClick ? ['Right Click'] : [])
     ].filter(Boolean)
     if (keys.length > 0) {
       const seq = p.options.sequenceMode ? ', one at a time' : ''

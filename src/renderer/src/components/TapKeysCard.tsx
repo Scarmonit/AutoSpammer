@@ -80,55 +80,33 @@ export function TapKeysCard(): JSX.Element {
         >
           {recording ? '● Stop recording' : 'Record'}
         </button>
-        <button
-          type="button"
-          className={`chipbtn${o.spacebar ? ' chipbtn--on' : ''}`}
-          title="Also tap the spacebar"
-          onClick={() => patchOptions({ spacebar: !o.spacebar })}
-        >
-          Space
-        </button>
-        <button
-          type="button"
-          className={`chipbtn${o.leftClick ? ' chipbtn--on' : ''}`}
-          title="Also tap the left mouse button"
-          onClick={() => patchOptions({ leftClick: !o.leftClick })}
-        >
-          LMB
-        </button>
-        <button
-          type="button"
-          className={`chipbtn${o.rightClick ? ' chipbtn--on' : ''}`}
-          title="Also tap the right mouse button"
-          onClick={() => patchOptions({ rightClick: !o.rightClick })}
-        >
-          RMB
-        </button>
       </div>
 
-      <div className="optionrow">
-        <span className="optionrow__label">Delay between taps</span>
-        <input
-          className="input keyrow__delay"
-          type="number"
-          min={0}
-          value={o.defaultDelayMs}
-          onChange={(e) =>
-            patchOptions({ defaultDelayMs: Math.max(0, Number(e.target.value) || 0) })
-          }
-        />
-        <span className="keyrow__unit">ms</span>
-        <span className="optionrow__gap" />
-        <span className="switchlabel">
-          <SectionToggle
-            small
-            checked={o.sequenceMode}
-            onChange={(v) => patchOptions({ sequenceMode: v })}
-            label="One key at a time (sequence)"
-            title="Fire the keys one at a time instead of all together"
+      <div className="keylist__actions">
+        <label className="check" title="Also tap the spacebar">
+          <input
+            type="checkbox"
+            checked={o.spacebar}
+            onChange={(e) => patchOptions({ spacebar: e.target.checked })}
           />
-          <span>One key at a time (sequence)</span>
-        </span>
+          <span>Space</span>
+        </label>
+        <label className="check" title="Also tap the left mouse button">
+          <input
+            type="checkbox"
+            checked={o.leftClick}
+            onChange={(e) => patchOptions({ leftClick: e.target.checked })}
+          />
+          <span>Left Click</span>
+        </label>
+        <label className="check" title="Also tap the right mouse button">
+          <input
+            type="checkbox"
+            checked={o.rightClick}
+            onChange={(e) => patchOptions({ rightClick: e.target.checked })}
+          />
+          <span>Right Click</span>
+        </label>
       </div>
     </Section>
   )

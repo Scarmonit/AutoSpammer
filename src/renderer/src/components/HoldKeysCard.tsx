@@ -91,7 +91,7 @@ export function HoldKeysCard(): JSX.Element {
           title="Hold the left mouse button"
           onClick={() => toggleMouse('mouse-left')}
         >
-          LMB
+          Left Click
         </button>
         <button
           type="button"
@@ -99,7 +99,7 @@ export function HoldKeysCard(): JSX.Element {
           title="Hold the right mouse button"
           onClick={() => toggleMouse('mouse-right')}
         >
-          RMB
+          Right Click
         </button>
       </div>
     </Section>

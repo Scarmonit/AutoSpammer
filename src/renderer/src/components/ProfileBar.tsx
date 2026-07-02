@@ -28,7 +28,7 @@ export function ProfileBar(): JSX.Element {
       </select>
       <button
         type="button"
-        className="btn btn--ghost subbar__btn"
+        className="btn btn--primary subbar__btn"
         title="New profile"
         onClick={() => void createProfile('')}
       >
@@ -44,7 +44,7 @@ export function ProfileBar(): JSX.Element {
       </button>
       <button
         type="button"
-        className="btn btn--ghost subbar__btn"
+        className="btn btn--danger subbar__btn"
         title="Delete profile"
         disabled={data.profiles.length <= 1}
         onClick={() => void deleteProfile(activeProfile.id)}

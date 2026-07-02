@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.33.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.34.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.33.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.33.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.33.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.33.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.34.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.34.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.34.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.34.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -68,7 +68,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 1. **Open Auto Spammer** from the Desktop or Start-menu shortcut.
 2. In **Tap keys**, type a key to repeat — for example `a`, `space`, `1`, `f6`, or `numpad5`. Add more with **+ Add key**, or click **Record** and press keys to capture them automatically.
-3. *(Optional)* Set the speed under **Delay between taps** — a lower number is faster (10 ms is very fast). Each key can have its own delay too.
+3. *(Optional)* Give any key its own delay in its row — a lower number is faster (the default is a very fast 10 ms).
 4. **Click into the game or app** you want the input sent to, so it is the active window.
 5. Press your **Toggle Hotkey** (default **F6**) anywhere — even while a game is focused — to start. The current hotkey is shown in the top bar; click it to rebind.
 6. To stop: press the **Toggle Hotkey** again, or hit **Esc** for an emergency stop. You can also Start/Stop from the system-tray menu.
@@ -92,12 +92,12 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Independent enabling** — a switched-off card greys out (keeping its inner settings) and is skipped on the next run; switch it back on and everything resumes as it was.
 - **UI scale** — a top-bar dropdown zooms the whole app (100–200%) for readability; double-click to type a custom percentage.
 - **Remembers window size and position** — the app reopens exactly where and how big you left it.
-- **Mouse buttons everywhere** — every key binding accepts a keyboard key *or* a mouse button (LMB, RMB, MMB, MB4, MB5).
+- **Mouse buttons everywhere** — every key binding accepts a keyboard key *or* a mouse button (Left/Right Click, MMB, MB4, MB5).
 - **Hotkey conflict prevention** — a key or mouse button can only drive one action; duplicate bindings are rejected with a clear message.
 
 ### Core
 
-- **Tap any keys** — letters, digits, function keys, punctuation, and numpad, each with its own delay, together or one-at-a-time with the **sequence** switch.
+- **Tap any keys** — letters, digits, function keys, punctuation, and numpad, each with its own delay.
 - **Click positions** — move to and click exact screen spots (left or right) every cycle.
 - **Loop** — repeat forever, once, or a set number of times (in the header toolbar).
 - **Hold keys down** + **Hold triggers** — keys/buttons held for the whole run, plus three hold-to-act modes that run only while you physically hold their key or button.
@@ -133,7 +133,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 ### Tap keys
 
-The **Tap keys** card rapidly taps everything in its list, together, the whole time a run is active. Keys show as chips, each with its own optional delay. Use **+ Add key** (or **Record**), and the **Space** / **LMB** / **RMB** quick-add chips to include the spacebar or mouse buttons — a chip highlights while it's active. At the bottom: **Delay between taps** and the **One key at a time (sequence)** switch.
+The **Tap keys** card rapidly taps everything in its list, together, the whole time a run is active. Keys show as chips, each with its own optional delay. Use **+ Add key** (or **Record**) to build the list, and check **Space**, **Left Click**, or **Right Click** to include the spacebar or a mouse button — uncheck to stop tapping it. The checkboxes are saved with the profile.
 
 ### Timers
 
@@ -141,7 +141,7 @@ The **Timers** card presses each key or mouse button on its **own schedule** (e.
 
 ### Hold keys down
 
-Keys *or* mouse buttons held down non-stop while running (not tapped), e.g. hold **W** to keep walking. Use **+ Add key**, or the **LMB** / **RMB** chips to toggle a mouse button in and out of the held list.
+Keys *or* mouse buttons held down non-stop while running (not tapped), e.g. hold **W** to keep walking. Use **+ Add key**, or the **Left Click** / **Right Click** chips to toggle a mouse button in and out of the held list.
 
 ### Hold triggers
 
@@ -153,7 +153,7 @@ Nothing in this card runs on its own — things only happen **while you physical
 
 ### The WHEN RUNNING summary bar
 
-Under the profile row, the **WHEN RUNNING** bar describes your current setup in plain English — e.g. *"tap 2, 3 every 10 ms · press 1 every 5 s · hold RMB down — loops forever"*. It updates live as you change settings and only includes cards that are switched on. Hide it (or the hint text under each card title) from **Options → Display**.
+Under the profile row, the **WHEN RUNNING** bar describes your current setup in plain English — e.g. *"tap 2, 3 every 10 ms · press 1 every 5 s · hold Right Click down — loops forever"*. It updates live as you change settings and only includes cards that are switched on. Hide it (or the hint text under each card title) from **Options → Display**.
 
 ### Every card has its own switch
 
@@ -198,8 +198,7 @@ All layout choices — sizes, collapsed state, hidden state, and order — are s
 
 ### Handy extras
 
-- **Space / LMB / RMB quick chips** — add those to the tap list without typing.
-- **One key at a time (sequence)** — fire your keys one at a time per cycle instead of all at once.
+- **Space / Left Click / Right Click checkboxes** — add those to the tap list without typing.
 - **Profiles** — save different setups and switch between them; they persist across restarts.
 - **Options → Display** — hide the hint text and/or the WHEN RUNNING summary bar for a denser UI.
 

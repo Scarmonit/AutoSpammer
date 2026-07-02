@@ -143,8 +143,8 @@ export function findBindingConflict(
 }
 
 const MOUSE_LABELS: Record<string, string> = {
-  'mouse-left': 'LMB',
-  'mouse-right': 'RMB',
+  'mouse-left': 'Left Click',
+  'mouse-right': 'Right Click',
   'mouse-middle': 'MMB',
   'mouse-4': 'MB4',
   'mouse-5': 'MB5'

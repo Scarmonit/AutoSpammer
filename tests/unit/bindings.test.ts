@@ -82,7 +82,7 @@ describe('conflictMessage', () => {
 
   it('adapts the wording for mouse buttons', () => {
     expect(conflictMessage('mouse-left', 'Hold-to-Spam Key')).toBe(
-      'LMB is already bound to Hold-to-Spam Key'
+      'Left Click is already bound to Hold-to-Spam Key'
     )
     expect(conflictMessage('mouse-4', 'Focus Hold Key')).toBe(
       'MB4 is already bound to Focus Hold Key'

@@ -89,29 +89,20 @@ test('Tap keys: seeded keys, adding a key updates the summary live', async () =>
   await expect(win.locator('.summarybar')).toContainText('R')
 })
 
-test('Tap keys: Space / LMB / RMB quick-add chips toggle and highlight', async () => {
+test('Tap keys: Space / Left Click / Right Click checkboxes add to the spam list', async () => {
   const keys = section('Tap keys')
-  for (const name of ['Space', 'LMB', 'RMB']) {
-    const chip = keys.getByRole('button', { name, exact: true })
-    await expect(chip).not.toHaveClass(/chipbtn--on/)
-    await chip.click()
-    await expect(chip).toHaveClass(/chipbtn--on/)
-    await chip.click()
-    await expect(chip).not.toHaveClass(/chipbtn--on/)
+  for (const name of ['Space', 'Left Click', 'Right Click']) {
+    const box = keys.locator('.check', { hasText: name }).locator('input')
+    await expect(box).not.toBeChecked()
+    await box.check()
+    await expect(win.locator('.summarybar')).toContainText(name)
+    await box.uncheck()
+    await expect(box).not.toBeChecked()
   }
-})
-
-test('Tap keys: delay + "One key at a time (sequence)" switch', async () => {
-  const keys = section('Tap keys')
-  const optionrow = keys.locator('.optionrow')
-  await expect(optionrow).toContainText('Delay between taps')
-  await expect(optionrow.locator('input[type="number"]')).toHaveValue('10')
-
-  const seq = optionrow.locator('.section__toggle input')
-  await expect(seq).not.toBeChecked()
-  await seq.check()
-  await expect(win.locator('.summarybar')).toContainText('one at a time')
-  await seq.uncheck()
+  // The old "Delay between taps" row and sequence switch are gone.
+  await expect(keys.locator('.optionrow')).toHaveCount(0)
+  await expect(keys.getByText('Delay between taps')).toHaveCount(0)
+  await expect(keys.getByText('One key at a time (sequence)')).toHaveCount(0)
 })
 
 test('Timers: + Add timer adds a Press/every row', async () => {
@@ -131,7 +122,7 @@ test('Timers: + Add timer adds a Press/every row', async () => {
   await expect(rows).toHaveCount(before)
 })
 
-test('Hold keys down: add-key row, LMB/RMB chips add and remove held buttons', async () => {
+test('Hold keys down: add-key row, Left/Right Click chips add and remove held buttons', async () => {
   const hold = section('Hold keys down')
   const rows = hold.locator('.keyrow')
   const before = await rows.count()
@@ -143,14 +134,15 @@ test('Hold keys down: add-key row, LMB/RMB chips add and remove held buttons', a
   await expect(newKey).toHaveValue('w')
   await expect(win.locator('.summarybar')).toContainText('hold W down')
 
-  // LMB quick chip adds a removable chip and highlights; clicking again removes.
-  const lmb = hold.getByRole('button', { name: 'LMB', exact: true })
+  // The Left Click quick chip adds a removable chip and highlights; clicking
+  // again removes it.
+  const lmb = hold.getByRole('button', { name: 'Left Click', exact: true })
   await lmb.click()
   await expect(lmb).toHaveClass(/chipbtn--on/)
-  await expect(hold.locator('.keychip--removable', { hasText: 'LMB' })).toBeVisible()
+  await expect(hold.locator('.keychip--removable', { hasText: 'Left Click' })).toBeVisible()
   await lmb.click()
   await expect(lmb).not.toHaveClass(/chipbtn--on/)
-  await expect(hold.locator('.keychip--removable', { hasText: 'LMB' })).toHaveCount(0)
+  await expect(hold.locator('.keychip--removable', { hasText: 'Left Click' })).toHaveCount(0)
 
   // Remove the added key row again.
   await rows.last().locator('.rowx').click()
@@ -245,6 +237,11 @@ test('the Profile toolbar is a dropdown with New / Save / Delete (no Rename)', a
     await expect(profile.getByRole('button', { name, exact: true })).toBeVisible()
   }
   await expect(profile.getByRole('button', { name: 'Rename', exact: true })).toHaveCount(0)
+  // New is the accent/primary action; Delete is the danger action.
+  await expect(profile.getByRole('button', { name: 'New', exact: true })).toHaveClass(/btn--primary/)
+  await expect(profile.getByRole('button', { name: 'Delete', exact: true })).toHaveClass(
+    /btn--danger/
+  )
   await expect(profile.locator('select option')).toContainText(['Default'])
 })
 
