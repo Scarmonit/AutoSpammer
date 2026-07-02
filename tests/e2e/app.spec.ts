@@ -126,7 +126,34 @@ test('Timed key presses: + Add timed press adds a Press/every row', async () => 
   await expect(rows).toHaveCount(before + 1)
   await expect(rows.last()).toContainText('Press')
   await expect(rows.last()).toContainText('every')
-  await expect(rows.last().locator('.timerrow__interval')).toHaveValue('5')
+
+  const interval = rows.last().locator('.timerrow__interval')
+  await expect(interval).toHaveValue('5')
+
+  // The stepper moves by whole seconds (step=1), not 0.1.
+  await expect(interval).toHaveAttribute('step', '1')
+  await interval.focus()
+  await interval.press('ArrowUp')
+  await expect(interval).toHaveValue('6')
+  await interval.press('ArrowDown')
+  await expect(interval).toHaveValue('5')
+
+  // Decimals can still be typed by hand.
+  await interval.fill('2.5')
+  await interval.press('Enter')
+  await expect(interval).toHaveValue('2.5')
+
+  // Zero / negative / empty values error on blur or Enter and revert.
+  for (const bad of ['0', '-3', '']) {
+    await interval.fill(bad)
+    await interval.press('Enter')
+    await expect(win.locator('.toast--error')).toContainText(
+      'Please enter a value greater than 0.'
+    )
+    await expect(interval).toHaveValue('2.5') // reverted to the previous value
+    await win.locator('.toast--error').click() // dismiss for the next round
+    await expect(win.locator('.toast--error')).toHaveCount(0)
+  }
 
   // Clean up so later summary assertions stay simple.
   await rows.last().locator('.rowx').click()

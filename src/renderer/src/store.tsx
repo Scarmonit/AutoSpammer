@@ -31,6 +31,8 @@ interface Store {
   macroPlaying: boolean
   message: Message
   dismissMessage: () => void
+  /** Show an error toast from the UI (e.g. input validation). */
+  showError: (text: string) => void
 
   updateProfile: (updater: (p: Profile) => Profile) => void
   patchOptions: (patch: Partial<Options>) => void
@@ -431,6 +433,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     macroPlaying,
     message,
     dismissMessage: () => setMessage(null),
+    showError: (text: string) => setMessage({ kind: 'error', text }),
     updateProfile,
     patchOptions,
     setSectionHeight,

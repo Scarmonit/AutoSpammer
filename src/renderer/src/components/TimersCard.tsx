@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import type { PeriodicEntry } from '@shared/types'
 import { makeId } from '@shared/defaults'
 import { SECTION_ACCENTS } from '@shared/sections'
@@ -8,9 +8,77 @@ import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
 import { prettyName } from '../keycapture'
 
+interface IntervalProps {
+  /** The last committed (valid) interval, in seconds. */
+  value: number
+  onCommit: (seconds: number) => void
+  onError: (message: string) => void
+}
+
+/**
+ * The "every [n] sec" field. The arrows step by whole seconds; decimals can
+ * still be typed by hand. The value is validated when the field loses focus or
+ * on Enter (not per keystroke, so it can be cleared while retyping): anything
+ * empty, zero, or negative shows an error and reverts to the previous value.
+ * Valid values commit immediately as they're typed/stepped.
+ */
+function IntervalField({ value, onCommit, onError }: IntervalProps): JSX.Element {
+  const [draft, setDraft] = useState(String(value))
+  const [focused, setFocused] = useState(false)
+
+  // Track external changes (profile switch, etc.) — but never clobber an
+  // in-progress edit (e.g. a trailing "2." while typing "2.5").
+  useEffect(() => {
+    if (!focused) setDraft(String(value))
+  }, [value, focused])
+
+  const parse = (text: string): number | null => {
+    if (text.trim() === '') return null
+    const n = Number(text)
+    return Number.isFinite(n) && n > 0 ? n : null
+  }
+
+  const commit = (): void => {
+    const n = parse(draft)
+    if (n === null) {
+      onError('Please enter a value greater than 0.')
+      setDraft(String(value)) // revert to the previous valid value
+      return
+    }
+    onCommit(n)
+    setDraft(String(n))
+  }
+
+  return (
+    <input
+      className="input timerrow__interval"
+      type="number"
+      min={1}
+      step={1}
+      value={draft}
+      onChange={(ev) => {
+        const text = ev.target.value
+        setDraft(text)
+        // Valid values (incl. stepper clicks) apply live; invalid intermediate
+        // states (empty while retyping) wait for blur/Enter to be validated.
+        const n = parse(text)
+        if (n !== null) onCommit(n)
+      }}
+      onFocus={() => setFocused(true)}
+      onBlur={() => {
+        setFocused(false)
+        commit()
+      }}
+      onKeyDown={(ev) => {
+        if (ev.key === 'Enter') (ev.target as HTMLInputElement).blur()
+      }}
+    />
+  )
+}
+
 /** "Timed key presses" card: keys/buttons pressed on their own schedules during a run. */
 export function TimersCard(): JSX.Element {
-  const { activeProfile, updateProfile } = useStore()
+  const { activeProfile, updateProfile, showError } = useStore()
   if (!activeProfile) return <></>
 
   const pk = activeProfile.periodicKey
@@ -57,15 +125,10 @@ export function TimersCard(): JSX.Element {
               onCapture={(name) => patchEntry(e.id, { key: name })}
             />
             <span className="keyrow__label">every</span>
-            <input
-              className="input timerrow__interval"
-              type="number"
-              min={0.1}
-              step={0.1}
+            <IntervalField
               value={e.intervalSec}
-              onChange={(ev) =>
-                patchEntry(e.id, { intervalSec: Math.max(0.1, Number(ev.target.value) || 0.1) })
-              }
+              onCommit={(seconds) => patchEntry(e.id, { intervalSec: seconds })}
+              onError={showError}
             />
             <span className="keyrow__unit">sec</span>
             <span className="keyrow__spacer" />
