@@ -5,21 +5,29 @@ import { useSectionId, useSectionDrag } from './sectionContext'
 interface Props {
   title: string
   children: React.ReactNode
+  /** Friendly one-line description under the title (hidden by "Show hints"). */
+  description?: string
+  /** Accent color for the title dot + the header switch. */
+  accent?: string
   right?: React.ReactNode
   /** Visually grey out the body (e.g. when the section is toggled off). */
   dim?: boolean
 }
 
-export function Section({ title, children, right, dim = false }: Props): JSX.Element {
+export function Section({ title, children, description, accent, right, dim = false }: Props): JSX.Element {
   const id = useSectionId()
   const drag = useSectionDrag()
-  const { activeProfile, toggleSectionCollapsed } = useStore()
+  const { data, activeProfile, toggleSectionCollapsed } = useStore()
   // Only sections rendered inside a ResizablePane (i.e. with an id) are collapsible.
   const collapsible = id !== null
   const collapsed = collapsible && !!activeProfile?.collapsedSections?.[id as string]
+  const showHints = data?.settings.showHints !== false
 
   return (
-    <section className={`section${collapsed ? ' section--collapsed' : ''}`}>
+    <section
+      className={`section${collapsed ? ' section--collapsed' : ''}`}
+      style={accent ? ({ '--accent': accent } as React.CSSProperties) : undefined}
+    >
       <header className="section__head">
         {/* The grip is the ONLY drag handle for reordering — the pane is not
             draggable, so body inputs and the resize splitter keep working. */}
@@ -32,7 +40,11 @@ export function Section({ title, children, right, dim = false }: Props): JSX.Ele
         >
           ⠿
         </span>
-        <h2 className="section__title">{title}</h2>
+        <span className="section__dot" aria-hidden="true" />
+        <div className="section__titles">
+          <h2 className="section__title">{title}</h2>
+          {description && showHints && <p className="section__desc hint">{description}</p>}
+        </div>
         <div className="section__head-actions">
           {right}
           {collapsible && (

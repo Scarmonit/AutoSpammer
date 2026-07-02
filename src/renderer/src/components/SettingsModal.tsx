@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { useStore } from '../store'
+import { SectionToggle } from './SectionToggle'
 
 interface Props {
   onClose: () => void
@@ -41,6 +42,29 @@ export function SettingsModal({ onClose }: Props): JSX.Element {
         </header>
 
         <div className="modal__body">
+          <div className="modal__group">Display</div>
+          <div className="modal__switchrow">
+            <span>Show hints</span>
+            <SectionToggle
+              small
+              checked={settings.showHints}
+              onChange={(v) => void updateSettings({ showHints: v })}
+              label="Show hints"
+              title="Show the friendly descriptions under section titles"
+            />
+          </div>
+          <div className="modal__switchrow">
+            <span>Show summary bar</span>
+            <SectionToggle
+              small
+              checked={settings.showSummaryBar}
+              onChange={(v) => void updateSettings({ showSummaryBar: v })}
+              label="Show summary bar"
+              title={'Show the "WHEN RUNNING" summary under the profile row'}
+            />
+          </div>
+
+          <div className="modal__group">Window</div>
           <label className="check">
             <input
               type="checkbox"

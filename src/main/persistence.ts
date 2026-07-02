@@ -42,6 +42,8 @@ function migrate(data: PersistedData): PersistedData {
   // from older saves.
   delete (data.settings as unknown as Record<string, unknown>).periodicKeyHotkey
   delete (data.settings as unknown as Record<string, unknown>).holdKeysHotkey
+  if (typeof data.settings.showHints !== 'boolean') data.settings.showHints = true
+  if (typeof data.settings.showSummaryBar !== 'boolean') data.settings.showSummaryBar = true
   // UI scale was added later; keep it a sane zoom factor.
   data.settings.uiScale = Math.min(2.5, Math.max(1, Number(data.settings.uiScale) || 1))
   // Close-to-tray toggle was added later; default older saves to "minimize to tray".
@@ -84,6 +86,10 @@ function migrate(data: PersistedData): PersistedData {
     // The macro recorder was added later; older saves start with an empty macro.
     if (!p.macro || typeof p.macro !== 'object') p.macro = { enabled: false, events: [] }
     if (!Array.isArray(p.macro.events)) p.macro.events = []
+    // v1.33 split "Keys to Spam" (spam + periodic) into Tap keys + Timers, and
+    // "Hold Actions" into Hold keys down + Hold triggers. Carry old master
+    // switches, visibility, and layout positions over to the split cards.
+    migrateSplitSections(p)
     // Draggable section order was added later; normalise (adds any new sections).
     p.sectionLayout = normalizeLayout(p.sectionLayout)
   }
@@ -93,6 +99,62 @@ function migrate(data: PersistedData): PersistedData {
     data.settings.activeProfileId = data.profiles[0].id
   }
   return data
+}
+
+/** Map the pre-1.33 'keys' / 'holdActions' section ids onto the split cards. */
+function migrateSplitSections(p: Profile): void {
+  // Layout: replace 'holdActions' with the two new cards and slot 'timers' in
+  // right after 'keys', but only for genuinely old layouts — never reshuffle a
+  // layout the user has already arranged with the new ids.
+  const layout = p.sectionLayout as { left?: string[]; right?: string[] } | null | undefined
+  if (layout) {
+    const all = [...(layout.left ?? []), ...(layout.right ?? [])]
+    const isOldLayout = all.includes('holdActions') && !all.includes('holdKeys')
+    if (isOldLayout) {
+      const expand = (arr?: string[]): string[] =>
+        (arr ?? []).flatMap((id) =>
+          id === 'keys' && !all.includes('timers')
+            ? ['keys', 'timers']
+            : id === 'holdActions'
+              ? ['holdKeys', 'holdTriggers']
+              : [id]
+        )
+      layout.left = expand(layout.left)
+      layout.right = expand(layout.right)
+    }
+  }
+
+  // Master Enabled switches: the old section masters become the new cards'
+  // feature flags ('Hold triggers' keeps using disabledSections — it has none).
+  const d = p.disabledSections as Record<string, boolean>
+  if (d?.keys === true) {
+    p.options.enableKeys = false
+    p.periodicKey.enabled = false
+    delete d.keys
+  }
+  if (d?.holdActions === true) {
+    p.holdKeys.enabled = false
+    d.holdTriggers = true
+    delete d.holdActions
+  }
+
+  const h = p.hiddenSections as Record<string, boolean>
+  if (h?.keys === true) h.timers = true // 'keys' itself is still a valid id
+  if (h?.holdActions === true) {
+    h.holdKeys = true
+    h.holdTriggers = true
+    delete h.holdActions
+  }
+
+  const c = p.collapsedSections as Record<string, boolean>
+  if (c?.holdActions === true) {
+    c.holdKeys = true
+    c.holdTriggers = true
+    delete c.holdActions
+  }
+  if (p.sectionHeights && 'holdActions' in p.sectionHeights) {
+    delete p.sectionHeights['holdActions']
+  }
 }
 
 async function writeNow(data: PersistedData): Promise<void> {

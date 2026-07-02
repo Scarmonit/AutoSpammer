@@ -1,4 +1,5 @@
 import React from 'react'
+import { SECTION_ACCENTS } from '@shared/sections'
 import { useStore } from '../store'
 import { Section } from './Section'
 import { SectionToggle } from './SectionToggle'
@@ -13,7 +14,9 @@ export function TextFunctionPanel(): JSX.Element {
 
   return (
     <Section
-      title="Text Function"
+      title="Text function"
+      description="Types this text once per cycle while running."
+      accent={SECTION_ACCENTS.textFunction}
       dim={!tf.enabled}
       right={
         <SectionToggle
@@ -23,11 +26,6 @@ export function TextFunctionPanel(): JSX.Element {
         />
       }
     >
-      <p className="helper">
-        When <strong>Enabled</strong>, types this string once per cycle while a run is active
-        (your <strong>Toggle Hotkey</strong> / <strong>F6</strong>).
-      </p>
-
       <div className="field">
         <label>Text</label>
         <input

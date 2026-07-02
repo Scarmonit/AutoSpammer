@@ -68,7 +68,7 @@ describe('section visibility', () => {
     expect(isSectionHidden(null, 'keys')).toBe(false)
   })
 
-  it('hiding "Keys to Spam" / "Hold Actions" disables what each one contains', () => {
+  it('hiding a card disables exactly what it contains', () => {
     const p = createDefaultProfile()
     p.options.enableKeys = true
     p.options.enableClickPositions = true
@@ -77,16 +77,13 @@ describe('section visibility', () => {
     p.holdToSpam.enabled = true
     p.focusHold.enabled = true
     p.rightClickHold.enabled = true
-    // "Keys to Spam" holds Spam Keys + Periodic; "Hold Actions" holds Hold Keys
-    // Down + the three hold modes.
-    p.hiddenSections = { keys: true, holdActions: true }
+    p.hiddenSections = { keys: true, timers: true, holdKeys: true, holdTriggers: true }
 
     const eff = applyHiddenSections(p)
-    // Keys to Spam features...
-    expect(eff.options.enableKeys).toBe(false)
-    expect(eff.periodicKey.enabled).toBe(false)
-    // Hold Actions features...
-    expect(eff.holdKeys.enabled).toBe(false)
+    expect(eff.options.enableKeys).toBe(false) // Tap keys
+    expect(eff.periodicKey.enabled).toBe(false) // Timers
+    expect(eff.holdKeys.enabled).toBe(false) // Hold keys down
+    // Hold triggers (all three modes)...
     expect(eff.holdToSpam.enabled).toBe(false)
     expect(eff.focusHold.enabled).toBe(false)
     expect(eff.rightClickHold.enabled).toBe(false)
@@ -98,27 +95,39 @@ describe('section visibility', () => {
     expect(p.holdToSpam.enabled).toBe(true)
   })
 
-  it('a master-disabled section skips its features on a run (like hidden)', () => {
+  it('hiding one split card leaves its former sibling running', () => {
     const p = createDefaultProfile()
     p.options.enableKeys = true
     p.periodicKey.enabled = true
     p.holdKeys.enabled = true
     p.holdToSpam.enabled = true
-    p.focusHold.enabled = true
-    p.rightClickHold.enabled = true
-    // The sections are still visible, but their master Enabled switch is off.
-    p.disabledSections = { keys: true, holdActions: true }
+    p.hiddenSections = { timers: true, holdTriggers: true }
 
     const eff = applyHiddenSections(p)
-    expect(eff.options.enableKeys).toBe(false)
     expect(eff.periodicKey.enabled).toBe(false)
-    expect(eff.holdKeys.enabled).toBe(false)
+    expect(eff.holdToSpam.enabled).toBe(false)
+    // Tap keys and Hold keys down are separate cards now — unaffected.
+    expect(eff.options.enableKeys).toBe(true)
+    expect(eff.holdKeys.enabled).toBe(true)
+  })
+
+  it('the Hold triggers master switch (disabledSections) skips the three modes', () => {
+    const p = createDefaultProfile()
+    p.holdKeys.enabled = true
+    p.holdToSpam.enabled = true
+    p.focusHold.enabled = true
+    p.rightClickHold.enabled = true
+    // The card is visible, but its master switch is off.
+    p.disabledSections = { holdTriggers: true }
+
+    const eff = applyHiddenSections(p)
     expect(eff.holdToSpam.enabled).toBe(false)
     expect(eff.focusHold.enabled).toBe(false)
     expect(eff.rightClickHold.enabled).toBe(false)
-    // Stored flags untouched (re-enabling the section restores them).
-    expect(p.options.enableKeys).toBe(true)
-    expect(p.holdKeys.enabled).toBe(true)
+    // Hold keys down has its own card + flag — unaffected.
+    expect(eff.holdKeys.enabled).toBe(true)
+    // Stored flags untouched (re-enabling the card restores them).
+    expect(p.holdToSpam.enabled).toBe(true)
   })
 
   it('applyHiddenSections is a no-op when nothing is hidden or disabled', () => {

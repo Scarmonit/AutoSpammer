@@ -15,7 +15,9 @@ export interface SectionLayout {
 /** Every section id the app knows about (used to reconcile saved layouts). */
 export const SECTION_IDS = [
   'keys',
-  'holdActions',
+  'timers',
+  'holdKeys',
+  'holdTriggers',
   'clickPositions',
   'textFunction',
   'macro'
@@ -25,17 +27,30 @@ export type SectionId = (typeof SECTION_IDS)[number]
 
 /** Human-readable names, matching each section's on-screen header title. */
 export const SECTION_LABELS: Record<string, string> = {
-  keys: 'Keys to Spam',
-  holdActions: 'Hold Actions',
-  clickPositions: 'Click Positions',
-  textFunction: 'Text Function',
+  keys: 'Tap keys',
+  timers: 'Timers',
+  holdKeys: 'Hold keys down',
+  holdTriggers: 'Hold triggers',
+  clickPositions: 'Click positions',
+  textFunction: 'Text function',
   macro: 'Macro'
+}
+
+/** Accent color per section: the title dot + its header switch. */
+export const SECTION_ACCENTS: Record<string, string> = {
+  keys: '#3b82f6',
+  timers: '#eab308',
+  holdKeys: '#3ddc84',
+  holdTriggers: '#a78bfa',
+  clickPositions: '#f472b6',
+  textFunction: '#22d3ee',
+  macro: '#e879f9'
 }
 
 /** The out-of-the-box arrangement. */
 export const DEFAULT_LAYOUT: SectionLayout = {
-  left: ['keys', 'clickPositions'],
-  right: ['holdActions', 'textFunction', 'macro']
+  left: ['keys', 'timers', 'clickPositions'],
+  right: ['holdKeys', 'holdTriggers', 'textFunction', 'macro']
 }
 
 export function cloneDefaultLayout(): SectionLayout {
@@ -121,11 +136,14 @@ export function isSectionHidden(
 }
 
 /**
- * Return the profile with every hidden section's runtime feature forced off, so
- * a hidden section never participates in a spam run (Start Spam / F6 / hold
+ * Return the profile with every hidden/master-disabled section's runtime feature
+ * forced off, so it never participates in a spam run (Start Spam / F6 / hold
  * triggers). The stored enable flags are untouched — re-showing a section
- * restores its original behaviour. Config-only sections (Profiles, Loop, Toggle
- * Hotkey) have no per-run feature to disable, so only the UI hides them.
+ * restores its original behaviour.
+ *
+ * Most cards' header switch IS their feature flag (enableKeys, periodicKey,
+ * holdKeys, textFunction, macro, enableClickPositions); "Hold triggers" has no
+ * single flag, so its header switch lives in disabledSections['holdTriggers'].
  */
 export function applyHiddenSections(profile: Profile): Profile {
   const h = profile.hiddenSections
@@ -134,29 +152,25 @@ export function applyHiddenSections(profile: Profile): Profile {
   const noDisabled = !d || Object.keys(d).length === 0
   if (noHidden && noDisabled) return profile
 
-  // A section's features don't run if it's hidden (Sections manager) OR its
-  // master Enabled switch is off. "Keys to Spam" holds the Spam Keys list and
-  // Periodic Actions; "Hold Actions" holds Hold Keys Down + the three hold modes.
   const off = (id: string): boolean => h?.[id] === true || d?.[id] === true
-  const keysOff = off('keys')
-  const holdOff = off('holdActions')
+  const triggersOff = off('holdTriggers')
 
   return {
     ...profile,
     options: {
       ...profile.options,
-      enableKeys: profile.options.enableKeys && !keysOff,
+      enableKeys: profile.options.enableKeys && !off('keys'),
       enableClickPositions: profile.options.enableClickPositions && !off('clickPositions')
     },
+    periodicKey: off('timers') ? { ...profile.periodicKey, enabled: false } : profile.periodicKey,
+    holdKeys: off('holdKeys') ? { ...profile.holdKeys, enabled: false } : profile.holdKeys,
     textFunction: off('textFunction')
       ? { ...profile.textFunction, enabled: false }
       : profile.textFunction,
-    holdKeys: holdOff ? { ...profile.holdKeys, enabled: false } : profile.holdKeys,
-    periodicKey: keysOff ? { ...profile.periodicKey, enabled: false } : profile.periodicKey,
     macro: off('macro') ? { ...profile.macro, enabled: false } : profile.macro,
-    holdToSpam: holdOff ? { ...profile.holdToSpam, enabled: false } : profile.holdToSpam,
-    focusHold: holdOff ? { ...profile.focusHold, enabled: false } : profile.focusHold,
-    rightClickHold: holdOff
+    holdToSpam: triggersOff ? { ...profile.holdToSpam, enabled: false } : profile.holdToSpam,
+    focusHold: triggersOff ? { ...profile.focusHold, enabled: false } : profile.focusHold,
+    rightClickHold: triggersOff
       ? { ...profile.rightClickHold, enabled: false }
       : profile.rightClickHold
   }

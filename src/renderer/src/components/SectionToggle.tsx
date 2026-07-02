@@ -3,24 +3,29 @@ import React from 'react'
 interface Props {
   checked: boolean
   onChange: (checked: boolean) => void
-  /** Accessible/visible label, e.g. "Enabled". */
+  /** Accessible name for the switch, e.g. "Enabled". */
   label?: string
   title?: string
+  /** Smaller switch for inline rows (hold triggers, settings). */
+  small?: boolean
 }
 
 /**
- * Compact on/off switch designed to sit in a Section header (the `right` slot).
- * Used to enable/disable whether a section contributes to the spam run.
+ * Toggle switch, colored by the surrounding section's accent (--accent).
+ * Sits in a Section header to enable/disable that card, and inline in rows.
  */
-export function SectionToggle({ checked, onChange, label = 'Enabled', title }: Props): JSX.Element {
+export function SectionToggle({ checked, onChange, label = 'Enabled', title, small = false }: Props): JSX.Element {
   return (
-    <label className="section__toggle" title={title ?? `${label} — include this section when spamming`}>
+    <label
+      className={`section__toggle${small ? ' section__toggle--sm' : ''}`}
+      title={title ?? `${label} — include this when running`}
+    >
       <input
         type="checkbox"
+        aria-label={label}
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />
-      <span>{label}</span>
     </label>
   )
 }

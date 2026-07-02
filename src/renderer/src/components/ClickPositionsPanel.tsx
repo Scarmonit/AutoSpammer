@@ -1,6 +1,7 @@
 import React from 'react'
 import type { ClickPosition } from '@shared/types'
 import { prettyBindingLabel } from '@shared/bindings'
+import { SECTION_ACCENTS } from '@shared/sections'
 import { useStore } from '../store'
 import { Section } from './Section'
 import { SectionToggle } from './SectionToggle'
@@ -33,7 +34,9 @@ export function ClickPositionsPanel(): JSX.Element {
 
   return (
     <Section
-      title="Click Positions"
+      title="Click positions"
+      description="Clicks these saved screen spots, in order, on repeat."
+      accent={SECTION_ACCENTS.clickPositions}
       dim={!enabled}
       right={
         <SectionToggle
@@ -43,13 +46,13 @@ export function ClickPositionsPanel(): JSX.Element {
         />
       }
     >
-      <p className="helper">
+      <p className="helper hint">
         Aim your mouse at a spot and press{' '}
         <code className="keycap keycap--inline">
           {recordHotkey ? prettyBindingLabel(recordHotkey) : '—'}
         </code>{' '}
-        to record it — works even while a game is focused. Or hit <strong>Record Clicks</strong> and every
-        left/right click you make is saved automatically. Recorded spots are clicked while spamming.
+        to record it — works even while a game is focused. Or hit <strong>Record clicks</strong> and every
+        left/right click you make is saved automatically.
       </p>
 
       <div className="field">
@@ -63,7 +66,7 @@ export function ClickPositionsPanel(): JSX.Element {
       </div>
 
       <div className="poslist">
-        {positions.length === 0 && <p className="muted">No positions yet.</p>}
+        {positions.length === 0 && <p className="muted">No positions saved yet.</p>}
         {positions.map((p, i) => (
           <div className="posrow" key={p.id}>
             <span className="posrow__idx">{i + 1}</span>
@@ -105,23 +108,24 @@ export function ClickPositionsPanel(): JSX.Element {
       <div className="keylist__actions">
         <button
           type="button"
-          className="btn btn--ghost"
+          className="chipbtn"
+          title="Save the current mouse position"
           disabled={recordingPositions}
           onClick={() => void addCurrentPosition()}
         >
-          + Add Current Mouse Position
+          + Add position
         </button>
         <button
           type="button"
-          className={`btn ${recordingPositions ? 'btn--danger btn--recording' : 'btn--ghost'}`}
+          className={`chipbtn${recordingPositions ? ' chipbtn--recording' : ''}`}
           title="Record every left/right click as a new position"
           onClick={() => void toggleRecordingPositions()}
         >
-          {recordingPositions ? '■ Stop Recording' : '● Record Clicks'}
+          {recordingPositions ? '■ Stop recording' : '● Record clicks'}
         </button>
         <button
           type="button"
-          className="btn btn--ghost"
+          className="chipbtn"
           disabled={positions.length === 0}
           onClick={() => setPositions([])}
         >

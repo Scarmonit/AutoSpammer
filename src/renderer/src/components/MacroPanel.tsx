@@ -1,6 +1,7 @@
 import React from 'react'
 import type { MacroEvent } from '@shared/types'
 import { prettyBindingLabel } from '@shared/bindings'
+import { SECTION_ACCENTS } from '@shared/sections'
 import { useStore } from '../store'
 import { Section } from './Section'
 import { SectionToggle } from './SectionToggle'
@@ -56,33 +57,35 @@ export function MacroPanel(): JSX.Element {
   return (
     <Section
       title="Macro"
+      description="Record a series of clicks & keys, then replay it on loop."
+      accent={SECTION_ACCENTS.macro}
       dim={!macro.enabled}
       right={
         <SectionToggle
           checked={macro.enabled}
           onChange={(v) => setMacroEnabled(v)}
-          title="Use the macro (turns off Keys to Spam and Click Positions)"
+          title="Use the macro (turns off Tap keys and Click positions)"
         />
       }
     >
-      <p className="helper">
-        Records <strong>everything</strong> — keys, clicks, and mouse movement with exact timing — then
-        replays it. Enabling Macro turns off Keys to Spam and Click Positions (and vice-versa). When
-        enabled, your <strong>Toggle Hotkey</strong> (F6) plays it on a loop per your{' '}
-        <strong>Loop</strong> setting; <strong>Play</strong> below is a one-shot preview.
+      <p className="helper hint">
+        Records <strong>everything</strong> — keys, clicks, and mouse movement with exact timing.
+        Enabling Macro turns off Tap keys and Click positions (and vice-versa). When enabled, your{' '}
+        <strong>Toggle Hotkey</strong> (F6) plays it on a loop per your <strong>Loop</strong> setting;{' '}
+        <strong>Play</strong> below is a one-shot preview.
       </p>
 
       <div className="keylist__actions">
         <button
           type="button"
-          className={`btn ${macroRecording ? 'btn--danger btn--recording' : 'btn--ghost'}`}
+          className={`chipbtn${macroRecording ? ' chipbtn--recording' : ''}`}
           disabled={macroPlaying}
           onClick={() => void toggleMacroRecording()}
         >
-          {macroRecording ? '■ Stop Recording' : '● Record'}
+          {macroRecording ? '■ Stop recording' : '● Record'}
         </button>
         <CaptureButton
-          label={`Set Record Hotkey (${recordHotkey ? prettyBindingLabel(recordHotkey) : 'unset'})`}
+          label={`Record hotkey (${recordHotkey ? prettyBindingLabel(recordHotkey) : 'unset'})`}
           mode="accelerator"
           className="btn--ghost"
           onCapture={(accel) => void assignBinding('macroRecordHotkey', accel)}

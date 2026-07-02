@@ -12,6 +12,7 @@ interface Props {
   onDrop: () => void
 }
 
+/** One tap-key row: chip-style key on the left, its delay + remove on the right. */
 export function KeyRow({
   entry,
   onChange,
@@ -40,10 +41,10 @@ export function KeyRow({
       </span>
 
       {isMouse ? (
-        <span className="keyrow__mouse">{prettyName(entry.key || entry.kind)}</span>
+        <span className="keychip">{prettyName(entry.key || entry.kind)}</span>
       ) : (
         <input
-          className="input keyrow__key"
+          className="keychip"
           value={entry.key}
           placeholder="key (e.g. a, space, f6)"
           spellCheck={false}
@@ -53,6 +54,8 @@ export function KeyRow({
         />
       )}
 
+      <span className="keyrow__spacer" />
+      <span className="keyrow__label">delay</span>
       <input
         className="input keyrow__delay"
         type="number"
@@ -66,7 +69,7 @@ export function KeyRow({
       />
       <span className="keyrow__unit">ms</span>
 
-      <button type="button" className="btn btn--icon btn--danger" title="Remove" onClick={onDelete}>
+      <button type="button" className="rowx" title="Remove" onClick={onDelete}>
         ×
       </button>
     </div>

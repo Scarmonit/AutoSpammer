@@ -79,6 +79,8 @@ export function createDefaultSettings(activeProfileId: string): AppSettings {
     recordPositionHotkey: 'F7',
     macroRecordHotkey: 'F10',
     uiScale: 1,
+    showHints: true,
+    showSummaryBar: true,
     minimizeToTrayOnClose: true,
     windowBounds: null,
     activeProfileId

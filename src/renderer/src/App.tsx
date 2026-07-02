@@ -6,8 +6,10 @@ import {
   type SectionColumnName
 } from '@shared/sections'
 import { useStore } from './store'
-import { KeysSection } from './components/KeysSection'
-import { HoldActionsSection } from './components/HoldActionsSection'
+import { TapKeysCard } from './components/TapKeysCard'
+import { TimersCard } from './components/TimersCard'
+import { HoldKeysCard } from './components/HoldKeysCard'
+import { HoldTriggersCard } from './components/HoldTriggersCard'
 import { TextFunctionPanel } from './components/TextFunctionPanel'
 import { ClickPositionsPanel } from './components/ClickPositionsPanel'
 import { MacroPanel } from './components/MacroPanel'
@@ -16,15 +18,18 @@ import { UiScaleControl } from './components/UiScaleControl'
 import { TopBarHotkeys } from './components/TopBarHotkeys'
 import { ProfileBar } from './components/ProfileBar'
 import { LoopBar } from './components/LoopBar'
+import { SummaryBar } from './components/SummaryBar'
 import { ResizablePane } from './components/ResizablePane'
 import { SettingsModal } from './components/SettingsModal'
 import { SectionManager } from './components/SectionManager'
 
-// Each section id maps to its rendered panel. Built once; the columns are laid
+// Each section id maps to its rendered card. Built once; the columns are laid
 // out from the (per-profile) drag-and-drop order.
 const SECTIONS: Record<string, JSX.Element> = {
-  keys: <KeysSection />,
-  holdActions: <HoldActionsSection />,
+  keys: <TapKeysCard />,
+  timers: <TimersCard />,
+  holdKeys: <HoldKeysCard />,
+  holdTriggers: <HoldTriggersCard />,
   clickPositions: <ClickPositionsPanel />,
   textFunction: <TextFunctionPanel />,
   macro: <MacroPanel />
@@ -85,7 +90,7 @@ function SectionColumn({
 }
 
 export function App(): JSX.Element {
-  const { loaded, message, dismissMessage, activeProfile, setSectionLayout, resetSectionLayout } =
+  const { loaded, data, message, dismissMessage, activeProfile, setSectionLayout, resetSectionLayout } =
     useStore()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null)
@@ -174,7 +179,7 @@ export function App(): JSX.Element {
   }
 
   return (
-    <div className="app">
+    <div className={`app${data?.settings.showHints === false ? ' app--nohints' : ''}`}>
       <header className="topbar">
         <div className="brand">
           <span className="brand__mark" />
@@ -217,6 +222,8 @@ export function App(): JSX.Element {
         <ProfileBar />
         <LoopBar />
       </div>
+
+      <SummaryBar />
 
       {optionsOpen && <SettingsModal onClose={() => setOptionsOpen(false)} />}
       {sectionsOpen && <SectionManager onClose={() => setSectionsOpen(false)} />}

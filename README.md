@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.32.1.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.33.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.32.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.32.1.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.32.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.32.1.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.33.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.33.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.33.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.33.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -67,8 +67,8 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 ## Quick Start
 
 1. **Open Auto Spammer** from the Desktop or Start-menu shortcut.
-2. In **Keys to Spam**, type a key to repeat — for example `a`, `space`, `1`, `f6`, or `numpad5`. Add more with **+ Add Key**, or click **Record** and press keys to capture them automatically.
-3. *(Optional)* Set the speed under **Default Delay** — a lower number is faster (10 ms is very fast). Each key can have its own delay too.
+2. In **Tap keys**, type a key to repeat — for example `a`, `space`, `1`, `f6`, or `numpad5`. Add more with **+ Add key**, or click **Record** and press keys to capture them automatically.
+3. *(Optional)* Set the speed under **Delay between taps** — a lower number is faster (10 ms is very fast). Each key can have its own delay too.
 4. **Click into the game or app** you want the input sent to, so it is the active window.
 5. Press your **Toggle Hotkey** (default **F6**) anywhere — even while a game is focused — to start. The current hotkey is shown in the top bar; click it to rebind.
 6. To stop: press the **Toggle Hotkey** again, or hit **Esc** for an emergency stop. You can also Start/Stop from the system-tray menu.
@@ -80,15 +80,16 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 ### Highlights
 
 - **Top-bar hotkey controls** — the global **Toggle** and **Emergency-stop** hotkeys live right in the top bar; click either to rebind it. Start and stop with the Toggle Hotkey (default **F6**), the hold-action keys, or the system tray — there's no separate Start button to hunt for.
-- **Profile and Loop toolbar** — a compact second row in the header holds the **Profile** picker (with New / Rename / Save / Delete) and the **Loop** control (Forever / Play Once / Loop X times), so they're always one click away without taking up a panel.
+- **Profile and Loop toolbar** — a compact second row in the header holds the **Profile** picker (with New / Save / Delete) and the **Loop** control (Forever / Play Once / Loop X times), so they're always one click away without taking up a panel.
 - **Sections manager** — an eye button in the top bar opens a popup listing every section with a checkbox. Uncheck one to completely hide it from the window *and* skip its feature when spamming; re-check to bring it back in its saved position. Saved per profile.
 - **Options dialog** — a gear button opens app settings. Toggle *"Minimize to system tray when closing the window"*: on (default) keeps Auto Spammer running in the tray when you press the close button; off makes the close button fully quit the app.
 - **Full macro recording and playback** — capture everything (keys, clicks, and mouse movement) with the exact timing between events, edit any delay, then replay it on a loop.
 - **Drag-and-drop sections** — grab any section header to reorder it, even across the two columns. A **Reset Layout** button restores the default order.
 - **Resizable sections** — drag the splitter between two panels to resize them; double-click to reset.
 - **Collapsible sections** — collapse any panel to just its title bar with the header chevron.
-- **Keys to Spam** — the key list with its quick options, plus the **periodic press list** inlined right below them for timed presses. **Hold Actions** is its own separate section (Hold Keys Down + the three hold-trigger modes). A dot on an accordion / mode header marks anything that's enabled.
-- **Independent enabling** — *every* section has an **Enabled** switch in its header (shown even when the section is collapsed). Keys to Spam and Hold Actions add one too, as a master switch for the whole group, while their inner parts keep their own toggles. A disabled feature greys out and is skipped on the next run.
+- **Clean card-based UI** — every feature is its own rounded card with a colored accent dot, a friendly one-line description, and its own **toggle switch**: Tap keys, Timers, Hold keys down, Hold triggers, Click positions, Text function, and Macro.
+- **WHEN RUNNING summary bar** — a live plain-English readout of what your setup will do (e.g. *"tap 2, 3 every 10 ms · press 1 every 5 s — loops forever"*), including only what's switched on. Toggle it — and the hint text — in **Options → Display**.
+- **Independent enabling** — a switched-off card greys out (keeping its inner settings) and is skipped on the next run; switch it back on and everything resumes as it was.
 - **UI scale** — a top-bar dropdown zooms the whole app (100–200%) for readability; double-click to type a custom percentage.
 - **Remembers window size and position** — the app reopens exactly where and how big you left it.
 - **Mouse buttons everywhere** — every key binding accepts a keyboard key *or* a mouse button (LMB, RMB, MMB, MB4, MB5).
@@ -96,11 +97,11 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 ### Core
 
-- **Spam any keys** — letters, digits, function keys, punctuation, and numpad, each with its own delay, in parallel or one-at-a-time **Sequence Mode**.
+- **Tap any keys** — letters, digits, function keys, punctuation, and numpad, each with its own delay, together or one-at-a-time with the **sequence** switch.
 - **Click positions** — move to and click exact screen spots (left or right) every cycle.
 - **Loop** — repeat forever, once, or a set number of times (in the header toolbar).
-- **Hold Actions** — its own section: Hold Keys Down plus Hold-to-Spam, Focus Hold, and Hold for Right-Click; each hold trigger runs only while you physically hold its chosen key or button.
-- **Periodic** — keys/buttons on their own timers (inlined in Keys to Spam, below the spam options).
+- **Hold keys down** + **Hold triggers** — keys/buttons held for the whole run, plus three hold-to-act modes that run only while you physically hold their key or button.
+- **Timers** — keys/buttons pressed on their own schedules, alongside the tapping.
 - **Profiles** — save and switch between different setups from the header toolbar; everything is remembered.
 - **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
 - **System tray** — runs in the background with close-to-tray.
@@ -114,14 +115,14 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
   <tr>
     <td width="50%" valign="top">
       <img src="docs/showcase-1.png" alt="Main overview" /><br/>
-      <sub><b>Main window</b> — Keys to Spam (with a Periodic Actions accordion), the
-      separate Hold Actions section, and Click Positions, with the Profile picker, Loop
-      control, and rebindable hotkeys in the header toolbar.</sub>
+      <sub><b>Main window</b> — Tap keys, Timers, Hold keys down, and Hold triggers cards
+      with their accent switches, plus the live <b>WHEN RUNNING</b> summary bar and the
+      Profile picker, Loop control, and rebindable hotkeys in the header.</sub>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/showcase-2.png" alt="Macro section and triggers" /><br/>
-      <sub><b>Macro and triggers</b> — full recording with editable per-event delays and a
-      live event list, alongside Focus Hold and Hold for Right-Click.</sub>
+      <img src="docs/showcase-2.png" alt="Cards collapsed and hold triggers" /><br/>
+      <sub><b>Collapsible cards</b> — every card collapses to its title bar; the hold
+      triggers each have their own switch with an inline key + delay row.</sub>
     </td>
   </tr>
 </table>
@@ -130,33 +131,40 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 ## Usage Guide
 
-### Keys to Spam
+### Tap keys
 
-The **Keys to Spam** section holds the key list itself, the Spacebar / Left Click / Right Click options, **Default Delay**, **Sequence Mode**, and the live **"Will spam"** preview. Its **Enabled** switch controls whether the key list spams.
+The **Tap keys** card rapidly taps everything in its list, together, the whole time a run is active. Keys show as chips, each with its own optional delay. Use **+ Add key** (or **Record**), and the **Space** / **LMB** / **RMB** quick-add chips to include the spacebar or mouse buttons — a chip highlights while it's active. At the bottom: **Delay between taps** and the **One key at a time (sequence)** switch.
 
-Directly below those options sits the **periodic press list**: press any number of keys or mouse buttons on their **own independent timers** (e.g. **F** every 5s *and* **MB4** every 2s). Use **+ Add Periodic Key**, **Set Key** to bind each, and set its interval. It has its own **Enabled** switch and runs alongside a normal run.
+### Timers
 
-### Hold Actions
+The **Timers** card presses each key or mouse button on its **own schedule** (e.g. **1** every 5s *and* **MB4** every 2s), running alongside the tapping. Each row reads *Press [key] every [n] sec* — click the key chip to capture a new binding — and **+ Add timer** adds another.
 
-The **Hold Actions** section gathers everything you trigger by *holding* a key or button. Each part has its own **Enabled** switch and is watched globally, so it works even while a game is focused.
+### Hold keys down
 
-- **Hold Keys Down** — hold keys *or* mouse buttons down continuously (not tapped), e.g. hold **W** to keep walking. Use **+ Add Key**, or **+ Left Click** / **+ Right Click** for a mouse button. Held automatically for the whole run.
-- **Hold-to-Spam** — while you hold the chosen key, it runs the whole spam system and stops when you release.
-- **Focus Hold** — hold a key to rapidly fire only that same key or button.
-- **Hold for Right-Click** — hold the trigger to rapidly right-click; release to stop.
+Keys *or* mouse buttons held down non-stop while running (not tapped), e.g. hold **W** to keep walking. Use **+ Add key**, or the **LMB** / **RMB** chips to toggle a mouse button in and out of the held list.
 
-Each hold trigger has its own **Set Key** and delay.
+### Hold triggers
 
-### Enable or disable Keys and Click Positions independently
+Nothing in this card runs on its own — things only happen **while you physically hold** a key or button (watched globally, so it works even while a game is focused). Each trigger has its own switch plus an inline *Hold [key] delay [ms]* row:
 
-**Keys to Spam** and **Click Positions** each have their own **Enabled** switch, so you can spam only keys, only click positions, or both. If you turn both off, starting a run does nothing and shows a quick warning. These switches are saved per profile.
+- **Hold to spam everything** — while held, runs your whole tap list. Release to stop.
+- **Hold to rapid-fire one key** — while held, fires just this key as fast as the delay allows.
+- **Hold to rapid right-click** — while held, right-clicks over and over.
+
+### The WHEN RUNNING summary bar
+
+Under the profile row, the **WHEN RUNNING** bar describes your current setup in plain English — e.g. *"tap 2, 3 every 10 ms · press 1 every 5 s · hold RMB down — loops forever"*. It updates live as you change settings and only includes cards that are switched on. Hide it (or the hint text under each card title) from **Options → Display**.
+
+### Every card has its own switch
+
+Each card's header switch controls whether that card participates in a run — a switched-off card greys out (its inner settings keep their state) and is skipped. All switches are saved per profile.
 
 ### Click Positions (record and click specific spots)
 
 To click exact places on screen rather than just where your cursor is, add spots in any of three ways:
 
-1. **One at a time** — aim your mouse at a spot and press **F7** (or click **+ Add Current Mouse Position**). This works even while a game is focused, so you can record several spots without alt-tabbing.
-2. **Record Clicks** — click **Record Clicks**, and every left or right click anywhere on screen is saved automatically as a position with the correct button. Click **Stop Recording** when done. Clicks on the Auto Spammer window itself are ignored.
+1. **One at a time** — aim your mouse at a spot and press **F7** (or click **+ Add position**). This works even while a game is focused, so you can record several spots without alt-tabbing.
+2. **Record clicks** — click **Record clicks**, and every left or right click anywhere on screen is saved automatically as a position with the correct button. Click **Stop recording** when done. Clicks on the Auto Spammer window itself are ignored.
 3. Each recorded spot shows its coordinates and an **L/R** button to switch between left and right click. Give it its own delay, or remove it.
 
 When a run starts, the cursor moves to each recorded spot and clicks it, in order, every cycle. The single-spot record hotkey (default **F7**) can be changed in that panel.
@@ -165,13 +173,13 @@ When a run starts, the cursor moves to each recorded spot and clicks it, in orde
 
 The **Macro** section records everything — every keystroke, every mouse click, and the mouse path — with the exact timing between each event, then plays it all back.
 
-1. *(Optional)* Click **Set Record Hotkey** to choose a key (default **F10**) that starts and stops recording from anywhere, even while a game is focused.
+1. *(Optional)* Click **Record hotkey** to choose a key (default **F10**) that starts and stops recording from anywhere, even while a game is focused.
 2. Click **Record** (or press the hotkey), do your actions, then press the hotkey again (or **Stop Recording**). The key you press to stop is never included, and clicks on the Auto Spammer window are ignored.
 3. The captured events are listed with the delay before each one. Edit any delay to speed a step up or slow it down.
 4. Run it like any other spam: flip the section's **Enabled** switch, then start a run with your **Toggle Hotkey** (**F6**). The macro plays back with your exact timings and repeats according to the **Loop** control in the header toolbar.
 5. The panel's **Play once** button is a quick one-shot preview; **Stop** cancels it, **Clear** wipes the recording, and **Save** writes it to the current profile.
 
-Macro is mutually exclusive with Spam Keys and Click Positions: enabling Macro turns those two off, and turning either back on turns Macro off. The recording is saved with the profile.
+Macro is mutually exclusive with Tap keys and Click positions: enabling Macro turns those two off, and turning either back on turns Macro off. The recording is saved with the profile.
 
 > **Tip:** pick a record hotkey you don't otherwise use in your game (F10 by default) — it's detected globally, so it also reaches the focused app.
 
@@ -190,9 +198,10 @@ All layout choices — sizes, collapsed state, hidden state, and order — are s
 
 ### Handy extras
 
-- **Spacebar / Left Click / Right Click** checkboxes — add those without typing.
-- **Sequence Mode** — fire your keys one at a time per cycle instead of all at once.
+- **Space / LMB / RMB quick chips** — add those to the tap list without typing.
+- **One key at a time (sequence)** — fire your keys one at a time per cycle instead of all at once.
 - **Profiles** — save different setups and switch between them; they persist across restarts.
+- **Options → Display** — hide the hint text and/or the WHEN RUNNING summary bar for a denser UI.
 
 ---
 
