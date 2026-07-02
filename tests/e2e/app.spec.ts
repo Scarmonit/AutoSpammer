@@ -177,6 +177,23 @@ test('Hold triggers: three renamed rows, each with its own switch and key/delay 
   await expect(first).toHaveClass(/trigrow--off/)
   await firstSwitch.check()
   await expect(first).not.toHaveClass(/trigrow--off/)
+
+  // Clicking the key chip opens the shared capture overlay and binds a key.
+  const chip = first.locator('button.keychip')
+  await expect(chip).toHaveText('—') // unset by default
+  await chip.click()
+  await expect(win.locator('.capture-overlay')).toBeVisible()
+  await win.keyboard.press('j')
+  await expect(win.locator('.capture-overlay')).toHaveCount(0)
+  await expect(chip).toHaveText('J')
+
+  // Esc cancels a capture without changing the binding.
+  await chip.click()
+  await expect(win.locator('.capture-overlay')).toBeVisible()
+  await win.keyboard.press('Escape')
+  await expect(win.locator('.capture-overlay')).toHaveCount(0)
+  await expect(chip).toHaveText('J')
+
   await firstSwitch.uncheck()
 })
 
@@ -262,35 +279,46 @@ test('the global Toggle and Emergency hotkeys live in the top bar', async () => 
   await expect(bar.getByRole('button', { name: /^Stop:/ })).toBeVisible()
 })
 
-test('only one hotkey capture is active at a time (top bar)', async () => {
+test('clicking a hotkey button opens the capture overlay; Esc cancels it', async () => {
   const bar = win.locator('.topbar__hotkeys')
+  await bar.getByRole('button', { name: 'Toggle: F6' }).click()
 
-  await bar.getByRole('button', { name: /^Toggle:/ }).click()
-  await expect(bar.locator('.btn--listening')).toHaveCount(1)
-  // Listening state tells the user mouse buttons are accepted too.
-  await expect(bar.locator('.btn--listening')).toHaveText('Press a key or mouse button…')
+  // Full-screen overlay with the mockup copy.
+  const overlay = win.locator('.capture-overlay')
+  await expect(overlay).toBeVisible()
+  await expect(overlay.locator('.capture-overlay__title')).toHaveText(
+    'Press any key or mouse button'
+  )
+  await expect(overlay.locator('.capture-overlay__sub')).toHaveText('Esc to cancel')
 
-  // Starting the Emergency capture must cancel the first one (not bind to both).
-  await bar.getByRole('button', { name: /^Stop:/ }).click()
-  await expect(bar.locator('.btn--listening')).toHaveCount(1)
-
-  // Clicking the active button again cancels capture.
-  await bar.locator('.btn--listening').click()
-  await expect(bar.locator('.btn--listening')).toHaveCount(0)
+  // Esc closes it without changing the binding.
+  await win.keyboard.press('Escape')
+  await expect(overlay).toHaveCount(0)
+  await expect(bar.getByRole('button', { name: 'Toggle: F6' })).toBeVisible()
 })
 
-test('the Escape key can be bound to the top-bar toggle hotkey', async () => {
+test('the overlay captures a key and rebinds the Stop hotkey', async () => {
   const bar = win.locator('.topbar__hotkeys')
 
-  // Move Emergency off Escape (to F1) so Escape is free to assign.
   await bar.getByRole('button', { name: /^Stop:/ }).click()
+  await expect(win.locator('.capture-overlay')).toBeVisible()
   await win.keyboard.press('F1')
+  await expect(win.locator('.capture-overlay')).toHaveCount(0)
   await expect(bar.getByRole('button', { name: 'Stop: F1' })).toBeVisible()
+})
 
-  // Escape now binds to the toggle normally instead of cancelling the capture.
-  await bar.getByRole('button', { name: /^Toggle:/ }).click()
-  await win.keyboard.press('Escape')
-  await expect(bar.getByRole('button', { name: 'Toggle: Escape' })).toBeVisible()
+test('pressing the start/stop hotkey during capture binds it instead of starting a run', async () => {
+  const bar = win.locator('.topbar__hotkeys')
+
+  // Capture for Toggle, then press the toggle key itself (F6).
+  await bar.getByRole('button', { name: 'Toggle: F6' }).click()
+  await expect(win.locator('.capture-overlay')).toBeVisible()
+  await win.keyboard.press('F6')
+
+  // The overlay consumed it as the (unchanged) binding — and no run started.
+  await expect(win.locator('.capture-overlay')).toHaveCount(0)
+  await expect(bar.getByRole('button', { name: 'Toggle: F6' })).toBeVisible()
+  await expect(win.locator('.status')).toContainText('Idle')
 })
 
 test('renders draggable splitters between sections', async () => {

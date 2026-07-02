@@ -41,6 +41,10 @@ const api = {
   recordPositionsStart: (): Promise<void> => ipcRenderer.invoke(IPC.RecordPositionsStart),
   recordPositionsStop: (): Promise<void> => ipcRenderer.invoke(IPC.RecordPositionsStop),
   getMousePosition: (): Promise<MousePoint> => ipcRenderer.invoke(IPC.GetMousePosition),
+  /** The key-capture overlay is open: suspend all global hotkeys/triggers. */
+  captureStart: (): Promise<void> => ipcRenderer.invoke(IPC.CaptureStart),
+  /** The overlay closed: re-register the global hotkeys. */
+  captureStop: (): Promise<void> => ipcRenderer.invoke(IPC.CaptureStop),
 
   /** Scale the whole renderer (text, padding, buttons) like browser zoom. */
   setZoomFactor: (factor: number): void => webFrame.setZoomFactor(factor),

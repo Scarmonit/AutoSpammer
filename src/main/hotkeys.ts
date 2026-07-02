@@ -67,6 +67,8 @@ export class GlobalInput {
   private emergencyButton: number | null = null
   private emergencyArmed = false
   private registerTimer: NodeJS.Timeout | null = null
+  /** True while the renderer's key-capture overlay is open — no hotkey fires. */
+  private captureSuspended = false
 
   // Token of the physical key currently driving a hold-mode run, plus which
   // mode it started, so we know exactly which key-up should stop the engine.
@@ -115,6 +117,30 @@ export class GlobalInput {
     this.scheduleRegister()
   }
 
+  /**
+   * While the key-capture overlay is open, every global hotkey and hold
+   * trigger is suspended so the pressed key/button reaches the renderer to be
+   * bound — pressing e.g. the start/stop hotkey must not start a run.
+   */
+  setCaptureSuspended(on: boolean): void {
+    if (this.captureSuspended === on) return
+    this.captureSuspended = on
+    if (on) {
+      if (this.registerTimer) {
+        clearTimeout(this.registerTimer)
+        this.registerTimer = null
+      }
+      for (const accel of this.registered) globalShortcut.unregister(accel)
+      this.registered.clear()
+      this.mouseHotkeys.clear()
+      this.macroHotkey = null
+      this.macroHotkeyButton = null
+      this.clearKeyboardEmergency()
+    } else {
+      this.registerHotkeys() // re-register from the current settings
+    }
+  }
+
   private scheduleRegister(): void {
     if (this.registerTimer) clearTimeout(this.registerTimer)
     this.registerTimer = setTimeout(() => {
@@ -129,6 +155,7 @@ export class GlobalInput {
    * can't register mouse). Emergency is (re)applied via applyEmergency().
    */
   private registerHotkeys(): void {
+    if (this.captureSuspended) return // re-registered when the capture ends
     const s = this.deps.getSettings()
 
     // The macro record hotkey is detected via the raw uiohook stream (not a
@@ -299,6 +326,11 @@ export class GlobalInput {
   // Physical hold detection
   // -------------------------------------------------------------------------
   private onKeyDown(e: UiohookKeyboardEvent): void {
+    // A key pressed while the capture overlay is open is being BOUND — it must
+    // not trigger recording, macro toggles, or hold-to-run starts. (Key-ups
+    // still flow below so an in-flight hold run can end normally.)
+    if (this.captureSuspended) return
+
     // The macro hotkey toggles recording and is never itself recorded. We also
     // swallow its key-up (start or stop) so it can't leak into the macro.
     if (this.matchesMacroHotkey(e)) {
@@ -342,6 +374,9 @@ export class GlobalInput {
   }
 
   private onMouseDown(e: UiohookMouseEvent): void {
+    // Same as onKeyDown: buttons pressed during a capture are being bound.
+    if (this.captureSuspended) return
+
     const button = Number(e.button)
 
     // The macro record hotkey (mouse) toggles recording and is never recorded;

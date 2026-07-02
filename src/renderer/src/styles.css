@@ -305,6 +305,36 @@ body {
   font-size: 12.5px;
 }
 
+/* ---------- Full-screen key-capture overlay ---------- */
+.capture-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200; /* above modals (100) */
+  display: grid;
+  place-items: center;
+  background: rgba(4, 5, 7, 0.72);
+  backdrop-filter: blur(7px);
+  -webkit-app-region: no-drag;
+  cursor: default;
+  user-select: none;
+}
+.capture-overlay__text {
+  text-align: center;
+  padding: 0 24px;
+}
+.capture-overlay__title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #f4f6f9;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
+}
+.capture-overlay__sub {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
 /* Sections-manager checklist. */
 .seclist {
   list-style: none;

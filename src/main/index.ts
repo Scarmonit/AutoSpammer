@@ -391,6 +391,9 @@ function registerIpc(): void {
 
   ipcMain.handle(IPC.GetMousePosition, () => getMousePosition())
 
+  ipcMain.handle(IPC.CaptureStart, () => globalInput.setCaptureSuspended(true))
+  ipcMain.handle(IPC.CaptureStop, () => globalInput.setCaptureSuspended(false))
+
   ipcMain.handle(IPC.MacroRecordStart, () => startMacroRecording())
   ipcMain.handle(IPC.MacroRecordStop, () => stopMacroRecording())
 

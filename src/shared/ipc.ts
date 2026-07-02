@@ -18,6 +18,10 @@ export const IPC = {
   RecordPositionsStart: 'record-positions:start',
   RecordPositionsStop: 'record-positions:stop',
   GetMousePosition: 'mouse:get-position',
+  // Key-capture overlay: suspend/resume every global hotkey + hold trigger so
+  // the pressed key is bound instead of firing its current action.
+  CaptureStart: 'capture:start',
+  CaptureStop: 'capture:stop',
   MacroRecordStart: 'macro:record-start',
   MacroRecordStop: 'macro:record-stop',
   MacroPlay: 'macro:play',
