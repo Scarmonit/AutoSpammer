@@ -42,7 +42,7 @@ test('main process is reachable via evaluate()', async () => {
 test('renders all seven cards with accent dots and descriptions', async () => {
   for (const heading of [
     'Tap keys',
-    'Timers',
+    'Timed key presses',
     'Hold keys down',
     'Hold triggers',
     'Click positions',
@@ -59,6 +59,17 @@ test('renders all seven cards with accent dots and descriptions', async () => {
   await expect(section('Tap keys').locator('.section__desc')).toHaveText(
     'Rapidly taps all of these, together, the whole time.'
   )
+  // Each card's "+ Add …" button carries the section accent styling.
+  for (const [heading, name] of [
+    ['Tap keys', '+ Add key'],
+    ['Timed key presses', '+ Add timed press'],
+    ['Hold keys down', '+ Add key'],
+    ['Click positions', '+ Add position']
+  ] as const) {
+    await expect(section(heading).getByRole('button', { name, exact: true })).toHaveClass(
+      /chipbtn--accent/
+    )
+  }
   // The old section names are gone.
   for (const gone of ['Keys to Spam', 'Hold Actions', 'Spam Keys', 'Periodic Actions']) {
     await expect(win.getByRole('heading', { name: gone, exact: true })).toHaveCount(0)
@@ -105,13 +116,13 @@ test('Tap keys: Space / Left Click / Right Click checkboxes add to the spam list
   await expect(keys.getByText('One key at a time (sequence)')).toHaveCount(0)
 })
 
-test('Timers: + Add timer adds a Press/every row', async () => {
-  const timers = section('Timers')
+test('Timed key presses: + Add timed press adds a Press/every row', async () => {
+  const timers = section('Timed key presses')
   await expect(timers.locator('.section__desc')).toContainText('own schedule')
   const rows = timers.locator('.timerrow')
   const before = await rows.count()
 
-  await timers.getByRole('button', { name: '+ Add timer' }).click()
+  await timers.getByRole('button', { name: '+ Add timed press' }).click()
   await expect(rows).toHaveCount(before + 1)
   await expect(rows.last()).toContainText('Press')
   await expect(rows.last()).toContainText('every')

@@ -108,7 +108,7 @@ export function ClickPositionsPanel(): JSX.Element {
       <div className="keylist__actions">
         <button
           type="button"
-          className="chipbtn"
+          className="chipbtn chipbtn--accent"
           title="Save the current mouse position"
           disabled={recordingPositions}
           onClick={() => void addCurrentPosition()}

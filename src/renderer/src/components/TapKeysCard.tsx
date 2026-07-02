@@ -69,7 +69,7 @@ export function TapKeysCard(): JSX.Element {
       </div>
 
       <div className="keylist__actions">
-        <button type="button" className="chipbtn" onClick={addKey}>
+        <button type="button" className="chipbtn chipbtn--accent" onClick={addKey}>
           + Add key
         </button>
         <button

@@ -82,7 +82,11 @@ export function HoldKeysCard(): JSX.Element {
       </div>
 
       <div className="keylist__actions">
-        <button type="button" className="chipbtn" onClick={() => setKeys([...keys, ''])}>
+        <button
+          type="button"
+          className="chipbtn chipbtn--accent"
+          onClick={() => setKeys([...keys, ''])}
+        >
           + Add key
         </button>
         <button

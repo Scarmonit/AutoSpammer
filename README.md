@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.34.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.35.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.34.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.34.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.34.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.34.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.35.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.35.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.35.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.35.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -87,7 +87,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Drag-and-drop sections** — grab any section header to reorder it, even across the two columns. A **Reset Layout** button restores the default order.
 - **Resizable sections** — drag the splitter between two panels to resize them; double-click to reset.
 - **Collapsible sections** — collapse any panel to just its title bar with the header chevron.
-- **Clean card-based UI** — every feature is its own rounded card with a colored accent dot, a friendly one-line description, and its own **toggle switch**: Tap keys, Timers, Hold keys down, Hold triggers, Click positions, Text function, and Macro.
+- **Clean card-based UI** — every feature is its own rounded card with a colored accent dot, a friendly one-line description, and its own **toggle switch**: Tap keys, Timed key presses, Hold keys down, Hold triggers, Click positions, Text function, and Macro.
 - **WHEN RUNNING summary bar** — a live plain-English readout of what your setup will do (e.g. *"tap 2, 3 every 10 ms · press 1 every 5 s — loops forever"*), including only what's switched on. Toggle it — and the hint text — in **Options → Display**.
 - **Independent enabling** — a switched-off card greys out (keeping its inner settings) and is skipped on the next run; switch it back on and everything resumes as it was.
 - **UI scale** — a top-bar dropdown zooms the whole app (100–200%) for readability; double-click to type a custom percentage.
@@ -101,7 +101,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Click positions** — move to and click exact screen spots (left or right) every cycle.
 - **Loop** — repeat forever, once, or a set number of times (in the header toolbar).
 - **Hold keys down** + **Hold triggers** — keys/buttons held for the whole run, plus three hold-to-act modes that run only while you physically hold their key or button.
-- **Timers** — keys/buttons pressed on their own schedules, alongside the tapping.
+- **Timed key presses** — keys/buttons pressed on their own schedules, alongside the tapping.
 - **Profiles** — save and switch between different setups from the header toolbar; everything is remembered.
 - **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
 - **System tray** — runs in the background with close-to-tray.
@@ -115,7 +115,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
   <tr>
     <td width="50%" valign="top">
       <img src="docs/showcase-1.png" alt="Main overview" /><br/>
-      <sub><b>Main window</b> — Tap keys, Timers, Hold keys down, and Hold triggers cards
+      <sub><b>Main window</b> — Tap keys, Timed key presses, Hold keys down, and Hold triggers cards
       with their accent switches, plus the live <b>WHEN RUNNING</b> summary bar and the
       Profile picker, Loop control, and rebindable hotkeys in the header.</sub>
     </td>
@@ -135,9 +135,9 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 The **Tap keys** card rapidly taps everything in its list, together, the whole time a run is active. Keys show as chips, each with its own optional delay. Use **+ Add key** (or **Record**) to build the list, and check **Space**, **Left Click**, or **Right Click** to include the spacebar or a mouse button — uncheck to stop tapping it. The checkboxes are saved with the profile.
 
-### Timers
+### Timed key presses
 
-The **Timers** card presses each key or mouse button on its **own schedule** (e.g. **1** every 5s *and* **MB4** every 2s), running alongside the tapping. Each row reads *Press [key] every [n] sec* — click the key chip to capture a new binding — and **+ Add timer** adds another.
+The **Timed key presses** card presses each key or mouse button on its **own schedule** (e.g. **1** every 5s *and* **MB4** every 2s), running alongside the tapping. Each row reads *Press [key] every [n] sec* — click the key chip to capture a new binding — and **+ Add timed press** adds another.
 
 ### Hold keys down
 

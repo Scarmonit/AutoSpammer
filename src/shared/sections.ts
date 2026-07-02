@@ -28,7 +28,7 @@ export type SectionId = (typeof SECTION_IDS)[number]
 /** Human-readable names, matching each section's on-screen header title. */
 export const SECTION_LABELS: Record<string, string> = {
   keys: 'Tap keys',
-  timers: 'Timers',
+  timers: 'Timed key presses',
   holdKeys: 'Hold keys down',
   holdTriggers: 'Hold triggers',
   clickPositions: 'Click positions',

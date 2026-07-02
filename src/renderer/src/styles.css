@@ -868,6 +868,16 @@ button.keychip:hover,
   opacity: 0.4;
   cursor: not-allowed;
 }
+/* The card's primary "+ Add …" button: colored with the section accent. */
+.chipbtn--accent {
+  color: var(--accent, var(--blue));
+  border-color: color-mix(in srgb, var(--accent, var(--blue)) 55%, transparent);
+}
+.chipbtn--accent:hover {
+  color: var(--accent, var(--blue));
+  border-color: var(--accent, var(--blue));
+  background: color-mix(in srgb, var(--accent, var(--blue)) 10%, transparent);
+}
 /* Recording state reuses the pulse animation below. */
 .chipbtn--recording {
   color: #ffb3ac;

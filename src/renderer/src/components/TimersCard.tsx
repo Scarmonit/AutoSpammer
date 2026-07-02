@@ -8,7 +8,7 @@ import { SectionToggle } from './SectionToggle'
 import { CaptureButton } from './CaptureButton'
 import { prettyName } from '../keycapture'
 
-/** "Timers" card: keys/buttons pressed on their own schedules during a run. */
+/** "Timed key presses" card: keys/buttons pressed on their own schedules during a run. */
 export function TimersCard(): JSX.Element {
   const { activeProfile, updateProfile } = useStore()
   if (!activeProfile) return <></>
@@ -33,8 +33,8 @@ export function TimersCard(): JSX.Element {
 
   return (
     <Section
-      title="Timers"
-      description="Each key presses on its own schedule — runs alongside tapping."
+      title="Timed key presses"
+      description="Presses each key repeatedly on its own schedule — runs alongside tapping."
       accent={SECTION_ACCENTS.timers}
       dim={!enabled}
       right={
@@ -46,7 +46,7 @@ export function TimersCard(): JSX.Element {
       }
     >
       <div className="keylist">
-        {entries.length === 0 && <p className="muted">No timers yet — add one below.</p>}
+        {entries.length === 0 && <p className="muted">No timed presses yet — add one below.</p>}
         {entries.map((e) => (
           <div className="timerrow" key={e.id}>
             <span className="keyrow__label">Press</span>
@@ -82,8 +82,8 @@ export function TimersCard(): JSX.Element {
       </div>
 
       <div className="keylist__actions">
-        <button type="button" className="chipbtn" onClick={addEntry}>
-          + Add timer
+        <button type="button" className="chipbtn chipbtn--accent" onClick={addEntry}>
+          + Add timed press
         </button>
       </div>
     </Section>
