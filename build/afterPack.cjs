@@ -8,7 +8,7 @@ const path = require('path')
 
 exports.default = async function afterPack(context) {
   const { appOutDir, packager, electronPlatformName } = context
-  const exe = packager.appInfo.productFilename // "Auto Spammer"
+  const exe = packager.appInfo.productFilename // e.g. "Monit"
 
   let binary
   if (electronPlatformName === 'win32') binary = path.join(appOutDir, `${exe}.exe`)

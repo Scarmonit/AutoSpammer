@@ -63,7 +63,7 @@ function createWindow(): void {
     ...(useSaved ? { x: saved!.x, y: saved!.y } : {}),
     minWidth: 680,
     minHeight: 600,
-    title: 'Auto Spammer',
+    title: 'Monit',
     icon: nativeImage.createFromDataURL(WINDOW_ICON_DATA_URL),
     backgroundColor: '#1b1d22',
     autoHideMenuBar: true,
@@ -108,7 +108,7 @@ function createWindow(): void {
     if (!trayHintShown && Notification.isSupported()) {
       trayHintShown = true
       new Notification({
-        title: 'Auto Spammer is still running',
+        title: 'Monit is still running',
         body: 'It lives in the system tray. Right-click the tray icon to quit.'
       }).show()
     }

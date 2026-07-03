@@ -1,7 +1,7 @@
 {
   "name": "auto-spammer",
-  "version": "1.38.0",
-  "description": "Auto Spammer — a Windows desktop macro / auto key spammer utility",
+  "version": "1.39.0",
+  "description": "Monit — a Windows desktop macro / auto key presser utility",
   "author": "Scarmonit",
   "license": "MIT",
   "main": "./out/main/index.js",

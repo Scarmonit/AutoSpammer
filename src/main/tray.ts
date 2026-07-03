@@ -32,15 +32,15 @@ export function createTray(deps: TrayDeps): TrayHandle {
 
   const update = (): void => {
     const running = deps.isSpamming()
-    tray.setToolTip(running ? 'Auto Spammer — running' : 'Auto Spammer — idle')
+    tray.setToolTip(running ? 'Monit — running' : 'Monit — idle')
     tray.setContextMenu(
       Menu.buildFromTemplate([
-        { label: 'Show Auto Spammer', click: showWindow },
+        { label: 'Show Monit', click: showWindow },
         { type: 'separator' },
         { label: running ? 'Stop Spam' : 'Start Spam', click: () => deps.onToggleSpam() },
         { label: 'Panic Stop (everything)', click: () => deps.onPanic() },
         { type: 'separator' },
-        { label: 'Quit Auto Spammer', click: () => deps.onQuit() }
+        { label: 'Quit Monit', click: () => deps.onQuit() }
       ])
     )
   }

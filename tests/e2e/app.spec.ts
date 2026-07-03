@@ -30,12 +30,15 @@ test.afterAll(async () => {
   await app?.close().catch(() => {})
 })
 
-test('window title is "Auto Spammer"', async () => {
-  expect(await win.title()).toBe('Auto Spammer')
+test('window title is "Monit"', async () => {
+  expect(await win.title()).toBe('Monit')
 })
 
 test('main process is reachable via evaluate()', async () => {
   const name = await app.evaluate(async ({ app }) => app.getName())
+  // The internal package name deliberately stays "auto-spammer": Electron
+  // derives the userData folder (%APPDATA%\auto-spammer, where profiles are
+  // saved) from it. Only the display/product name changed to Monit.
   expect(name).toBe('auto-spammer')
 })
 
@@ -302,7 +305,7 @@ test('the Profile toolbar is a dropdown with New / Save / Delete (no Rename)', a
 
 test('the top bar keeps only the title, Sections menu, gear, and status', async () => {
   const bar = win.locator('.topbar')
-  await expect(bar.locator('.brand h1')).toHaveText('Auto Spammer')
+  await expect(bar.locator('.brand h1')).toHaveText('Monit')
   await expect(bar.getByRole('button', { name: 'Sections ▾', exact: true })).toBeVisible()
   await expect(bar.getByRole('button', { name: 'Options', exact: true })).toBeVisible()
   await expect(bar.locator('.status')).toBeVisible()

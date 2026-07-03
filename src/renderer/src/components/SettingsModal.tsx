@@ -130,7 +130,7 @@ export function SettingsModal({ onClose }: Props): JSX.Element {
               checked={settings.minimizeToTrayOnClose}
               onChange={(v) => void updateSettings({ minimizeToTrayOnClose: v })}
               label="Minimize to tray on close"
-              title="Keep Auto Spammer (and its hotkeys) running in the tray when the window closes"
+              title="Keep Monit (and its hotkeys) running in the tray when the window closes"
             />
           </OptRow>
         </div>

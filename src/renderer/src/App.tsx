@@ -180,7 +180,7 @@ export function App(): JSX.Element {
       <header className="topbar">
         <div className="brand">
           <span className="brand__mark" />
-          <h1>Auto Spammer</h1>
+          <h1>Monit</h1>
         </div>
         <div className="topbar__tools">
           <div className="topbar__menuwrap">

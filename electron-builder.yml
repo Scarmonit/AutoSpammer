@@ -1,5 +1,6 @@
+# appId is the installer's upgrade identity — keep it stable across renames.
 appId: com.scarmonit.autospammer
-productName: Auto Spammer
+productName: Monit
 # Native modules ship prebuilt N-API binaries that load directly in Electron,
 # so skip the from-source rebuild (which would require Visual Studio).
 npmRebuild: false
@@ -34,9 +35,9 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: Auto Spammer
+  shortcutName: Monit
   installerIcon: build/icon.ico
   uninstallerIcon: build/icon.ico
-  artifactName: AutoSpammer-Setup-${version}.${ext}
+  artifactName: Monit-Setup-${version}.${ext}
 portable:
-  artifactName: AutoSpammer-Portable-${version}.${ext}
+  artifactName: Monit-Portable-${version}.${ext}

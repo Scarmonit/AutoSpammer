@@ -205,7 +205,7 @@ export class GlobalInput {
       this.deps.onConflict({
         field,
         accelerator: accel,
-        message: `"${accel}" is already assigned to another Auto Spammer hotkey.`
+        message: `"${accel}" is already assigned to another Monit hotkey.`
       })
       return
     }

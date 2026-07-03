@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/icon.png" alt="Auto Spammer" width="120" height="120" />
+  <img src="docs/icon.png" alt="Monit" width="120" height="120" />
 </p>
 
-<h1 align="center">Auto Spammer</h1>
+<h1 align="center">Monit</h1>
 
 <p align="center">
   A fast, dark-themed <strong>auto key-presser, clicker &amp; macro recorder</strong> for Windows.<br/>
@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.38.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.39.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -29,7 +29,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/showcase-1.png" alt="Auto Spammer main window" width="900" />
+  <img src="docs/showcase-1.png" alt="Monit main window" width="900" />
 </p>
 
 ---
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.38.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.38.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.38.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.38.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.39.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.39.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.39.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.39.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -66,7 +66,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 ## Quick Start
 
-1. **Open Auto Spammer** from the Desktop or Start-menu shortcut.
+1. **Open Monit** from the Desktop or Start-menu shortcut.
 2. In **Tap keys**, type a key to repeat — for example `a`, `space`, `1`, `f6`, or `numpad5`. Add more with **+ Add key**, or click **Record** and press keys to capture them automatically.
 3. *(Optional)* Give any key its own delay in its row — a lower number is faster (the default is a very fast 10 ms).
 4. **Click into the game or app** you want the input sent to, so it is the active window.
@@ -165,7 +165,7 @@ Each card's header switch controls whether that card participates in a run — a
 To click exact places on screen rather than just where your cursor is, add spots in any of three ways:
 
 1. **One at a time** — aim your mouse at a spot and press **F7** (or click **+ Add position**). This works even while a game is focused, so you can record several spots without alt-tabbing.
-2. **Record clicks** — click **Record clicks**, and every left or right click anywhere on screen is saved automatically as a position with the correct button. Click **Stop recording** when done. Clicks on the Auto Spammer window itself are ignored.
+2. **Record clicks** — click **Record clicks**, and every left or right click anywhere on screen is saved automatically as a position with the correct button. Click **Stop recording** when done. Clicks on the Monit window itself are ignored.
 3. Each recorded spot shows its coordinates and an **L/R** button to switch between left and right click. Give it its own delay, or remove it.
 
 When a run starts, the cursor moves to each recorded spot and clicks it, in order, every cycle. The single-spot record hotkey (default **F7**) can be changed in that panel.
@@ -175,7 +175,7 @@ When a run starts, the cursor moves to each recorded spot and clicks it, in orde
 The **Macro** section records everything — every keystroke, every mouse click, and the mouse path — with the exact timing between each event, then plays it all back.
 
 1. *(Optional)* Click **Record hotkey** to choose a key (default **F10**) that starts and stops recording from anywhere, even while a game is focused.
-2. Click **Record** (or press the hotkey), do your actions, then press the hotkey again (or **Stop Recording**). The key you press to stop is never included, and clicks on the Auto Spammer window are ignored.
+2. Click **Record** (or press the hotkey), do your actions, then press the hotkey again (or **Stop Recording**). The key you press to stop is never included, and clicks on the Monit window are ignored.
 3. The captured events are listed with the delay before each one. Edit any delay to speed a step up or slow it down.
 4. Run it like any other spam: flip the section's **Enabled** switch, then start a run with your **Toggle Hotkey** (**F6**). The macro plays back with your exact timings and repeats according to the **Loop** control in the header toolbar.
 5. The panel's **Play once** button is a quick one-shot preview; **Stop** cancels it, **Clear** wipes the recording, and **Save** writes it to the current profile.
@@ -186,7 +186,7 @@ Macro is mutually exclusive with Tap keys and Click positions: enabling Macro tu
 
 ### System tray
 
-Auto Spammer lives in the system tray so it stays out of your way while you game. By default, closing the window minimizes it to the tray (it keeps running and global hotkeys still work). Right-click the tray icon to **Show**, **Start/Stop Spam**, **Panic Stop**, or **Quit**. Left-click the icon to bring the window back. You can make the close button quit instead in the **Options** dialog.
+Monit lives in the system tray so it stays out of your way while you game. By default, closing the window minimizes it to the tray (it keeps running and global hotkeys still work). Right-click the tray icon to **Show**, **Start/Stop Spam**, **Panic Stop**, or **Quit**. Left-click the icon to bring the window back. You can make the close button quit instead in the **Options** dialog.
 
 ### Layout: resize, collapse, hide, and reorder
 
@@ -222,14 +222,14 @@ All shortcuts are rebindable in the app. The **Start / stop** and **Emergency st
 
 ## Responsible Use
 
-Auto Spammer sends real keyboard and mouse input to whatever window is focused. **Many online and competitive games forbid input automation and may ban your account.** Only use it where automation is allowed — single-player games, your own applications, accessibility, testing, and similar. You are responsible for how you use it.
+Monit sends real keyboard and mouse input to whatever window is focused. **Many online and competitive games forbid input automation and may ban your account.** Only use it where automation is allowed — single-player games, your own applications, accessibility, testing, and similar. You are responsible for how you use it.
 
 ---
 
 ## Troubleshooting
 
 - **"Windows protected your PC" popup** — click **More info**, then **Run anyway**. This only appears because the app isn't signed with a paid certificate.
-- **Keys go to the wrong window** — click into the target window first; Auto Spammer sends input to whatever is focused.
+- **Keys go to the wrong window** — click into the target window first; Monit sends input to whatever is focused.
 - **It won't stop** — press **Esc**, or press your **Toggle Hotkey** (**F6**), or use the tray's Stop.
 - **Antivirus flags it** — key-pressers look like automation tools to antivirus software, so false positives can happen. The full source is in this repository if you'd prefer to build it yourself.
 
@@ -247,7 +247,7 @@ cd AutoSpammer
 npm install          # download dependencies
 
 npm run dev          # run the app in development (hot reload)
-npm run build:win    # build the installer -> release/AutoSpammer-Setup-<version>.exe
+npm run build:win    # build the installer -> release/Monit-Setup-<version>.exe
 npm run icons        # regenerate icons from build/icon-source.png
 ```
 
