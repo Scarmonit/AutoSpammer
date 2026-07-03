@@ -71,7 +71,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 3. *(Optional)* Give any key its own delay in its row — a lower number is faster (the default is a very fast 10 ms).
 4. **Click into the game or app** you want the input sent to, so it is the active window.
 5. Press your **Start / stop hotkey** (default **F6**) anywhere — even while a game is focused — to start. Rebind it under **Options (⚙️) → Hotkeys**.
-6. To stop: press the **Toggle Hotkey** again, or hit **Esc** for an emergency stop. You can also Start/Stop from the system-tray menu.
+6. To stop: press the **Start / stop hotkey** again, or hit **Esc** for an emergency stop. You can also Start/Stop from the system-tray menu.
 
 ---
 
