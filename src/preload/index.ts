@@ -29,6 +29,12 @@ const api = {
   deleteProfile: (id: string): Promise<PersistedData> => ipcRenderer.invoke(IPC.DeleteProfile, id),
   setActiveProfile: (id: string): Promise<PersistedData> =>
     ipcRenderer.invoke(IPC.SetActiveProfile, id),
+  /** Save the active profile to a shareable .monit file (native dialog). */
+  exportProfile: (): Promise<{ ok: boolean; cancelled?: boolean; path?: string; error?: string }> =>
+    ipcRenderer.invoke(IPC.ExportProfile),
+  /** Load a .monit file as a new profile (native dialog); data arrives via onDataUpdated. */
+  importProfile: (): Promise<{ ok: boolean; cancelled?: boolean; name?: string; error?: string }> =>
+    ipcRenderer.invoke(IPC.ImportProfile),
   updateSettings: (patch: Partial<AppSettings>): Promise<PersistedData> =>
     ipcRenderer.invoke(IPC.UpdateSettings, patch),
 

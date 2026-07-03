@@ -1,4 +1,5 @@
-import { app, BrowserWindow, ipcMain, shell, Notification, screen, nativeImage } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, shell, Notification, screen, nativeImage } from 'electron'
+import { promises as fsp } from 'fs'
 import { join } from 'path'
 import type {
   PersistedData,
@@ -18,6 +19,7 @@ import { getMousePosition } from './input'
 import { pointInRect } from './geometry'
 import { parseAccelerator } from './keymap'
 import { normalizeLayout, applyHiddenSections } from '@shared/sections'
+import { exportPayload, profileFromExport, uniqueProfileName, PROFILE_FILE_EXT } from '@shared/profileio'
 import { MacroRecorder, MacroPlayer } from './macro'
 import { createTray, type TrayHandle } from './tray'
 import { WINDOW_ICON_DATA_URL } from './trayicon'
@@ -341,6 +343,66 @@ function registerIpc(): void {
     }
     saveData(data)
     return data
+  })
+
+  // ----- Profile sharing: save/load a single profile as a .monit file -----
+
+  ipcMain.handle(IPC.ExportProfile, async () => {
+    if (!mainWindow) return { ok: true, cancelled: true }
+    const prof = activeProfile(data)
+    const safeName = prof.name.replace(/[\\/:*?"<>|]/g, '-').trim() || 'profile'
+    const res = await dialog.showSaveDialog(mainWindow, {
+      title: 'Export profile',
+      defaultPath: `${safeName}.${PROFILE_FILE_EXT}`,
+      filters: [
+        { name: 'Monit profile', extensions: [PROFILE_FILE_EXT] },
+        { name: 'JSON', extensions: ['json'] }
+      ]
+    })
+    if (res.canceled || !res.filePath) return { ok: true, cancelled: true }
+    try {
+      await fsp.writeFile(res.filePath, JSON.stringify(exportPayload(prof), null, 2), 'utf-8')
+      return { ok: true, path: res.filePath }
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err)
+      return { ok: false, error: `Could not write the file: ${detail}` }
+    }
+  })
+
+  ipcMain.handle(IPC.ImportProfile, async () => {
+    if (!mainWindow) return { ok: true, cancelled: true }
+    const res = await dialog.showOpenDialog(mainWindow, {
+      title: 'Load profile',
+      properties: ['openFile'],
+      filters: [
+        { name: 'Monit profile', extensions: [PROFILE_FILE_EXT, 'json'] },
+        { name: 'All files', extensions: ['*'] }
+      ]
+    })
+    const file = res.filePaths[0]
+    if (res.canceled || !file) return { ok: true, cancelled: true }
+    try {
+      let raw: unknown
+      try {
+        raw = JSON.parse(await fsp.readFile(file, 'utf-8'))
+      } catch {
+        throw new Error("That file isn't a valid Monit profile (it can't be read as JSON).")
+      }
+      // Validates + sanitizes; throws a user-readable Error on a bad file. The
+      // imported profile gets a fresh id and (if needed) a "Name (2)"-style
+      // name, so existing profiles are never touched.
+      const prof = profileFromExport(raw)
+      prof.name = uniqueProfileName(prof.name, data.profiles.map((p) => p.name))
+      data.profiles.push(prof)
+      data.settings.activeProfileId = prof.id
+      saveData(data)
+      globalInput.onSettingsChanged() // the active profile's hold keys changed
+      send(IPC.DataUpdated, data)
+      return { ok: true, name: prof.name }
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : 'Could not load that profile.'
+      return { ok: false, error: detail }
+    }
   })
 
   ipcMain.handle(IPC.SetActiveProfile, (_e, id: string) => {

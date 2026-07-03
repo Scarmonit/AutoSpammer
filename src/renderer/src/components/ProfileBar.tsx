@@ -6,7 +6,16 @@ import { useStore } from '../store'
  * New / Save / Delete actions.
  */
 export function ProfileBar(): JSX.Element {
-  const { data, activeProfile, createProfile, deleteProfile, setActiveProfile, saveNow } = useStore()
+  const {
+    data,
+    activeProfile,
+    createProfile,
+    deleteProfile,
+    setActiveProfile,
+    saveNow,
+    exportProfile,
+    importProfile
+  } = useStore()
 
   if (!data || !activeProfile) return <></>
 
@@ -50,6 +59,22 @@ export function ProfileBar(): JSX.Element {
         onClick={() => void deleteProfile(activeProfile.id)}
       >
         Delete
+      </button>
+      <button
+        type="button"
+        className="btn btn--ghost subbar__btn"
+        title="Save this profile to a .monit file you can share"
+        onClick={() => void exportProfile()}
+      >
+        Export
+      </button>
+      <button
+        type="button"
+        className="btn btn--ghost subbar__btn"
+        title="Load a shared .monit profile file as a new profile"
+        onClick={() => void importProfile()}
+      >
+        Load
       </button>
     </div>
   )

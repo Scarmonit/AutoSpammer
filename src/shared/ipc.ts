@@ -9,6 +9,8 @@ export const IPC = {
   RenameProfile: 'profile:rename',
   DeleteProfile: 'profile:delete',
   SetActiveProfile: 'profile:set-active',
+  ExportProfile: 'profile:export',
+  ImportProfile: 'profile:import',
   UpdateSettings: 'settings:update',
   Start: 'engine:start',
   Stop: 'engine:stop',

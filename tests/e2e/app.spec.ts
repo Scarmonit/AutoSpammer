@@ -288,10 +288,10 @@ test('enabling Macro disables Tap keys and Click positions (mutually exclusive)'
   await posToggle.check()
 })
 
-test('the Profile toolbar is a dropdown with New / Save / Delete (no Rename)', async () => {
+test('the Profile toolbar is a dropdown with New / Save / Delete / Export / Load', async () => {
   const profile = win.locator('.subbar__group').filter({ hasText: 'Profile' })
   await expect(profile.locator('select')).toBeVisible()
-  for (const name of ['New', 'Save', 'Delete']) {
+  for (const name of ['New', 'Save', 'Delete', 'Export', 'Load']) {
     await expect(profile.getByRole('button', { name, exact: true })).toBeVisible()
   }
   await expect(profile.getByRole('button', { name: 'Rename', exact: true })).toHaveCount(0)

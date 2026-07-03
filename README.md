@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.39.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.40.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.39.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.39.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.39.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.39.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.40.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.40.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.40.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.40.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 

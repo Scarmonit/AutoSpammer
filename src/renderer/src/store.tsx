@@ -57,6 +57,10 @@ interface Store {
   renameProfile: (id: string, name: string) => Promise<void>
   deleteProfile: (id: string) => Promise<void>
   setActiveProfile: (id: string) => Promise<void>
+  /** Save the active profile to a shareable .monit file. */
+  exportProfile: () => Promise<void>
+  /** Load a .monit file as a new profile and switch to it. */
+  importProfile: () => Promise<void>
   saveNow: () => Promise<void>
   updateSettings: (patch: Partial<AppSettings>) => Promise<void>
   /** Set the whole-window UI scale (zoom factor); applies immediately. */
@@ -324,6 +328,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     setMessage({ kind: 'info', text: 'Profile saved.' })
   }, [])
 
+  const exportProfile = useCallback(async () => {
+    // Flush any pending debounced edits so the file matches what's on screen.
+    const current = dataRef.current
+    const prof = current?.profiles.find((p) => p.id === current.settings.activeProfileId)
+    if (prof) {
+      if (saveTimer.current) clearTimeout(saveTimer.current)
+      await window.api.saveProfile(prof)
+    }
+    const res = await window.api.exportProfile()
+    if (!res.ok) setMessage({ kind: 'error', text: res.error ?? 'Could not export the profile.' })
+    else if (!res.cancelled) setMessage({ kind: 'info', text: `Profile exported to ${res.path}` })
+  }, [])
+
+  const importProfile = useCallback(async () => {
+    // On success the main process broadcasts DataUpdated, which refreshes
+    // `data` (including the newly active imported profile).
+    const res = await window.api.importProfile()
+    if (!res.ok) setMessage({ kind: 'error', text: res.error ?? 'Could not load that profile.' })
+    else if (!res.cancelled) setMessage({ kind: 'info', text: `Profile "${res.name}" loaded.` })
+  }, [])
+
   const start = useCallback(async () => {
     // Flush any pending debounced profile save first, so the main process runs
     // the latest profile (e.g. freshly recorded/edited macro events).
@@ -448,6 +473,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }): JSX.
     renameProfile,
     deleteProfile,
     setActiveProfile,
+    exportProfile,
+    importProfile,
     saveNow,
     updateSettings,
     setUiScale,
