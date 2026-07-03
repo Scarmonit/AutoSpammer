@@ -183,15 +183,18 @@ export function App(): JSX.Element {
           <h1>Auto Spammer</h1>
         </div>
         <div className="topbar__tools">
-          <button
-            type="button"
-            className="topbar__btn topbar__btn--icon"
-            title="Sections — show or hide sections"
-            aria-label="Sections"
-            onClick={() => setSectionsOpen(true)}
-          >
-            👁️
-          </button>
+          <div className="topbar__menuwrap">
+            <button
+              type="button"
+              className="topbar__btn"
+              title="Show or hide sections"
+              aria-expanded={sectionsOpen}
+              onClick={() => setSectionsOpen((o) => !o)}
+            >
+              Sections ▾
+            </button>
+            {sectionsOpen && <SectionManager onClose={() => setSectionsOpen(false)} />}
+          </div>
           <button
             type="button"
             className="topbar__btn topbar__btn--icon"
@@ -213,7 +216,6 @@ export function App(): JSX.Element {
       <SummaryBar />
 
       {optionsOpen && <SettingsModal onClose={() => setOptionsOpen(false)} />}
-      {sectionsOpen && <SectionManager onClose={() => setSectionsOpen(false)} />}
 
       {message && (
         <div className={`toast toast--${message.kind}`} onClick={dismissMessage}>

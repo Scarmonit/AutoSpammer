@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.37.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.38.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.37.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.37.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.37.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.37.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[AutoSpammer-Portable-1.38.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Portable-1.38.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[AutoSpammer-Setup-1.38.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/AutoSpammer-Setup-1.38.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -81,7 +81,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 
 - **Global hotkey controls** — the **Start / stop** and **Emergency stop** hotkeys live under **Options → Hotkeys**; click a key chip to rebind it. Start and stop with the hotkey (default **F6**), the hold-action keys, or the system tray — there's no separate Start button to hunt for.
 - **Profile and Loop toolbar** — a compact second row in the header holds the **Profile** picker (with New / Save / Delete) and the **Loop** control (Forever / Play Once / Loop X times), so they're always one click away without taking up a panel.
-- **Sections manager** — an eye button in the top bar opens a popup listing every section with a checkbox. Uncheck one to completely hide it from the window *and* skip its feature when spamming; re-check to bring it back in its saved position. Saved per profile.
+- **Sections dropdown** — the **Sections ▾** button in the top bar opens a panel listing every section with its accent dot and an accent-colored switch. Toggle one off to completely hide it from the window *and* skip its feature when spamming; toggle it back to restore it in its saved position. Saved per profile.
 - **Options dialog** — a gear button opens app settings: the Display toggles (hints, summary bar), **Text size**, the **Start / stop** and **Emergency stop** hotkey bindings, **Minimize to tray on close**, and **Reset layout**.
 - **Full macro recording and playback** — capture everything (keys, clicks, and mouse movement) with the exact timing between events, edit any delay, then replay it on a loop.
 - **Drag-and-drop sections** — grab any section header to reorder it, even across the two columns. **Reset layout** (in Options) restores the default order.
@@ -192,7 +192,7 @@ Auto Spammer lives in the system tray so it stays out of your way while you game
 
 - **Resize** — hover the thin gap between two sections (the cursor becomes a resize arrow) and drag up or down. Double-click the splitter to reset that section to its natural size.
 - **Collapse** — click the chevron in a section header to collapse it to just the title bar; click again to expand.
-- **Hide** — use the **Sections** manager (eye button in the top bar) to remove a section entirely and skip its feature on the next run.
+- **Hide** — use the **Sections ▾** dropdown in the top bar to remove a section entirely and skip its feature on the next run.
 - **Reorder** — drag a section by its header grip to a new spot, within a column or across both. Use **Reset layout** (in Options) to restore the default order.
 
 All layout choices — sizes, collapsed state, hidden state, and order — are saved per profile.

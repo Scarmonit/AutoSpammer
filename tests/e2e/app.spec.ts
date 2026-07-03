@@ -300,10 +300,10 @@ test('the Profile toolbar is a dropdown with New / Save / Delete (no Rename)', a
   await expect(profile.locator('select option')).toContainText(['Default'])
 })
 
-test('the top bar keeps only the title, eye, gear, and status', async () => {
+test('the top bar keeps only the title, Sections menu, gear, and status', async () => {
   const bar = win.locator('.topbar')
   await expect(bar.locator('.brand h1')).toHaveText('Auto Spammer')
-  await expect(bar.getByRole('button', { name: 'Sections', exact: true })).toBeVisible()
+  await expect(bar.getByRole('button', { name: 'Sections ▾', exact: true })).toBeVisible()
   await expect(bar.getByRole('button', { name: 'Options', exact: true })).toBeVisible()
   await expect(bar.locator('.status')).toBeVisible()
   // The hotkeys, text-size dropdown, and Reset Layout moved into Options.
@@ -546,30 +546,47 @@ test('Options modal: Display / Hotkeys / Window groups per the mockup', async ()
   await expect(win.locator('.modal')).toHaveCount(0)
 })
 
-test('the Sections (👁️) manager hides and restores a card', async () => {
+test('the Sections dropdown hides and restores a card', async () => {
   // Default: all 7 cards render.
   await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
   await expect(section('Macro')).toBeVisible()
 
-  // Open the manager and uncheck "Macro".
-  await win.getByRole('button', { name: 'Sections', exact: true }).click()
-  const manager = win.locator('.modal')
-  await expect(manager).toBeVisible()
-  await expect(manager.locator('.seclist__row')).toHaveCount(7)
-  const row = manager.locator('.seclist__row', { hasText: 'Macro' })
+  // The "Sections ▾" button opens an anchored dropdown (not a modal).
+  await win.getByRole('button', { name: 'Sections ▾', exact: true }).click()
+  const menu = win.locator('.secmenu')
+  await expect(menu).toBeVisible()
+  await expect(win.locator('.modal')).toHaveCount(0)
+  await expect(menu.locator('.secmenu__title')).toHaveText('Sections')
+  await expect(menu.locator('.secmenu__desc')).toHaveText(
+    'Hidden sections disappear from the window and are skipped when running.'
+  )
+
+  // Every section is listed — including Text function — with an accent dot
+  // and an accent-colored switch.
+  await expect(menu.locator('.secmenu__row')).toHaveCount(7)
+  await expect(menu.locator('.secmenu__row .section__dot')).toHaveCount(7)
+  await expect(menu.locator('.secmenu__row', { hasText: 'Text function' })).toBeVisible()
+
+  // Switching "Macro" off hides its card; one fewer pane.
+  const row = menu.locator('.secmenu__row', { hasText: 'Macro' })
   await expect(row.locator('input')).toBeChecked()
   await row.locator('input').uncheck()
-
-  // The card disappears from the main UI; one fewer pane.
   await expect(win.locator('[data-rs-pane]')).toHaveCount(6)
   await expect(section('Macro')).toHaveCount(0)
 
-  // Re-checking via "Show all" brings it back.
-  await manager.getByRole('button', { name: 'Show all' }).click()
+  // "Show all" brings it back; Done closes the dropdown.
+  await menu.getByRole('button', { name: 'Show all' }).click()
   await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
-  await manager.getByRole('button', { name: 'Done' }).click()
-  await expect(win.locator('.modal')).toHaveCount(0)
+  await menu.getByRole('button', { name: 'Done' }).click()
+  await expect(win.locator('.secmenu')).toHaveCount(0)
   await expect(section('Macro')).toBeVisible()
+
+  // Reopen and click outside (far left, away from the anchored panel) — the
+  // dropdown closes too.
+  await win.getByRole('button', { name: 'Sections ▾', exact: true }).click()
+  await expect(win.locator('.secmenu')).toBeVisible()
+  await win.mouse.click(40, 400)
+  await expect(win.locator('.secmenu')).toHaveCount(0)
 })
 
 test('the top-bar Loop control changes mode (and the summary follows)', async () => {
