@@ -9,11 +9,11 @@ const PRESETS = Array.from({ length: (MAX_PCT - MIN_PCT) / 5 + 1 }, (_, i) => MI
 const clampPct = (n: number): number => Math.min(MAX_PCT, Math.max(MIN_PCT, Math.round(n)))
 
 /**
- * Top-bar control for the whole-window UI scale (zoom). Pick a preset from the
- * dropdown, or double-click it to type any custom value between 100% and 200%.
- * Applies immediately and is saved globally.
+ * Whole-window UI scale (zoom) control, shown in the Options dialog. Pick a
+ * preset from the dropdown, or double-click it to type any custom value
+ * between 100% and 200%. Applies immediately and is saved globally.
  */
-export function UiScaleControl(): JSX.Element {
+export function UiScaleControl({ icon = true }: { icon?: boolean }): JSX.Element {
   const { data, setUiScale } = useStore()
   const [editing, setEditing] = useState(false)
   if (!data) return <></>
@@ -30,9 +30,11 @@ export function UiScaleControl(): JSX.Element {
       title="Text / UI size — double-click to type a custom %"
       onDoubleClick={() => setEditing(true)}
     >
-      <span className="uiscale__icon" aria-hidden="true">
-        A
-      </span>
+      {icon && (
+        <span className="uiscale__icon" aria-hidden="true">
+          A
+        </span>
+      )}
       {editing ? (
         <input
           className="input uiscale__input"
@@ -49,6 +51,9 @@ export function UiScaleControl(): JSX.Element {
               apply(Number((e.target as HTMLInputElement).value) || pct)
               setEditing(false)
             } else if (e.key === 'Escape') {
+              // Cancel only this edit — don't let the Escape bubble up and
+              // close the Options dialog around it.
+              e.stopPropagation()
               setEditing(false)
             }
           }}

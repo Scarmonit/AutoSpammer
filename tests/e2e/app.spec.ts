@@ -300,15 +300,36 @@ test('the Profile toolbar is a dropdown with New / Save / Delete (no Rename)', a
   await expect(profile.locator('select option')).toContainText(['Default'])
 })
 
-test('the global Toggle and Emergency hotkeys live in the top bar', async () => {
-  const bar = win.locator('.topbar__hotkeys')
-  await expect(bar.getByRole('button', { name: /^Toggle:/ })).toBeVisible()
-  await expect(bar.getByRole('button', { name: /^Stop:/ })).toBeVisible()
+test('the top bar keeps only the title, eye, gear, and status', async () => {
+  const bar = win.locator('.topbar')
+  await expect(bar.locator('.brand h1')).toHaveText('Auto Spammer')
+  await expect(bar.getByRole('button', { name: 'Sections', exact: true })).toBeVisible()
+  await expect(bar.getByRole('button', { name: 'Options', exact: true })).toBeVisible()
+  await expect(bar.locator('.status')).toBeVisible()
+  // The hotkeys, text-size dropdown, and Reset Layout moved into Options.
+  await expect(bar.getByRole('button', { name: /^Toggle:/ })).toHaveCount(0)
+  await expect(bar.getByRole('button', { name: /^Stop:/ })).toHaveCount(0)
+  await expect(bar.getByRole('button', { name: 'Reset Layout' })).toHaveCount(0)
+  await expect(bar.locator('.uiscale')).toHaveCount(0)
 })
 
-test('clicking a hotkey button opens the capture overlay; Esc cancels it', async () => {
-  const bar = win.locator('.topbar__hotkeys')
-  await bar.getByRole('button', { name: 'Toggle: F6' }).click()
+/** Open the Options dialog and return its locator. */
+async function openOptions(): Promise<Locator> {
+  await win.getByRole('button', { name: 'Options', exact: true }).click()
+  const modal = win.locator('.modal')
+  await expect(modal).toBeVisible()
+  return modal
+}
+
+/** The key chip inside a named Options row (e.g. "Start / stop"). */
+const optionChip = (modal: Locator, row: string): Locator =>
+  modal.locator('.optrow', { hasText: row }).locator('button.keychip')
+
+test('the Start / stop chip opens the capture overlay; Esc cancels it', async () => {
+  const modal = await openOptions()
+  const chip = optionChip(modal, 'Start / stop')
+  await expect(chip).toHaveText('F6')
+  await chip.click()
 
   // Full-screen overlay with the mockup copy.
   const overlay = win.locator('.capture-overlay')
@@ -318,34 +339,45 @@ test('clicking a hotkey button opens the capture overlay; Esc cancels it', async
   )
   await expect(overlay.locator('.capture-overlay__sub')).toHaveText('Esc to cancel')
 
-  // Esc closes it without changing the binding.
+  // Esc closes only the overlay — the binding and the dialog are untouched.
   await win.keyboard.press('Escape')
   await expect(overlay).toHaveCount(0)
-  await expect(bar.getByRole('button', { name: 'Toggle: F6' })).toBeVisible()
+  await expect(modal).toBeVisible()
+  await expect(chip).toHaveText('F6')
+
+  await modal.getByRole('button', { name: 'Done' }).click()
+  await expect(win.locator('.modal')).toHaveCount(0)
 })
 
-test('the overlay captures a key and rebinds the Stop hotkey', async () => {
-  const bar = win.locator('.topbar__hotkeys')
+test('the overlay captures a key and rebinds the Emergency stop', async () => {
+  const modal = await openOptions()
+  const chip = optionChip(modal, 'Emergency stop')
+  await expect(chip).toHaveText('Esc') // Escape shows as a compact "Esc" chip
 
-  await bar.getByRole('button', { name: /^Stop:/ }).click()
+  await chip.click()
   await expect(win.locator('.capture-overlay')).toBeVisible()
   await win.keyboard.press('F1')
   await expect(win.locator('.capture-overlay')).toHaveCount(0)
-  await expect(bar.getByRole('button', { name: 'Stop: F1' })).toBeVisible()
+  await expect(chip).toHaveText('F1')
+
+  await modal.getByRole('button', { name: 'Done' }).click()
 })
 
 test('pressing the start/stop hotkey during capture binds it instead of starting a run', async () => {
-  const bar = win.locator('.topbar__hotkeys')
+  const modal = await openOptions()
+  const chip = optionChip(modal, 'Start / stop')
 
-  // Capture for Toggle, then press the toggle key itself (F6).
-  await bar.getByRole('button', { name: 'Toggle: F6' }).click()
+  // Capture for Start / stop, then press the toggle key itself (F6).
+  await chip.click()
   await expect(win.locator('.capture-overlay')).toBeVisible()
   await win.keyboard.press('F6')
 
   // The overlay consumed it as the (unchanged) binding — and no run started.
   await expect(win.locator('.capture-overlay')).toHaveCount(0)
-  await expect(bar.getByRole('button', { name: 'Toggle: F6' })).toBeVisible()
+  await expect(chip).toHaveText('F6')
   await expect(win.locator('.status')).toContainText('Idle')
+
+  await modal.getByRole('button', { name: 'Done' }).click()
 })
 
 test('renders draggable splitters between sections', async () => {
@@ -364,7 +396,10 @@ test('sections reorder via the grip handle (not the whole pane) + Reset Layout',
   await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(0)
   await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(7)
   await expect(win.locator('.section__grip').first()).toBeVisible()
-  await expect(win.getByRole('button', { name: 'Reset Layout' })).toBeVisible()
+  // Reset layout now lives in the Options footer.
+  const modal = await openOptions()
+  await expect(modal.getByRole('button', { name: 'Reset layout' })).toBeVisible()
+  await modal.getByRole('button', { name: 'Done' }).click()
 })
 
 test('drag-to-resize a section works at a normal window size', async () => {
@@ -415,19 +450,25 @@ test('every card can be collapsed via its header chevron', async () => {
   await expect(keys.locator('.section__body')).toBeVisible()
 })
 
-test('the top bar UI scale is a dropdown that double-clicks into a custom input', async () => {
-  const select = win.locator('.uiscale__select')
+test('the Text size dropdown in Options double-clicks into a custom input', async () => {
+  const modal = await openOptions()
+  const row = modal.locator('.optrow', { hasText: 'Text size' })
+  const select = row.locator('.uiscale__select')
   await expect(select).toBeVisible()
   await expect(select).toHaveValue('100')
   await expect(select.locator('option[value="150"]')).toHaveCount(1) // common increments
 
   // Double-clicking the control switches to a custom number input (100–200).
-  await win.locator('.uiscale').dblclick()
-  const input = win.locator('.uiscale__input')
+  await row.locator('.uiscale').dblclick()
+  const input = row.locator('.uiscale__input')
   await expect(input).toBeVisible()
   await expect(input).toHaveAttribute('max', '200')
   await input.press('Escape') // cancel without changing the scale
-  await expect(win.locator('.uiscale__select')).toBeVisible()
+  await expect(row.locator('.uiscale__select')).toBeVisible()
+
+  // That Escape cancelled the input edit; the dialog itself stays open.
+  await expect(modal).toBeVisible()
+  await modal.getByRole('button', { name: 'Done' }).click()
 })
 
 test('Text function has a header switch that dims its body', async () => {
@@ -444,16 +485,31 @@ test('Text function has a header switch that dims its body', async () => {
   await expect(body).toHaveClass(/section__body--off/)
 })
 
-test('Options modal: Display switches control hints + summary bar, tray setting round-trips', async () => {
-  await win.getByRole('button', { name: 'Options', exact: true }).click()
-  const modal = win.locator('.modal')
-  await expect(modal).toBeVisible()
-  await expect(modal).toContainText('Display')
+test('Options modal: Display / Hotkeys / Window groups per the mockup', async () => {
+  const modal = await openOptions()
+  for (const group of ['Display', 'Hotkeys', 'Window']) {
+    await expect(modal.locator('.modal__group', { hasText: group })).toBeVisible()
+  }
 
-  const switches = modal.locator('.modal__switchrow .section__toggle input')
-  await expect(switches).toHaveCount(2)
-  const hints = switches.nth(0)
-  const summary = switches.nth(1)
+  // Every row shows a title + one-line description.
+  await expect(modal.locator('.optrow', { hasText: 'Show hints' })).toContainText(
+    'One-line explanations under each section title.'
+  )
+  await expect(modal.locator('.optrow', { hasText: 'Show summary in toolbar' })).toContainText(
+    'Plain-English preview of what will run.'
+  )
+  await expect(modal.locator('.optrow', { hasText: 'Text size' })).toContainText(
+    'Scales the whole window.'
+  )
+  await expect(modal.locator('.optrow', { hasText: 'Start / stop' })).toContainText(
+    'Toggles the whole run from any window.'
+  )
+  await expect(modal.locator('.optrow', { hasText: 'Emergency stop' })).toContainText(
+    'Always stops everything, even mid-run.'
+  )
+
+  const hints = modal.locator('.optrow', { hasText: 'Show hints' }).locator('input')
+  const summary = modal.locator('.optrow', { hasText: 'Show summary in toolbar' }).locator('input')
   await expect(hints).toBeChecked() // both default to on
   await expect(summary).toBeChecked()
 
@@ -463,19 +519,23 @@ test('Options modal: Display switches control hints + summary bar, tray setting 
   await hints.check()
   await expect(win.locator('.section__desc').first()).toBeVisible()
 
-  // "Show summary bar" off removes the WHEN RUNNING bar; back on restores it.
+  // "Show summary in toolbar" off removes the WHEN RUNNING bar; on restores it.
   await summary.uncheck()
   await expect(win.locator('.summarybar')).toHaveCount(0)
   await summary.check()
   await expect(win.locator('.summarybar')).toBeVisible()
 
-  // The close-to-tray checkbox defaults to ON and round-trips.
-  const tray = modal.locator('.check input[type="checkbox"]')
+  // The tray switch defaults to ON, round-trips, and its description follows.
+  const trayRow = modal.locator('.optrow', { hasText: 'Minimize to tray on close' })
+  const tray = trayRow.locator('input')
   await expect(tray).toBeChecked()
   await tray.uncheck()
-  await expect(tray).not.toBeChecked()
+  await expect(trayRow).toContainText('Closing the window fully quits the app.')
   await tray.check()
-  await expect(tray).toBeChecked()
+  await expect(trayRow).toContainText('keeps it running in the tray')
+
+  // Footer: Reset layout on the left, Done on the right.
+  await expect(modal.getByRole('button', { name: 'Reset layout' })).toBeVisible()
 
   // Closes via the Done button and via Escape.
   await modal.getByRole('button', { name: 'Done' }).click()

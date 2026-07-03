@@ -14,8 +14,6 @@ import { TextFunctionPanel } from './components/TextFunctionPanel'
 import { ClickPositionsPanel } from './components/ClickPositionsPanel'
 import { MacroPanel } from './components/MacroPanel'
 import { StatusIndicator } from './components/StatusIndicator'
-import { UiScaleControl } from './components/UiScaleControl'
-import { TopBarHotkeys } from './components/TopBarHotkeys'
 import { ProfileBar } from './components/ProfileBar'
 import { LoopBar } from './components/LoopBar'
 import { SummaryBar } from './components/SummaryBar'
@@ -90,8 +88,7 @@ function SectionColumn({
 }
 
 export function App(): JSX.Element {
-  const { loaded, data, message, dismissMessage, activeProfile, setSectionLayout, resetSectionLayout } =
-    useStore()
+  const { loaded, data, message, dismissMessage, activeProfile, setSectionLayout } = useStore()
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null)
   const [optionsOpen, setOptionsOpen] = useState(false)
@@ -186,16 +183,6 @@ export function App(): JSX.Element {
           <h1>Auto Spammer</h1>
         </div>
         <div className="topbar__tools">
-          <TopBarHotkeys />
-          <UiScaleControl />
-          <button
-            type="button"
-            className="topbar__btn"
-            title="Reset the section layout to its default order"
-            onClick={resetSectionLayout}
-          >
-            Reset Layout
-          </button>
           <button
             type="button"
             className="topbar__btn topbar__btn--icon"
