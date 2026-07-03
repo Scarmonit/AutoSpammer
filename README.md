@@ -80,7 +80,8 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 ### Highlights
 
 - **Global hotkey controls** — the **Start / stop** and **Emergency stop** hotkeys live under **Options → Hotkeys**; click a key chip to rebind it. Start and stop with the hotkey (default **F6**), the hold-action keys, or the system tray — there's no separate Start button to hunt for.
-- **Profile and Loop toolbar** — a compact second row in the header holds the **Profile** picker (with New / Save / Delete) and the **Loop** control (Forever / Play Once / Loop X times), so they're always one click away without taking up a panel.
+- **Profile and Loop toolbar** — a compact second row in the header holds the **Profile** picker (New / Save / Delete / Export / Load) and the **Loop** control (Forever / Play Once / Loop X times), so they're always one click away without taking up a panel.
+- **Share profiles as files** — **Export** saves the current profile (every setting it stores) to a `.monit` file named after it; **Load** imports a shared file as a new profile and switches to it. Name clashes import as *"Name (2)"*, bad files show a clear error, and your other profiles are never touched.
 - **Sections dropdown** — the **Sections ▾** button in the top bar opens a panel listing every section with its accent dot and an accent-colored switch. Toggle one off to completely hide it from the window *and* skip its feature when spamming; toggle it back to restore it in its saved position. Saved per profile.
 - **Options dialog** — a gear button opens app settings: the Display toggles (hints, summary bar), **Text size**, the **Start / stop** and **Emergency stop** hotkey bindings, **Minimize to tray on close**, and **Reset layout**.
 - **Full macro recording and playback** — capture everything (keys, clicks, and mouse movement) with the exact timing between events, edit any delay, then replay it on a loop.
