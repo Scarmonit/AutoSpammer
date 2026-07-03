@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { SECTION_IDS, SECTION_LABELS, SECTION_ACCENTS, isSectionHidden } from '@shared/sections'
 import { useStore } from '../store'
 import { SectionToggle } from './SectionToggle'
@@ -6,6 +6,9 @@ import { SectionToggle } from './SectionToggle'
 interface Props {
   onClose: () => void
 }
+
+const PANEL_WIDTH = 300
+const GAP = 8
 
 /**
  * Sections picker: a dropdown panel anchored under the top bar's "Sections ▾"
@@ -15,7 +18,19 @@ interface Props {
  */
 export function SectionManager({ onClose }: Props): JSX.Element {
   const ref = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
   const { activeProfile, setSectionHidden, showAllSections } = useStore()
+
+  // Anchor the panel under the "Sections ▾" trigger, right-aligned to it but
+  // clamped inside the viewport — so it never spills off-screen when the top
+  // bar wraps to a second line at narrow widths.
+  useLayoutEffect(() => {
+    const btn = ref.current?.parentElement?.querySelector('button')
+    if (!btn) return
+    const r = btn.getBoundingClientRect()
+    const left = Math.max(GAP, Math.min(r.right - PANEL_WIDTH, window.innerWidth - PANEL_WIDTH - GAP))
+    setPos({ top: r.bottom + GAP, left })
+  }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
@@ -39,7 +54,13 @@ export function SectionManager({ onClose }: Props): JSX.Element {
   const hiddenCount = SECTION_IDS.filter((id) => isSectionHidden(hidden, id)).length
 
   return (
-    <div className="secmenu" ref={ref} role="dialog" aria-label="Sections">
+    <div
+      className="secmenu"
+      ref={ref}
+      role="dialog"
+      aria-label="Sections"
+      style={pos ? { top: pos.top, left: pos.left } : { visibility: 'hidden' }}
+    >
       <div className="secmenu__title">Sections</div>
       <p className="secmenu__desc">
         Hidden sections disappear from the window and are skipped when running.

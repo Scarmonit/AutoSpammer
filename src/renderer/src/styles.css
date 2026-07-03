@@ -55,43 +55,25 @@ body {
   color: var(--text-dim);
 }
 
-/* ---------- Top bar ---------- */
+/* ---------- Top bar (single row: Profile … Loop / Sections / ⚙ / status) ---------- */
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--border-soft);
   background: var(--bg);
   -webkit-app-region: drag;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.brand__mark {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  background: linear-gradient(135deg, var(--blue), #7aa7ff);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-}
-
-.brand h1 {
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0;
-  letter-spacing: 0.2px;
-}
-
-/* ---------- Top-bar tools (UI scale + status) ---------- */
+/* Right-side cluster: Loop, Sections, Options, status. */
 .topbar__tools {
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 8px 14px;
   -webkit-app-region: no-drag;
 }
 
@@ -120,23 +102,20 @@ body {
   line-height: 1;
 }
 
-/* ---------- Secondary toolbar (Profile + Loop) ---------- */
-.subbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  padding: 7px 16px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border-soft);
-  -webkit-app-region: no-drag;
-}
+/* ---------- Toolbar groups (Profile picker, Loop control) ---------- */
 .subbar__group {
   display: flex;
   align-items: center;
   gap: 6px;
-  min-width: 0;
+  /* Each group stays on one line; the top bar wraps whole groups instead. */
+  flex: none;
+  /* Lives inside the draggable top bar — keep its controls clickable. */
+  -webkit-app-region: no-drag;
+}
+/* Pin the dropdown width so the toolbar's layout math is stable (beats the
+   generic `.input { width: 100% }` by specificity). */
+.subbar__group .subbar__select {
+  width: 120px;
 }
 .subbar__label {
   font-size: 10px;
@@ -150,7 +129,7 @@ body {
 .subbar__select {
   width: auto;
   min-width: 0;
-  max-width: 200px;
+  max-width: 130px;
   height: 28px;
   padding: 0 24px 0 8px;
   /* little chevron so it still reads as a dropdown without the native arrow */
@@ -344,9 +323,9 @@ body {
   position: relative;
 }
 .secmenu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  /* Positioned in JS (SectionManager) so it stays on-screen when the top bar
+     wraps; fixed to the viewport, right-aligned under the Sections button. */
+  position: fixed;
   z-index: 120;
   width: 300px;
   padding: 14px;

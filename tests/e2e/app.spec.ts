@@ -303,13 +303,23 @@ test('the Profile toolbar is a dropdown with New / Save / Delete / Export / Load
   await expect(profile.locator('select option')).toContainText(['Default'])
 })
 
-test('the top bar keeps only the title, Sections menu, gear, and status', async () => {
+test('the single top bar: Profile controls left; Loop, Sections, gear, status right', async () => {
   const bar = win.locator('.topbar')
-  await expect(bar.locator('.brand h1')).toHaveText('Monit')
-  await expect(bar.getByRole('button', { name: 'Sections ▾', exact: true })).toBeVisible()
-  await expect(bar.getByRole('button', { name: 'Options', exact: true })).toBeVisible()
-  await expect(bar.locator('.status')).toBeVisible()
-  // The hotkeys, text-size dropdown, and Reset Layout moved into Options.
+  // The "Monit" brand title/dot are gone; the Profile group sits on the far left.
+  await expect(bar.locator('.brand')).toHaveCount(0)
+  await expect(bar.locator('h1')).toHaveCount(0)
+  await expect(bar.locator('.subbar__group').filter({ hasText: 'Profile' })).toBeVisible()
+  // Loop lives in the right cluster, before the Sections button.
+  const tools = bar.locator('.topbar__tools')
+  await expect(tools.locator('.subbar__group').filter({ hasText: 'Loop' })).toBeVisible()
+  await expect(tools.getByRole('button', { name: 'Sections ▾', exact: true })).toBeVisible()
+  await expect(tools.getByRole('button', { name: 'Options', exact: true })).toBeVisible()
+  await expect(tools.locator('.status')).toBeVisible()
+  const loopBox = (await tools.locator('.subbar__group').boundingBox())!
+  const sectionsBox = (await tools.getByRole('button', { name: 'Sections ▾' }).boundingBox())!
+  expect(loopBox.x).toBeLessThan(sectionsBox.x)
+  // The old second row is gone, and so are the controls moved into Options.
+  await expect(win.locator('.subbar')).toHaveCount(0)
   await expect(bar.getByRole('button', { name: /^Toggle:/ })).toHaveCount(0)
   await expect(bar.getByRole('button', { name: /^Stop:/ })).toHaveCount(0)
   await expect(bar.getByRole('button', { name: 'Reset Layout' })).toHaveCount(0)
@@ -584,11 +594,14 @@ test('the Sections dropdown hides and restores a card', async () => {
   await expect(win.locator('.secmenu')).toHaveCount(0)
   await expect(section('Macro')).toBeVisible()
 
-  // Reopen and click outside (far left, away from the anchored panel) — the
-  // dropdown closes too.
+  // Reopen and click outside the panel — it closes too. The panel sits at the
+  // top (left when the bar wraps, right otherwise); a low-right point clears it
+  // in both layouts.
   await win.getByRole('button', { name: 'Sections ▾', exact: true }).click()
   await expect(win.locator('.secmenu')).toBeVisible()
-  await win.mouse.click(40, 400)
+  const menuBox = (await win.locator('.secmenu').boundingBox())!
+  const vp = win.viewportSize() ?? { width: 744, height: 701 }
+  await win.mouse.click(vp.width - 20, menuBox.y + menuBox.height + 40)
   await expect(win.locator('.secmenu')).toHaveCount(0)
 })
 

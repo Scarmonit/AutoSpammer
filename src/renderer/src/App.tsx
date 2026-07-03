@@ -178,11 +178,9 @@ export function App(): JSX.Element {
   return (
     <div className={`app${data?.settings.showHints === false ? ' app--nohints' : ''}`}>
       <header className="topbar">
-        <div className="brand">
-          <span className="brand__mark" />
-          <h1>Monit</h1>
-        </div>
+        <ProfileBar />
         <div className="topbar__tools">
+          <LoopBar />
           <div className="topbar__menuwrap">
             <button
               type="button"
@@ -207,11 +205,6 @@ export function App(): JSX.Element {
           <StatusIndicator />
         </div>
       </header>
-
-      <div className="subbar">
-        <ProfileBar />
-        <LoopBar />
-      </div>
 
       <SummaryBar />
 
