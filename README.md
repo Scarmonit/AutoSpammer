@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.0.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.1.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.41.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.0.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.41.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.41.0.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.41.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.1.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.41.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.41.1.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -198,9 +198,13 @@ Each trigger row has two halves:
    - **image appears** — click **Capture image**, then left-click two opposite corners of the thing to look for (a captured thumbnail appears). By default the whole screen is searched; **Search: screen** lets you click two corners to limit the search area (faster, fewer false hits), and its **×** resets to full screen. The same **±** tolerance applies per pixel.
 2. **then** — the action to run on a match: **press a key** (click the chip to capture one), **left click** / **right click** at the current cursor position, or **click a saved position** from the Click positions card.
 
+Every row shows a live **now** readout of what Monit currently sees — the pixel's current color (and a ✓/✕ for whether it's within tolerance), or whether the image is on screen. Use it to confirm your pick is right and to tune the tolerance *before* starting a run: if the ✓ flickers while the target looks steady, raise the **±** value (game icons often glow or pulse). An incomplete trigger (no pixel picked, no image captured, no key bound, or a deleted position) shows a **⚠ Won't run** note in its row and a warning toast when a run starts — it never fails silently.
+
 Each row has its own switch, and the card's header switch gates them all — both must be on, and only during a run (started with **F6**, the tray, or a hold trigger). **check every [n] ms** sets how often the screen is polled (250 ms default; lower is snappier but uses more CPU). While a trigger matches, its action fires once per check. Everything is saved with the profile and included in `.monit` exports.
 
 > **Tip:** for "click the button when it turns green", use **pixel color** on a pixel inside the button plus a **click a saved position** action — it's much cheaper than image matching.
+
+> **Not matching in a game?** Detection reads the screen the same way a screenshot does, so a game in *exclusive fullscreen* may not be visible to it — switch the game to **borderless windowed** (or windowed). Detection can only watch the **primary monitor**. And remember the triggers only run while a run is active (**F6**).
 
 ### System tray
 

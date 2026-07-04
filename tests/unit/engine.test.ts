@@ -50,9 +50,7 @@ vi.mock('../../src/main/detection', () => ({
   DetectionRunner: vi.fn(
     (config: unknown, positions: unknown, onError: (m: string) => void) =>
       new FakeDetectionRunner(config, positions, onError)
-  ),
-  isTriggerReady: (t: { enabled: boolean; mode: string; color: string; image: string | null }) =>
-    t.enabled && (t.mode === 'color' ? t.color !== '' : t.image !== null)
+  )
 }))
 
 import { SpamEngine } from '../../src/main/engine'
@@ -555,6 +553,53 @@ describe('SpamEngine — Detection triggers integration', () => {
     })
     await runToIdle(p)
     expect(detectionRunners.length).toBe(0)
+  })
+
+  it('warns (and does not start the watcher) when a trigger has no action bound', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.detection = {
+        enabled: true,
+        pollMs: 100,
+        triggers: [trigger({ action: { kind: 'key', key: '', positionId: '' } })]
+      }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    const { errors } = await runToIdle(p)
+    expect(detectionRunners.length).toBe(0)
+    expect(errors.some((m) => /detection trigger #1/i.test(m) && /no key bound/i.test(m))).toBe(true)
+  })
+
+  it('warns when a trigger points at a deleted click position', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.clickPositions = []
+      p.detection = {
+        enabled: true,
+        pollMs: 100,
+        triggers: [trigger({ action: { kind: 'position', key: '', positionId: 'gone' } })]
+      }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    const { errors } = await runToIdle(p)
+    expect(detectionRunners.length).toBe(0)
+    expect(errors.some((m) => /position no longer exists/i.test(m))).toBe(true)
+  })
+
+  it('runs a position-action trigger when its click position exists', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.clickPositions = [{ id: 'cp1', x: 5, y: 6, button: 'left', delayMs: null }]
+      p.detection = {
+        enabled: true,
+        pollMs: 100,
+        triggers: [trigger({ action: { kind: 'position', key: '', positionId: 'cp1' } })]
+      }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    const { errors } = await runToIdle(p)
+    expect(detectionRunners.length).toBe(1)
+    expect(errors).toEqual([])
   })
 
   it('does not run detection for the focused hold modes', async () => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import type { DetectionTrigger, DetectionAction } from '@shared/types'
+import type { DetectionTrigger, DetectionAction, DetectionProbeResult } from '@shared/types'
 import { createDefaultDetectionTrigger } from '@shared/defaults'
 import { SECTION_ACCENTS } from '@shared/sections'
 import { useStore } from '../store'
@@ -56,6 +56,40 @@ export function DetectionCard(): JSX.Element {
   const [picking, setPicking] = useState<Picking | null>(null)
   const pickingRef = useRef<Picking | null>(null)
   pickingRef.current = picking
+
+  // Live "now:" readout — what detection currently sees for each trigger.
+  const [probes, setProbes] = useState<Record<string, DetectionProbeResult>>({})
+  const hasTriggers = (activeProfile?.detection?.triggers.length ?? 0) > 0
+
+  useEffect(() => {
+    if (!hasTriggers) {
+      setProbes({})
+      return
+    }
+    let disposed = false
+    let busy = false
+    const poll = async (): Promise<void> => {
+      // Skip while hidden or while the previous (possibly slow) probe runs.
+      if (busy || document.visibilityState !== 'visible') return
+      busy = true
+      try {
+        const results = await window.api.detectionProbe()
+        if (!disposed) {
+          setProbes(Object.fromEntries(results.map((r) => [r.id, r])))
+        }
+      } catch {
+        /* probing is best-effort */
+      } finally {
+        busy = false
+      }
+    }
+    void poll()
+    const timer = setInterval(() => void poll(), 1000)
+    return () => {
+      disposed = true
+      clearInterval(timer)
+    }
+  }, [hasTriggers])
 
   // Keep the latest updateProfile for the (once-subscribed) pick listeners.
   const updateRef = useRef(updateProfile)
@@ -148,7 +182,9 @@ export function DetectionCard(): JSX.Element {
       <p className="helper hint">
         <strong>Pick pixel</strong>: left-click any spot on screen to capture its position and
         color. <strong>Capture image</strong>: left-click two opposite corners of the area to
-        match. Triggers only fire during a run, and only while their condition matches.
+        match. The <strong>now</strong> readout shows live what Monit sees — if its ✓/✕ flickers,
+        raise the ± tolerance. Triggers only fire <strong>while a run is active</strong> (start
+        one with your Start/stop hotkey, default F6).
       </p>
 
       <div className="trigrows">
@@ -197,6 +233,21 @@ export function DetectionCard(): JSX.Element {
                         <span className="detrow__xy">
                           at ({t.x}, {t.y})
                         </span>
+                        {probes[t.id]?.currentColor && (
+                          <span
+                            className={`detrow__now${probes[t.id].matched ? ' detrow__now--hit' : ''}`}
+                            title={`The pixel is ${probes[t.id].currentColor} right now — ${
+                              probes[t.id].matched ? 'within' : 'outside'
+                            } the ± tolerance`}
+                          >
+                            now
+                            <span
+                              className="detrow__swatch detrow__swatch--sm"
+                              style={{ background: probes[t.id].currentColor! }}
+                            />
+                            {probes[t.id].matched ? '✓' : '✕'}
+                          </span>
+                        )}
                       </>
                     )}
                   </>
@@ -232,6 +283,18 @@ export function DetectionCard(): JSX.Element {
                       >
                         ×
                       </button>
+                    )}
+                    {t.image && probes[t.id] && !probes[t.id].issue && (
+                      <span
+                        className={`detrow__now${probes[t.id].matched ? ' detrow__now--hit' : ''}`}
+                        title={
+                          probes[t.id].matched
+                            ? 'The image is on screen right now'
+                            : 'The image is not on screen right now'
+                        }
+                      >
+                        {probes[t.id].matched ? '✓ on screen' : '✕ not found'}
+                      </span>
                     )}
                   </>
                 )}
@@ -296,6 +359,9 @@ export function DetectionCard(): JSX.Element {
                   ×
                 </button>
               </div>
+              {t.enabled && probes[t.id]?.issue && (
+                <p className="detrow__issue">⚠ Won't run: {probes[t.id].issue}</p>
+              )}
             </div>
           </div>
         ))}

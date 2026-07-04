@@ -22,7 +22,8 @@ import {
   tapBinding
 } from './input'
 import { playMacroEvent } from './macro'
-import { DetectionRunner, isTriggerReady } from './detection'
+import { DetectionRunner } from './detection'
+import { isTriggerReady, triggerIssue } from './detectmatch'
 
 interface Fireable {
   kind: ActionKind | 'text' | 'pos-click'
@@ -115,6 +116,13 @@ export class SpamEngine {
     // Hold Keys Down + Periodic Key ride along with a full-spam run (alongside
     // Keys to Spam or a Macro), and stop when the run stops.
     const aug = fullSpam ? buildAugment(profile) : NO_AUGMENT
+
+    // A switched-on detection trigger that can't run (nothing picked yet, no
+    // action bound, missing position) must be called out, never silently skipped.
+    if (fullSpam) {
+      const warning = detectionSetupWarning(profile)
+      if (warning) this.cb.onError(warning)
+    }
 
     // A full-spam run with the macro enabled replays the recording (looped) in
     // place of the keys/positions spam.
@@ -496,11 +504,27 @@ function buildAugment(profile: Profile): RunAugment {
         }))
     : []
   const det = profile.detection
+  const positions = profile.clickPositions ?? []
   const detection =
-    det?.enabled && (det.triggers ?? []).some(isTriggerReady)
-      ? { config: det, positions: profile.clickPositions ?? [] }
+    det?.enabled && (det.triggers ?? []).some((t) => isTriggerReady(t, positions))
+      ? { config: det, positions }
       : null
   return { holdKeys, periodic, detection }
+}
+
+/** Message for the first switched-on detection trigger that can't run, if any. */
+function detectionSetupWarning(profile: Profile): string | null {
+  const det = profile.detection
+  if (!det?.enabled) return null
+  const positions = profile.clickPositions ?? []
+  const triggers = det.triggers ?? []
+  for (let i = 0; i < triggers.length; i++) {
+    const t = triggers[i]
+    if (!t.enabled) continue
+    const issue = triggerIssue(t, positions)
+    if (issue) return `Detection trigger #${i + 1} won't run: ${issue}.`
+  }
+  return null
 }
 
 function hasAugment(aug: RunAugment): boolean {

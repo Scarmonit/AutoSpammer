@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest'
+import type { DetectionTrigger, ClickPosition } from '@shared/types'
 import {
   hexToRgb,
   rgbToHex,
   colorWithinTolerance,
   findTemplate,
+  isTriggerReady,
+  triggerIssue,
   type RawImage
 } from '../../src/main/detectmatch'
 
@@ -64,6 +67,67 @@ describe('colorWithinTolerance', () => {
   it('allows per-channel drift up to the tolerance', () => {
     expect(colorWithinTolerance(a, { r: 110, g: 140, b: 210 }, 10)).toBe(true)
     expect(colorWithinTolerance(a, { r: 111, g: 150, b: 200 }, 10)).toBe(false)
+  })
+})
+
+describe('trigger readiness', () => {
+  const positions: ClickPosition[] = [{ id: 'cp1', x: 1, y: 2, button: 'left', delayMs: null }]
+  const base: DetectionTrigger = {
+    id: 't1',
+    enabled: true,
+    mode: 'color',
+    x: 10,
+    y: 20,
+    color: '#00ff00',
+    tolerance: 25,
+    image: null,
+    searchArea: null,
+    action: { kind: 'key', key: 'f', positionId: '' }
+  }
+
+  it('a picked color + bound key is ready with no issue', () => {
+    expect(isTriggerReady(base, positions)).toBe(true)
+    expect(triggerIssue(base, positions)).toBeNull()
+  })
+
+  it('is not ready before a pixel is picked', () => {
+    const t = { ...base, color: '' }
+    expect(isTriggerReady(t, positions)).toBe(false)
+    expect(triggerIssue(t, positions)).toMatch(/no pixel picked/i)
+  })
+
+  it('is not ready before an image is captured (image mode)', () => {
+    const t: DetectionTrigger = { ...base, mode: 'image', image: null }
+    expect(isTriggerReady(t, positions)).toBe(false)
+    expect(triggerIssue(t, positions)).toMatch(/no image captured/i)
+  })
+
+  it('is ready in image mode once a template exists', () => {
+    const t: DetectionTrigger = { ...base, mode: 'image', image: 'data:image/png;base64,x' }
+    expect(isTriggerReady(t, positions)).toBe(true)
+  })
+
+  it('is not ready with an unbound key action', () => {
+    const t: DetectionTrigger = { ...base, action: { kind: 'key', key: '  ', positionId: '' } }
+    expect(isTriggerReady(t, positions)).toBe(false)
+    expect(triggerIssue(t, positions)).toMatch(/no key bound/i)
+  })
+
+  it('mouse actions are always ready', () => {
+    const t: DetectionTrigger = { ...base, action: { kind: 'mouse-left', key: '', positionId: '' } }
+    expect(isTriggerReady(t, positions)).toBe(true)
+  })
+
+  it('position actions need an existing saved position', () => {
+    const ok: DetectionTrigger = { ...base, action: { kind: 'position', key: '', positionId: 'cp1' } }
+    const gone: DetectionTrigger = { ...base, action: { kind: 'position', key: '', positionId: 'zz' } }
+    expect(isTriggerReady(ok, positions)).toBe(true)
+    expect(isTriggerReady(gone, positions)).toBe(false)
+    expect(triggerIssue(gone, positions)).toMatch(/no longer exists/i)
+  })
+
+  it('a switched-off trigger is never ready', () => {
+    expect(isTriggerReady({ ...base, enabled: false }, positions)).toBe(false)
   })
 })
 

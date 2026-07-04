@@ -1081,6 +1081,27 @@ button.keychip:hover,
   flex: 0 0 76px;
   text-align: center;
 }
+/* Live "now:" readout — what detection currently sees for this trigger. */
+.detrow__now {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.detrow__now--hit {
+  color: #3ddc84;
+}
+.detrow__swatch--sm {
+  width: 12px;
+  height: 12px;
+}
+.detrow__issue {
+  margin: 0;
+  font-size: 11.5px;
+  color: #f2c14e;
+}
 
 /* ---------- Click positions ---------- */
 .poslist {

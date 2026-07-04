@@ -32,6 +32,7 @@ export const IPC = {
   // flows driven by the global mouse hook (work while a game is focused).
   DetectionPickPixel: 'detection:pick-pixel',
   DetectionCaptureRegion: 'detection:capture-region',
+  DetectionProbe: 'detection:probe',
 
   // main -> renderer (events)
   StatusChanged: 'event:status',

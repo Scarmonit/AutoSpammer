@@ -10,7 +10,8 @@ import type {
   MousePoint,
   MacroEvent,
   PixelPickedPayload,
-  RegionCapturedPayload
+  RegionCapturedPayload,
+  DetectionProbeResult
 } from '@shared/types'
 
 /** Subscribe helper that returns an unsubscribe function. */
@@ -63,6 +64,8 @@ const api = {
   /** Toggle the detection "Capture region" mode (two outside clicks = corners). */
   detectionCaptureRegion: (on: boolean, purpose: 'template' | 'search'): Promise<void> =>
     ipcRenderer.invoke(IPC.DetectionCaptureRegion, { on, purpose }),
+  /** Live per-trigger snapshot: current pixel color / match state / issues. */
+  detectionProbe: (): Promise<DetectionProbeResult[]> => ipcRenderer.invoke(IPC.DetectionProbe),
 
   macroRecordStart: (): Promise<void> => ipcRenderer.invoke(IPC.MacroRecordStart),
   macroRecordStop: (): Promise<void> => ipcRenderer.invoke(IPC.MacroRecordStop),

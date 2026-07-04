@@ -36,7 +36,7 @@ import {
   DETECTION_POLL_DEFAULT_MS,
   PROFILE_FILE_EXT
 } from '@shared/profileio'
-import { pixelColorAt, captureTemplate } from './detection'
+import { pixelColorAt, captureTemplate, probeTriggers } from './detection'
 import { MacroRecorder, MacroPlayer } from './macro'
 import { createTray, type TrayHandle } from './tray'
 import { WINDOW_ICON_DATA_URL } from './trayicon'
@@ -506,7 +506,21 @@ function registerIpc(): void {
     regionPurpose = args?.purpose === 'search' ? 'search' : 'template'
     globalInput.setPickingRegion(args?.on === true)
   })
+
+  // Live "what does detection see right now?" for the card's now: readout.
+  // Serialized: a probe already in flight is shared, never stacked.
+  ipcMain.handle(IPC.DetectionProbe, () => {
+    if (!probeInFlight) {
+      const prof = activeProfile(data)
+      probeInFlight = probeTriggers(prof.detection, prof.clickPositions ?? []).finally(() => {
+        probeInFlight = null
+      })
+    }
+    return probeInFlight
+  })
 }
+
+let probeInFlight: Promise<unknown> | null = null
 
 // What the in-flight "Capture region" is for: a template image or a search area.
 let regionPurpose: 'template' | 'search' = 'template'

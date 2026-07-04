@@ -272,6 +272,11 @@ test('Detection triggers: empty state, add a trigger, mode + action controls, re
   await expect(row.locator('select').first()).toHaveValue('color')
   await expect(row.getByRole('button', { name: 'Pick pixel' })).toBeVisible()
 
+  // The live probe flags the incomplete setup instead of failing silently.
+  await expect(row.locator('.detrow__issue')).toContainText('no pixel picked yet', {
+    timeout: 5000
+  })
+
   // Image mode swaps in the capture-region controls.
   await row.locator('select').first().selectOption('image')
   await expect(row.getByRole('button', { name: 'Capture image' })).toBeVisible()

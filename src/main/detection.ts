@@ -8,11 +8,23 @@ import type {
   ClickPosition,
   DetectionConfig,
   DetectionRect,
-  DetectionTrigger
+  DetectionTrigger,
+  DetectionProbeResult
 } from '@shared/types'
 import { DETECTION_POLL_MIN_MS, DETECTION_POLL_MAX_MS, DETECTION_POLL_DEFAULT_MS } from '@shared/profileio'
-import { hexToRgb, rgbToHex, colorWithinTolerance, findTemplate, type RawImage, type Rgb } from './detectmatch'
+import {
+  hexToRgb,
+  rgbToHex,
+  colorWithinTolerance,
+  findTemplate,
+  isTriggerReady,
+  triggerIssue,
+  type RawImage,
+  type Rgb
+} from './detectmatch'
 import { tapBinding, clickAt } from './input'
+
+export { isTriggerReady } from './detectmatch'
 
 /** Captured templates are clamped to this size; bigger regions get cropped. */
 export const MAX_TEMPLATE_SIZE = 256
@@ -106,6 +118,22 @@ interface ResolvedTrigger {
   fire: () => Promise<void>
 }
 
+/** Does a resolved trigger's condition match the screen right now? */
+async function evaluateTrigger(t: Omit<ResolvedTrigger, 'fire'>): Promise<boolean> {
+  if (t.mode === 'color') {
+    if (!t.rgb) return false
+    const c = await nutScreen.colorAt(new Point(t.x, t.y))
+    return colorWithinTolerance({ r: c.R, g: c.G, b: c.B }, t.rgb, t.tolerance)
+  }
+  if (!t.needle) return false
+  const area = t.searchArea
+    ? await clampToScreen(t.searchArea)
+    : { x: 0, y: 0, width: await nutScreen.width(), height: await nutScreen.height() }
+  if (!area) return false
+  const hay = await grabRaw(area)
+  return findTemplate(hay, t.needle, t.tolerance)
+}
+
 /** Map a trigger's action to a fire function, or null when it's unset. */
 function resolveAction(
   trigger: DetectionTrigger,
@@ -126,11 +154,53 @@ function resolveAction(
   }
 }
 
-/** True when a trigger is switched on and has enough setup to be evaluated. */
-export function isTriggerReady(t: DetectionTrigger): boolean {
-  if (!t.enabled) return false
-  if (t.mode === 'color') return hexToRgb(t.color) !== null
-  return typeof t.image === 'string' && t.image !== ''
+/**
+ * Live "what does detection see right now?" snapshot for the card UI: one
+ * result per trigger with the current pixel color (color mode), whether the
+ * condition matches, and any setup issue. Never throws — capture errors show
+ * up as an issue string on the affected trigger.
+ */
+export async function probeTriggers(
+  config: DetectionConfig,
+  positions: ClickPosition[]
+): Promise<DetectionProbeResult[]> {
+  const out: DetectionProbeResult[] = []
+  for (const t of config.triggers ?? []) {
+    const issue = t.enabled ? triggerIssue(t, positions) : null
+    const result: DetectionProbeResult = {
+      id: t.id,
+      matched: false,
+      currentColor: null,
+      issue
+    }
+    try {
+      if (t.mode === 'color' && Number.isFinite(t.x) && Number.isFinite(t.y)) {
+        const c = await nutScreen.colorAt(new Point(t.x, t.y))
+        result.currentColor = rgbToHex(c.R, c.G, c.B)
+        const rgb = hexToRgb(t.color)
+        result.matched =
+          rgb !== null && colorWithinTolerance({ r: c.R, g: c.G, b: c.B }, rgb, t.tolerance)
+      } else if (t.mode === 'image' && t.image) {
+        const needle = decodeTemplate(t.image)
+        result.matched =
+          needle !== null &&
+          (await evaluateTrigger({
+            mode: 'image',
+            x: t.x,
+            y: t.y,
+            rgb: null,
+            tolerance: t.tolerance,
+            needle,
+            searchArea: t.searchArea
+          }))
+      }
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err)
+      result.issue = `can't read the screen there (${detail}) — is that spot on your primary monitor?`
+    }
+    out.push(result)
+  }
+  return out
 }
 
 /**
@@ -155,9 +225,9 @@ export class DetectionRunner {
       ? Math.min(DETECTION_POLL_MAX_MS, Math.max(DETECTION_POLL_MIN_MS, Math.round(config.pollMs)))
       : DETECTION_POLL_DEFAULT_MS
     for (const t of config.triggers ?? []) {
-      if (!isTriggerReady(t)) continue
+      if (!isTriggerReady(t, positions)) continue
       const fire = resolveAction(t, positions)
-      if (!fire) continue // no action set (or its saved position was deleted)
+      if (!fire) continue // unreachable after isTriggerReady, but stay safe
       this.triggers.push({
         mode: t.mode,
         x: t.x,
@@ -191,7 +261,7 @@ export class DetectionRunner {
     for (const t of this.triggers) {
       if (this.stopped) return
       try {
-        if (await this.matches(t)) await t.fire()
+        if (await evaluateTrigger(t)) await t.fire()
       } catch (err) {
         // Report the first failure (e.g. capture denied), keep the run alive.
         if (!this.errorReported) {
@@ -202,20 +272,5 @@ export class DetectionRunner {
       }
     }
     if (!this.stopped) this.timer = setTimeout(() => void this.tick(), this.pollMs)
-  }
-
-  private async matches(t: ResolvedTrigger): Promise<boolean> {
-    if (t.mode === 'color') {
-      if (!t.rgb) return false
-      const c = await nutScreen.colorAt(new Point(t.x, t.y))
-      return colorWithinTolerance({ r: c.R, g: c.G, b: c.B }, t.rgb, t.tolerance)
-    }
-    if (!t.needle) return false
-    const area = t.searchArea
-      ? await clampToScreen(t.searchArea)
-      : { x: 0, y: 0, width: await nutScreen.width(), height: await nutScreen.height() }
-    if (!area) return false
-    const hay = await grabRaw(area)
-    return findTemplate(hay, t.needle, t.tolerance)
   }
 }

@@ -155,6 +155,17 @@ export interface DetectionConfig {
   triggers: DetectionTrigger[]
 }
 
+/** Live per-trigger snapshot for the card's "now:" readout. */
+export interface DetectionProbeResult {
+  id: string
+  /** Does the trigger's condition match the screen right now? */
+  matched: boolean
+  /** Current color under the watched pixel ('#rrggbb'), color mode only. */
+  currentColor: string | null
+  /** Why the trigger can't run (setup gap or capture failure), or null. */
+  issue: string | null
+}
+
 /** Result of the one-shot "Pick pixel" flow (physical pixels + '#rrggbb'). */
 export interface PixelPickedPayload {
   x: number

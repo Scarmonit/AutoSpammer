@@ -1,6 +1,8 @@
-// Pure pixel/template matching for the Detection triggers feature. No Electron
-// or native imports, so it's unit-testable and shared by the screen-capture
-// glue in detection.ts.
+// Pure pixel/template matching + trigger-readiness checks for the Detection
+// triggers feature. No Electron or native imports, so it's unit-testable and
+// shared by the engine and the screen-capture glue in detection.ts.
+
+import type { DetectionTrigger, DetectionAction, ClickPosition } from '@shared/types'
 
 export interface Rgb {
   r: number
@@ -35,6 +37,52 @@ export function rgbToHex(r: number, g: number, b: number): string {
 export function colorWithinTolerance(a: Rgb, b: Rgb, tolerance: number): boolean {
   const t = Math.max(0, tolerance)
   return Math.abs(a.r - b.r) <= t && Math.abs(a.g - b.g) <= t && Math.abs(a.b - b.b) <= t
+}
+
+// ---------------------------------------------------------------------------
+// Trigger readiness — a trigger only runs when BOTH halves are set up: the
+// condition (a picked color / captured image) and a usable action. Anything
+// less must be reported, never silently skipped.
+// ---------------------------------------------------------------------------
+
+/** Is the watch half configured (picked pixel color / captured template)? */
+export function conditionReady(t: DetectionTrigger): boolean {
+  if (t.mode === 'color') return hexToRgb(t.color) !== null
+  return typeof t.image === 'string' && t.image !== ''
+}
+
+/** Is the act half configured (bound key / existing saved position)? */
+export function actionReady(a: DetectionAction, positions: ClickPosition[]): boolean {
+  switch (a.kind) {
+    case 'key':
+      return a.key.trim() !== ''
+    case 'mouse-left':
+    case 'mouse-right':
+      return true
+    case 'position':
+      return positions.some((p) => p.id === a.positionId)
+  }
+}
+
+/** Fully runnable: switched on with both halves configured. */
+export function isTriggerReady(t: DetectionTrigger, positions: ClickPosition[]): boolean {
+  return t.enabled && conditionReady(t) && actionReady(t.action, positions)
+}
+
+/**
+ * Human-readable reason a switched-on trigger can't run, or null when it can.
+ * Shown as a toast at run start and inline in the trigger's row.
+ */
+export function triggerIssue(t: DetectionTrigger, positions: ClickPosition[]): string | null {
+  if (!conditionReady(t)) {
+    return t.mode === 'color' ? 'no pixel picked yet' : 'no image captured yet'
+  }
+  if (!actionReady(t.action, positions)) {
+    return t.action.kind === 'key'
+      ? 'no key bound for its action'
+      : 'its saved click position no longer exists'
+  }
+  return null
 }
 
 /** One template pixel checked during the scan (offset + expected BGR bytes). */

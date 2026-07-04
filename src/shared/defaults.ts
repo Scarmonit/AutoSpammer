@@ -19,7 +19,8 @@ export function createDefaultDetectionTrigger(): DetectionTrigger {
     x: 0,
     y: 0,
     color: '',
-    tolerance: 10,
+    // Game UI glows/pulses; a roomy default avoids near-miss frustration.
+    tolerance: 25,
     image: null,
     searchArea: null,
     action: { kind: 'key', key: '', positionId: '' }
