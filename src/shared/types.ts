@@ -140,6 +140,14 @@ export interface DetectionTrigger {
   color: string
   /** Max per-RGB-channel difference that still matches (0 = exact). */
   tolerance: number
+  /**
+   * How often to RE-FIRE the action while the condition stays true, in ms. The
+   * action fires immediately when the condition first matches, then again every
+   * `repeatMs` for as long as it keeps matching (so an interrupted press — stun,
+   * cast, etc. — keeps retrying until it lands). Never faster than the section's
+   * poll interval.
+   */
+  repeatMs: number
   /** Captured template as a PNG data URL (image mode). Null = not captured yet. */
   image: string | null
   /** Where to look for the template; null = the whole primary display. */

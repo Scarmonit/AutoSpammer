@@ -35,6 +35,11 @@ export const DETECTION_POLL_MIN_MS = 10
 export const DETECTION_POLL_MAX_MS = 10000
 export const DETECTION_POLL_DEFAULT_MS = 100
 
+/** Per-trigger re-fire interval bounds (ms) while a condition stays true. */
+export const DETECTION_REPEAT_MIN_MS = 10
+export const DETECTION_REPEAT_MAX_MS = 600000
+export const DETECTION_REPEAT_DEFAULT_MS = 100
+
 /** Template PNGs bigger than this (as a data URL) are dropped on load. */
 const MAX_TEMPLATE_DATAURL_LENGTH = 3_000_000
 
@@ -75,6 +80,9 @@ export function fixDetectionTrigger(v: unknown): DetectionTrigger {
     tolerance: Number.isFinite(t.tolerance)
       ? Math.min(255, Math.max(0, Math.round(t.tolerance as number)))
       : def.tolerance,
+    repeatMs: Number.isFinite(t.repeatMs)
+      ? Math.min(DETECTION_REPEAT_MAX_MS, Math.max(DETECTION_REPEAT_MIN_MS, Math.round(t.repeatMs as number)))
+      : def.repeatMs,
     image,
     searchArea: fixDetectionRect(t.searchArea),
     action: {

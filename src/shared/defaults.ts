@@ -21,6 +21,8 @@ export function createDefaultDetectionTrigger(): DetectionTrigger {
     color: '',
     // Game UI glows/pulses; a roomy default avoids near-miss frustration.
     tolerance: 25,
+    // Re-press ~10×/s while the condition holds, so an interrupted cast retries.
+    repeatMs: 100,
     image: null,
     searchArea: null,
     action: { kind: 'key', key: '', positionId: '' }

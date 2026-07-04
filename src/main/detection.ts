@@ -18,11 +18,14 @@ import {
   colorWithinTolerance,
   findTemplate,
   boundingRect,
+  evaluateFireGate,
   isTriggerReady,
   triggerIssue,
+  NEVER_FIRED,
   type RawImage,
   type Rgb
 } from './detectmatch'
+import { DETECTION_REPEAT_MIN_MS, DETECTION_REPEAT_MAX_MS, DETECTION_REPEAT_DEFAULT_MS } from '@shared/profileio'
 import { tapBinding, clickAt } from './input'
 
 export { isTriggerReady } from './detectmatch'
@@ -128,21 +131,34 @@ function decodeTemplate(dataUrl: string): RawImage | null {
   }
 }
 
-/** A color-mode trigger, pre-resolved: watch one pixel, fire on match. */
-interface ColorWatch {
-  x: number
-  y: number
-  rgb: Rgb
+/** Fields shared by every resolved watch: its action + repeat-while-true state. */
+interface WatchBase {
   tolerance: number
+  /** Re-fire interval (ms) while the condition holds. */
+  repeatMs: number
+  /** When this watch last fired (ms epoch); NEVER_FIRED until the first fire. */
+  lastFiredAt: number
   fire: () => Promise<void>
 }
 
+/** A color-mode trigger, pre-resolved: watch one pixel, fire on match. */
+interface ColorWatch extends WatchBase {
+  x: number
+  y: number
+  rgb: Rgb
+}
+
 /** An image-mode trigger, pre-resolved: search for the template, fire on hit. */
-interface ImageWatch {
+interface ImageWatch extends WatchBase {
   needle: RawImage
   searchArea: DetectionRect | null
-  tolerance: number
-  fire: () => Promise<void>
+}
+
+/** Clamp a trigger's stored repeat interval into the allowed range. */
+function clampRepeatMs(ms: number): number {
+  return Number.isFinite(ms)
+    ? Math.min(DETECTION_REPEAT_MAX_MS, Math.max(DETECTION_REPEAT_MIN_MS, Math.round(ms)))
+    : DETECTION_REPEAT_DEFAULT_MS
 }
 
 /** Is the template visible in its search area (whole screen when unset)? */
@@ -261,12 +277,24 @@ export class DetectionRunner {
       if (!isTriggerReady(t, positions)) continue
       const fire = resolveAction(t, positions)
       if (!fire) continue // unreachable after isTriggerReady, but stay safe
+      const repeatMs = clampRepeatMs(t.repeatMs)
       if (t.mode === 'color') {
         const rgb = hexToRgb(t.color)
-        if (rgb) this.colors.push({ x: t.x, y: t.y, rgb, tolerance: t.tolerance, fire })
+        if (rgb) {
+          this.colors.push({ x: t.x, y: t.y, rgb, tolerance: t.tolerance, repeatMs, lastFiredAt: NEVER_FIRED, fire })
+        }
       } else {
         const needle = t.image ? decodeTemplate(t.image) : null
-        if (needle) this.images.push({ needle, searchArea: t.searchArea, tolerance: t.tolerance, fire })
+        if (needle) {
+          this.images.push({
+            needle,
+            searchArea: t.searchArea,
+            tolerance: t.tolerance,
+            repeatMs,
+            lastFiredAt: NEVER_FIRED,
+            fire
+          })
+        }
       }
     }
   }
@@ -299,7 +327,8 @@ export class DetectionRunner {
           if (this.stopped) return
           const c = pixels[i]
           const w = this.colors[i]
-          if (c && colorWithinTolerance(c, w.rgb, w.tolerance)) await w.fire()
+          const matched = !!c && colorWithinTolerance(c, w.rgb, w.tolerance)
+          await this.applyGate(w, matched)
         }
       } catch (err) {
         this.reportOnce(err)
@@ -308,12 +337,23 @@ export class DetectionRunner {
     for (const w of this.images) {
       if (this.stopped) return
       try {
-        if (await imageOnScreen(w.needle, w.searchArea, w.tolerance)) await w.fire()
+        const matched = await imageOnScreen(w.needle, w.searchArea, w.tolerance)
+        await this.applyGate(w, matched)
       } catch (err) {
         this.reportOnce(err)
       }
     }
     if (!this.stopped) this.timer = setTimeout(() => void this.tick(), this.pollMs)
+  }
+
+  /**
+   * Fire the watch's action if it's due: immediately on the rising edge, then
+   * every `repeatMs` while the condition holds; re-arm when it goes false.
+   */
+  private async applyGate(w: WatchBase, matched: boolean): Promise<void> {
+    const gate = evaluateFireGate(matched, Date.now(), w.lastFiredAt, w.repeatMs)
+    w.lastFiredAt = gate.lastFiredAt
+    if (gate.shouldFire) await w.fire()
   }
 
   /** Report the first failure (e.g. capture denied), keep the run alive. */

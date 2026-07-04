@@ -184,9 +184,10 @@ export function DetectionCard(): JSX.Element {
         color. <strong>Capture image</strong>: left-click two opposite corners of the area to
         match. The <strong>now</strong> readout shows live what Monit sees — if its ✓/✕ flickers,
         raise the ± tolerance. Triggers only fire <strong>while a run is active</strong> (start
-        one with your Start/stop hotkey, default F6). Pixel-color checks are cheap — set{' '}
-        <strong>check every</strong> to 10–25 ms for near-instant reactions; image checks cost
-        more, so give them a search area.
+        one with your Start/stop hotkey, default F6). While the condition stays true the action
+        keeps firing every <strong>repeat every</strong> ms — so an interrupted press (stun, cast)
+        retries until it lands. Pixel-color checks are cheap — set <strong>check every</strong> to
+        10–25 ms for near-instant reactions; image checks cost more, so give them a search area.
       </p>
 
       <div className="trigrows">
@@ -351,6 +352,24 @@ export function DetectionCard(): JSX.Element {
                     ))}
                   </select>
                 )}
+                <span className="keyrow__label" title="Keeps re-pressing this often while the condition stays true, so an interrupted action retries until it lands">
+                  repeat every
+                </span>
+                <input
+                  className="input detrow__repeat"
+                  type="number"
+                  min={10}
+                  max={600000}
+                  step={10}
+                  value={t.repeatMs}
+                  title="How often to re-fire while the condition holds (ms). Can't be faster than the check interval below."
+                  onChange={(e) =>
+                    patchAt(t.id, {
+                      repeatMs: Math.min(600000, Math.max(10, Math.round(Number(e.target.value) || 0)))
+                    })
+                  }
+                />
+                <span className="keyrow__unit">ms</span>
                 <span className="keyrow__spacer" />
                 <button
                   type="button"

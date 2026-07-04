@@ -59,6 +59,41 @@ export function boundingRect(points: Array<{ x: number; y: number }>): Detection
 }
 
 // ---------------------------------------------------------------------------
+// Repeat-while-true firing gate (level-triggered, not edge-triggered).
+//
+// A trigger fires the instant its condition becomes true, then keeps re-firing
+// every `repeatMs` for as long as it stays true — so a press that didn't "take"
+// (stunned, mid-cast, GCD) keeps retrying and lands the moment the character can
+// act. When the condition goes false the gate re-arms, so the next rising edge
+// fires immediately again. `lastFiredAt` starts at -Infinity to force that first
+// fire regardless of the clock.
+// ---------------------------------------------------------------------------
+export const NEVER_FIRED = Number.NEGATIVE_INFINITY
+
+export interface FireGate {
+  /** Whether to fire the action on this tick. */
+  shouldFire: boolean
+  /** The `lastFiredAt` to carry into the next tick. */
+  lastFiredAt: number
+}
+
+/**
+ * Decide whether a watched trigger should fire this tick given the current
+ * match state and when it last fired. Pure, so the repeat cadence is unit-
+ * tested without touching the screen or a timer.
+ */
+export function evaluateFireGate(
+  matched: boolean,
+  now: number,
+  lastFiredAt: number,
+  repeatMs: number
+): FireGate {
+  if (!matched) return { shouldFire: false, lastFiredAt: NEVER_FIRED } // re-arm
+  if (now - lastFiredAt >= Math.max(0, repeatMs)) return { shouldFire: true, lastFiredAt: now }
+  return { shouldFire: false, lastFiredAt }
+}
+
+// ---------------------------------------------------------------------------
 // Trigger readiness — a trigger only runs when BOTH halves are set up: the
 // condition (a picked color / captured image) and a usable action. Anything
 // less must be reported, never silently skipped.

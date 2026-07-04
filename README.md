@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.2.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.3.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.41.2.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.2.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.41.2.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.41.2.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.41.3.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.3.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.41.3.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.41.3.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -196,11 +196,13 @@ Each trigger row has two halves:
 1. **When** — pick the match mode:
    - **pixel color** — click **Pick pixel**, then left-click any spot on screen (even in a game). The pixel's position and color are captured and shown as a swatch with its hex value. The **±** field is the tolerance per RGB channel (0 = exact match; 10 forgives slight shading).
    - **image appears** — click **Capture image**, then left-click two opposite corners of the thing to look for (a captured thumbnail appears). By default the whole screen is searched; **Search: screen** lets you click two corners to limit the search area (faster, fewer false hits), and its **×** resets to full screen. The same **±** tolerance applies per pixel.
-2. **then** — the action to run on a match: **press a key** (click the chip to capture one), **left click** / **right click** at the current cursor position, or **click a saved position** from the Click positions card.
+2. **then** — the action to run on a match: **press a key** (click the chip to capture one), **left click** / **right click** at the current cursor position, or **click a saved position** from the Click positions card. **repeat every [n] ms** controls how often the action re-fires *while the condition stays true* (default 100 ms).
 
 Every row shows a live **now** readout of what Monit currently sees — the pixel's current color (and a ✓/✕ for whether it's within tolerance), or whether the image is on screen. Use it to confirm your pick is right and to tune the tolerance *before* starting a run: if the ✓ flickers while the target looks steady, raise the **±** value (game icons often glow or pulse). An incomplete trigger (no pixel picked, no image captured, no key bound, or a deleted position) shows a **⚠ Won't run** note in its row and a warning toast when a run starts — it never fails silently.
 
-Each row has its own switch, and the card's header switch gates them all — both must be on, and only during a run (started with **F6**, the tray, or a hold trigger). **check every [n] ms** sets the pause between screen checks (100 ms default, down to 10 ms). Pixel-color checks are cheap — every watched pixel is read from a *single* screen grab per check, so more color triggers cost nothing extra; at 10–25 ms the reaction time is typically 50–100 ms. Image checks are heavier, so give them a search area. While a trigger matches, its action fires once per check. Everything is saved with the profile and included in `.monit` exports.
+Each row has its own switch, and the card's header switch gates them all — both must be on, and only during a run (started with **F6**, the tray, or a hold trigger). **check every [n] ms** sets the pause between screen checks (100 ms default, down to 10 ms). Pixel-color checks are cheap — every watched pixel is read from a *single* screen grab per check, so more color triggers cost nothing extra; at 10–25 ms the reaction time is typically 50–100 ms. Image checks are heavier, so give them a search area.
+
+**Repeat-while-true, not once.** A trigger fires the moment its condition becomes true, and then keeps re-firing every **repeat every** ms for as long as it stays true — so if a press doesn't "take" (you were stunned, mid-cast, or on a global cooldown), it keeps trying and goes off the instant your character can act. Firing stops the moment the condition is no longer true (e.g. the ability is now on cooldown, so the pixel/image no longer matches), and re-arms so the next time it becomes true it fires immediately again. Everything is saved with the profile and included in `.monit` exports.
 
 > **Tip:** for "click the button when it turns green", use **pixel color** on a pixel inside the button plus a **click a saved position** action — it's much cheaper than image matching.
 

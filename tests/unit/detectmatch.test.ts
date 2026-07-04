@@ -6,6 +6,8 @@ import {
   colorWithinTolerance,
   findTemplate,
   boundingRect,
+  evaluateFireGate,
+  NEVER_FIRED,
   isTriggerReady,
   triggerIssue,
   type RawImage
@@ -71,6 +73,52 @@ describe('colorWithinTolerance', () => {
   })
 })
 
+describe('evaluateFireGate (repeat-while-true)', () => {
+  it('fires immediately on the rising edge (first-ever match)', () => {
+    const g = evaluateFireGate(true, 1000, NEVER_FIRED, 100)
+    expect(g.shouldFire).toBe(true)
+    expect(g.lastFiredAt).toBe(1000)
+  })
+
+  it('holds fire until repeatMs has elapsed, then fires again', () => {
+    // Fired at t=1000; still true at t=1050 (<100 later) -> wait.
+    const wait = evaluateFireGate(true, 1050, 1000, 100)
+    expect(wait.shouldFire).toBe(false)
+    expect(wait.lastFiredAt).toBe(1000) // unchanged
+
+    // Still true at t=1100 (>=100 later) -> re-fire.
+    const again = evaluateFireGate(true, 1100, 1000, 100)
+    expect(again.shouldFire).toBe(true)
+    expect(again.lastFiredAt).toBe(1100)
+  })
+
+  it('keeps re-firing every repeatMs for as long as the condition stays true', () => {
+    let last = NEVER_FIRED
+    const fires: number[] = []
+    for (let now = 0; now <= 500; now += 25) {
+      const g = evaluateFireGate(true, now, last, 100)
+      last = g.lastFiredAt
+      if (g.shouldFire) fires.push(now)
+    }
+    // Immediate at 0, then ~every 100 ms: 0, 100, 200, 300, 400, 500.
+    expect(fires).toEqual([0, 100, 200, 300, 400, 500])
+  })
+
+  it('re-arms when the condition goes false, so the next true fires at once', () => {
+    const off = evaluateFireGate(false, 1200, 1000, 100)
+    expect(off.shouldFire).toBe(false)
+    expect(off.lastFiredAt).toBe(NEVER_FIRED)
+
+    const backOn = evaluateFireGate(true, 1205, off.lastFiredAt, 100)
+    expect(backOn.shouldFire).toBe(true) // fires immediately despite only 5 ms passing
+  })
+
+  it('treats a non-positive repeat interval as "every tick"', () => {
+    const g = evaluateFireGate(true, 500, 500, 0)
+    expect(g.shouldFire).toBe(true)
+  })
+})
+
 describe('boundingRect', () => {
   it('wraps a single point in a 1×1 rect', () => {
     expect(boundingRect([{ x: 10, y: 20 }])).toEqual({ x: 10, y: 20, width: 1, height: 1 })
@@ -97,6 +145,7 @@ describe('trigger readiness', () => {
     y: 20,
     color: '#00ff00',
     tolerance: 25,
+    repeatMs: 100,
     image: null,
     searchArea: null,
     action: { kind: 'key', key: 'f', positionId: '' }

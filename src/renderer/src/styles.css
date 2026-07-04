@@ -1077,6 +1077,10 @@ button.keychip:hover,
   flex: 0 0 60px;
   text-align: center;
 }
+.detrow__repeat {
+  flex: 0 0 72px;
+  text-align: center;
+}
 .detrow__poll {
   flex: 0 0 76px;
   text-align: center;
