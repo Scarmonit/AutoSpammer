@@ -5,6 +5,7 @@ import {
   rgbToHex,
   colorWithinTolerance,
   findTemplate,
+  boundingRect,
   isTriggerReady,
   triggerIssue,
   type RawImage
@@ -67,6 +68,22 @@ describe('colorWithinTolerance', () => {
   it('allows per-channel drift up to the tolerance', () => {
     expect(colorWithinTolerance(a, { r: 110, g: 140, b: 210 }, 10)).toBe(true)
     expect(colorWithinTolerance(a, { r: 111, g: 150, b: 200 }, 10)).toBe(false)
+  })
+})
+
+describe('boundingRect', () => {
+  it('wraps a single point in a 1×1 rect', () => {
+    expect(boundingRect([{ x: 10, y: 20 }])).toEqual({ x: 10, y: 20, width: 1, height: 1 })
+  })
+
+  it('spans all points inclusively', () => {
+    expect(
+      boundingRect([
+        { x: 100, y: 50 },
+        { x: 40, y: 90 },
+        { x: 70, y: 10 }
+      ])
+    ).toEqual({ x: 40, y: 10, width: 61, height: 81 })
   })
 })
 

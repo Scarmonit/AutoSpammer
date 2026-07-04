@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.1.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.2.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.41.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.1.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.41.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.41.1.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.41.2.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.2.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.41.2.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.41.2.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -200,7 +200,7 @@ Each trigger row has two halves:
 
 Every row shows a live **now** readout of what Monit currently sees — the pixel's current color (and a ✓/✕ for whether it's within tolerance), or whether the image is on screen. Use it to confirm your pick is right and to tune the tolerance *before* starting a run: if the ✓ flickers while the target looks steady, raise the **±** value (game icons often glow or pulse). An incomplete trigger (no pixel picked, no image captured, no key bound, or a deleted position) shows a **⚠ Won't run** note in its row and a warning toast when a run starts — it never fails silently.
 
-Each row has its own switch, and the card's header switch gates them all — both must be on, and only during a run (started with **F6**, the tray, or a hold trigger). **check every [n] ms** sets how often the screen is polled (250 ms default; lower is snappier but uses more CPU). While a trigger matches, its action fires once per check. Everything is saved with the profile and included in `.monit` exports.
+Each row has its own switch, and the card's header switch gates them all — both must be on, and only during a run (started with **F6**, the tray, or a hold trigger). **check every [n] ms** sets the pause between screen checks (100 ms default, down to 10 ms). Pixel-color checks are cheap — every watched pixel is read from a *single* screen grab per check, so more color triggers cost nothing extra; at 10–25 ms the reaction time is typically 50–100 ms. Image checks are heavier, so give them a search area. While a trigger matches, its action fires once per check. Everything is saved with the profile and included in `.monit` exports.
 
 > **Tip:** for "click the button when it turns green", use **pixel color** on a pixel inside the button plus a **click a saved position** action — it's much cheaper than image matching.
 

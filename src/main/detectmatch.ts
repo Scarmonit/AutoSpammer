@@ -2,7 +2,7 @@
 // triggers feature. No Electron or native imports, so it's unit-testable and
 // shared by the engine and the screen-capture glue in detection.ts.
 
-import type { DetectionTrigger, DetectionAction, ClickPosition } from '@shared/types'
+import type { DetectionTrigger, DetectionAction, DetectionRect, ClickPosition } from '@shared/types'
 
 export interface Rgb {
   r: number
@@ -37,6 +37,25 @@ export function rgbToHex(r: number, g: number, b: number): string {
 export function colorWithinTolerance(a: Rgb, b: Rgb, tolerance: number): boolean {
   const t = Math.max(0, tolerance)
   return Math.abs(a.r - b.r) <= t && Math.abs(a.g - b.g) <= t && Math.abs(a.b - b.b) <= t
+}
+
+/**
+ * Smallest rectangle containing every point. Screen grabs have a large fixed
+ * cost (~20 ms BitBlt) regardless of size, so all watched pixels are read from
+ * ONE bounding-box grab per tick instead of one grab per pixel.
+ */
+export function boundingRect(points: Array<{ x: number; y: number }>): DetectionRect {
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  for (const p of points) {
+    if (p.x < minX) minX = p.x
+    if (p.y < minY) minY = p.y
+    if (p.x > maxX) maxX = p.x
+    if (p.y > maxY) maxY = p.y
+  }
+  return { x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1 }
 }
 
 // ---------------------------------------------------------------------------

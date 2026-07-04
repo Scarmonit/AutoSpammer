@@ -87,7 +87,7 @@ export function createDefaultProfile(name = 'Default'): Profile {
     },
     detection: {
       enabled: true,
-      pollMs: 250,
+      pollMs: 100,
       triggers: []
     },
     sectionLayout: cloneDefaultLayout()

@@ -26,10 +26,14 @@ const ENTRY_KINDS = new Set(['key', 'mouse-left', 'mouse-right'])
 const LOOP_MODES = new Set(['forever', 'once', 'count'])
 const DETECTION_ACTION_KINDS = new Set(['key', 'mouse-left', 'mouse-right', 'position'])
 
-/** Poll-interval bounds for the detection watcher (ms). */
-export const DETECTION_POLL_MIN_MS = 50
+/**
+ * Poll-interval bounds for the detection watcher (ms). The interval is the
+ * pause BETWEEN checks (ticks never overlap), so even the 10 ms floor is a
+ * pace, not a CPU burn: one batched pixel grab per tick costs ~20 ms.
+ */
+export const DETECTION_POLL_MIN_MS = 10
 export const DETECTION_POLL_MAX_MS = 10000
-export const DETECTION_POLL_DEFAULT_MS = 250
+export const DETECTION_POLL_DEFAULT_MS = 100
 
 /** Template PNGs bigger than this (as a data URL) are dropped on load. */
 const MAX_TEMPLATE_DATAURL_LENGTH = 3_000_000

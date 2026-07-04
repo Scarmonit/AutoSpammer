@@ -24,7 +24,7 @@ function PollField({ value, onCommit }: { value: number; onCommit: (ms: number) 
 
   const commit = (): void => {
     const n = Number(draft)
-    const ms = Number.isFinite(n) && n > 0 ? Math.min(10000, Math.max(50, Math.round(n))) : value
+    const ms = Number.isFinite(n) && n > 0 ? Math.min(10000, Math.max(10, Math.round(n))) : value
     onCommit(ms)
     setDraft(String(ms))
   }
@@ -33,9 +33,9 @@ function PollField({ value, onCommit }: { value: number; onCommit: (ms: number) 
     <input
       className="input detrow__poll"
       type="number"
-      min={50}
+      min={10}
       max={10000}
-      step={50}
+      step={10}
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onFocus={() => setFocused(true)}
@@ -184,7 +184,9 @@ export function DetectionCard(): JSX.Element {
         color. <strong>Capture image</strong>: left-click two opposite corners of the area to
         match. The <strong>now</strong> readout shows live what Monit sees — if its ✓/✕ flickers,
         raise the ± tolerance. Triggers only fire <strong>while a run is active</strong> (start
-        one with your Start/stop hotkey, default F6).
+        one with your Start/stop hotkey, default F6). Pixel-color checks are cheap — set{' '}
+        <strong>check every</strong> to 10–25 ms for near-instant reactions; image checks cost
+        more, so give them a search area.
       </p>
 
       <div className="trigrows">

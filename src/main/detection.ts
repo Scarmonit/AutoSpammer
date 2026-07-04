@@ -2,7 +2,7 @@
 // (used by the pick flows) and the DetectionRunner that polls the screen during
 // a run and fires a trigger's action while its condition matches.
 
-import { screen as nutScreen, Point, Region } from '@nut-tree-fork/nut-js'
+import { screen as nutScreen, Region } from '@nut-tree-fork/nut-js'
 import { nativeImage } from 'electron'
 import type {
   ClickPosition,
@@ -17,6 +17,7 @@ import {
   rgbToHex,
   colorWithinTolerance,
   findTemplate,
+  boundingRect,
   isTriggerReady,
   triggerIssue,
   type RawImage,
@@ -29,10 +30,31 @@ export { isTriggerReady } from './detectmatch'
 /** Captured templates are clamped to this size; bigger regions get cropped. */
 export const MAX_TEMPLATE_SIZE = 256
 
+/**
+ * Read several screen pixels with ONE region grab. A grab's cost is dominated
+ * by a fixed ~20 ms BitBlt regardless of size (nut-js's own colorAt grabs the
+ * WHOLE screen per pixel — ~120 ms each), so all watched pixels are read from
+ * a single bounding-box capture. Points off the primary display return null.
+ */
+export async function readPixels(points: Array<{ x: number; y: number }>): Promise<Array<Rgb | null>> {
+  if (points.length === 0) return []
+  const area = await clampToScreen(boundingRect(points))
+  if (!area) return points.map(() => null)
+  const raw = await grabRaw(area)
+  return points.map((p) => {
+    const dx = p.x - area.x
+    const dy = p.y - area.y
+    if (dx < 0 || dy < 0 || dx >= raw.width || dy >= raw.height) return null
+    const o = (dy * raw.width + dx) * 4
+    return { r: raw.data[o + 2], g: raw.data[o + 1], b: raw.data[o] }
+  })
+}
+
 /** The color under a screen pixel, as '#rrggbb'. */
 export async function pixelColorAt(x: number, y: number): Promise<string> {
-  const c = await nutScreen.colorAt(new Point(x, y))
-  return rgbToHex(c.R, c.G, c.B)
+  const [rgb] = await readPixels([{ x, y }])
+  if (!rgb) throw new Error('that spot is outside the primary display')
+  return rgbToHex(rgb.r, rgb.g, rgb.b)
 }
 
 /** Keep a rect inside the primary display so grabRegion never throws. */
@@ -106,32 +128,35 @@ function decodeTemplate(dataUrl: string): RawImage | null {
   }
 }
 
-/** A trigger with everything pre-resolved for fast per-tick evaluation. */
-interface ResolvedTrigger {
-  mode: 'color' | 'image'
+/** A color-mode trigger, pre-resolved: watch one pixel, fire on match. */
+interface ColorWatch {
   x: number
   y: number
-  rgb: Rgb | null
+  rgb: Rgb
   tolerance: number
-  needle: RawImage | null
-  searchArea: DetectionRect | null
   fire: () => Promise<void>
 }
 
-/** Does a resolved trigger's condition match the screen right now? */
-async function evaluateTrigger(t: Omit<ResolvedTrigger, 'fire'>): Promise<boolean> {
-  if (t.mode === 'color') {
-    if (!t.rgb) return false
-    const c = await nutScreen.colorAt(new Point(t.x, t.y))
-    return colorWithinTolerance({ r: c.R, g: c.G, b: c.B }, t.rgb, t.tolerance)
-  }
-  if (!t.needle) return false
-  const area = t.searchArea
-    ? await clampToScreen(t.searchArea)
+/** An image-mode trigger, pre-resolved: search for the template, fire on hit. */
+interface ImageWatch {
+  needle: RawImage
+  searchArea: DetectionRect | null
+  tolerance: number
+  fire: () => Promise<void>
+}
+
+/** Is the template visible in its search area (whole screen when unset)? */
+async function imageOnScreen(
+  needle: RawImage,
+  searchArea: DetectionRect | null,
+  tolerance: number
+): Promise<boolean> {
+  const area = searchArea
+    ? await clampToScreen(searchArea)
     : { x: 0, y: 0, width: await nutScreen.width(), height: await nutScreen.height() }
   if (!area) return false
   const hay = await grabRaw(area)
-  return findTemplate(hay, t.needle, t.tolerance)
+  return findTemplate(hay, needle, tolerance)
 }
 
 /** Map a trigger's action to a fire function, or null when it's unset. */
@@ -164,41 +189,48 @@ export async function probeTriggers(
   config: DetectionConfig,
   positions: ClickPosition[]
 ): Promise<DetectionProbeResult[]> {
-  const out: DetectionProbeResult[] = []
-  for (const t of config.triggers ?? []) {
-    const issue = t.enabled ? triggerIssue(t, positions) : null
-    const result: DetectionProbeResult = {
-      id: t.id,
-      matched: false,
-      currentColor: null,
-      issue
-    }
+  const triggers = config.triggers ?? []
+  const out: DetectionProbeResult[] = triggers.map((t) => ({
+    id: t.id,
+    matched: false,
+    currentColor: null,
+    issue: t.enabled ? triggerIssue(t, positions) : null
+  }))
+
+  // All color pixels in one grab (same batched read the runner uses).
+  const colorIdx = triggers
+    .map((_, i) => i)
+    .filter((i) => triggers[i].mode === 'color' && Number.isFinite(triggers[i].x) && Number.isFinite(triggers[i].y))
+  if (colorIdx.length > 0) {
     try {
-      if (t.mode === 'color' && Number.isFinite(t.x) && Number.isFinite(t.y)) {
-        const c = await nutScreen.colorAt(new Point(t.x, t.y))
-        result.currentColor = rgbToHex(c.R, c.G, c.B)
-        const rgb = hexToRgb(t.color)
-        result.matched =
-          rgb !== null && colorWithinTolerance({ r: c.R, g: c.G, b: c.B }, rgb, t.tolerance)
-      } else if (t.mode === 'image' && t.image) {
-        const needle = decodeTemplate(t.image)
-        result.matched =
-          needle !== null &&
-          (await evaluateTrigger({
-            mode: 'image',
-            x: t.x,
-            y: t.y,
-            rgb: null,
-            tolerance: t.tolerance,
-            needle,
-            searchArea: t.searchArea
-          }))
-      }
+      const colors = await readPixels(colorIdx.map((i) => ({ x: triggers[i].x, y: triggers[i].y })))
+      colorIdx.forEach((ti, k) => {
+        const c = colors[k]
+        if (!c) {
+          out[ti].issue = "can't read the screen there — is that spot on your primary monitor?"
+          return
+        }
+        out[ti].currentColor = rgbToHex(c.r, c.g, c.b)
+        const rgb = hexToRgb(triggers[ti].color)
+        out[ti].matched = rgb !== null && colorWithinTolerance(c, rgb, triggers[ti].tolerance)
+      })
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err)
-      result.issue = `can't read the screen there (${detail}) — is that spot on your primary monitor?`
+      for (const ti of colorIdx) out[ti].issue = `can't read the screen (${detail})`
     }
-    out.push(result)
+  }
+
+  // Image triggers each grab their own (search) area.
+  for (let i = 0; i < triggers.length; i++) {
+    const t = triggers[i]
+    if (t.mode !== 'image' || !t.image) continue
+    try {
+      const needle = decodeTemplate(t.image)
+      out[i].matched = needle !== null && (await imageOnScreen(needle, t.searchArea, t.tolerance))
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err)
+      out[i].issue = `can't read the screen there (${detail}) — is that area on your primary monitor?`
+    }
   }
   return out
 }
@@ -212,7 +244,8 @@ export async function probeTriggers(
 export class DetectionRunner {
   private stopped = false
   private timer: NodeJS.Timeout | null = null
-  private triggers: ResolvedTrigger[] = []
+  private colors: ColorWatch[] = []
+  private images: ImageWatch[] = []
   private readonly pollMs: number
   private errorReported = false
 
@@ -228,27 +261,26 @@ export class DetectionRunner {
       if (!isTriggerReady(t, positions)) continue
       const fire = resolveAction(t, positions)
       if (!fire) continue // unreachable after isTriggerReady, but stay safe
-      this.triggers.push({
-        mode: t.mode,
-        x: t.x,
-        y: t.y,
-        rgb: hexToRgb(t.color),
-        tolerance: t.tolerance,
-        needle: t.mode === 'image' && t.image ? decodeTemplate(t.image) : null,
-        searchArea: t.searchArea,
-        fire
-      })
+      if (t.mode === 'color') {
+        const rgb = hexToRgb(t.color)
+        if (rgb) this.colors.push({ x: t.x, y: t.y, rgb, tolerance: t.tolerance, fire })
+      } else {
+        const needle = t.image ? decodeTemplate(t.image) : null
+        if (needle) this.images.push({ needle, searchArea: t.searchArea, tolerance: t.tolerance, fire })
+      }
     }
   }
 
   /** Anything to actually watch (ready triggers with a usable action)? */
   hasWork(): boolean {
-    return this.triggers.length > 0
+    return this.colors.length > 0 || this.images.length > 0
   }
 
   start(): void {
     if (this.stopped || !this.hasWork()) return
-    this.timer = setTimeout(() => void this.tick(), this.pollMs)
+    // First check right away — a condition that's already true fires without
+    // waiting a full interval.
+    this.timer = setTimeout(() => void this.tick(), 0)
   }
 
   stop(): void {
@@ -258,19 +290,37 @@ export class DetectionRunner {
   }
 
   private async tick(): Promise<void> {
-    for (const t of this.triggers) {
+    // Every watched pixel is read from one screen grab, so per-tick cost stays
+    // flat (~one BitBlt) no matter how many color triggers there are.
+    if (this.colors.length > 0) {
+      try {
+        const pixels = await readPixels(this.colors)
+        for (let i = 0; i < this.colors.length; i++) {
+          if (this.stopped) return
+          const c = pixels[i]
+          const w = this.colors[i]
+          if (c && colorWithinTolerance(c, w.rgb, w.tolerance)) await w.fire()
+        }
+      } catch (err) {
+        this.reportOnce(err)
+      }
+    }
+    for (const w of this.images) {
       if (this.stopped) return
       try {
-        if (await evaluateTrigger(t)) await t.fire()
+        if (await imageOnScreen(w.needle, w.searchArea, w.tolerance)) await w.fire()
       } catch (err) {
-        // Report the first failure (e.g. capture denied), keep the run alive.
-        if (!this.errorReported) {
-          this.errorReported = true
-          const detail = err instanceof Error ? err.message : String(err)
-          this.onError(`Detection trigger check failed: ${detail}`)
-        }
+        this.reportOnce(err)
       }
     }
     if (!this.stopped) this.timer = setTimeout(() => void this.tick(), this.pollMs)
+  }
+
+  /** Report the first failure (e.g. capture denied), keep the run alive. */
+  private reportOnce(err: unknown): void {
+    if (this.errorReported) return
+    this.errorReported = true
+    const detail = err instanceof Error ? err.message : String(err)
+    this.onError(`Detection trigger check failed: ${detail}`)
   }
 }

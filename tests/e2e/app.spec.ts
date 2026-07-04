@@ -291,7 +291,7 @@ test('Detection triggers: empty state, add a trigger, mode + action controls, re
 
   // The poll-interval field holds the default and commits edits on blur.
   const poll = det.locator('.detrow__poll')
-  await expect(poll).toHaveValue('250')
+  await expect(poll).toHaveValue('100')
   await poll.fill('500')
   await poll.blur()
   await expect(poll).toHaveValue('500')
