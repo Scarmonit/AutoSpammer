@@ -52,6 +52,13 @@ export function SummaryBar(): JSX.Element | null {
     parts.push(`play the macro (${p.macro.events.length} events)`)
   }
 
+  if (p.detection?.enabled) {
+    const ready = p.detection.triggers.filter(
+      (t) => t.enabled && (t.mode === 'color' ? t.color !== '' : t.image !== null)
+    ).length
+    if (ready > 0) parts.push(`watch ${ready} detection trigger${ready === 1 ? '' : 's'}`)
+  }
+
   const loop =
     p.loop.mode === 'forever'
       ? 'loops forever'

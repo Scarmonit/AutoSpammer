@@ -1,4 +1,4 @@
-import type { Profile, AppSettings, PersistedData } from './types'
+import type { Profile, AppSettings, PersistedData, DetectionTrigger } from './types'
 import { cloneDefaultLayout } from './sections'
 
 export const DATA_VERSION = 1
@@ -8,6 +8,22 @@ let counter = 0
 export function makeId(prefix = 'id'): string {
   counter += 1
   return `${prefix}_${Date.now().toString(36)}_${counter.toString(36)}`
+}
+
+/** A fresh, empty detection trigger (color mode, nothing captured yet). */
+export function createDefaultDetectionTrigger(): DetectionTrigger {
+  return {
+    id: makeId('det'),
+    enabled: true,
+    mode: 'color',
+    x: 0,
+    y: 0,
+    color: '',
+    tolerance: 10,
+    image: null,
+    searchArea: null,
+    action: { kind: 'key', key: '', positionId: '' }
+  }
 }
 
 export function createDefaultProfile(name = 'Default'): Profile {
@@ -67,6 +83,11 @@ export function createDefaultProfile(name = 'Default'): Profile {
     macro: {
       enabled: false,
       events: []
+    },
+    detection: {
+      enabled: true,
+      pollMs: 250,
+      triggers: []
     },
     sectionLayout: cloneDefaultLayout()
   }

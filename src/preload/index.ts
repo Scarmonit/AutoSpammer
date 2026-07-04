@@ -8,7 +8,9 @@ import type {
   RecordedKey,
   HotkeyConflict,
   MousePoint,
-  MacroEvent
+  MacroEvent,
+  PixelPickedPayload,
+  RegionCapturedPayload
 } from '@shared/types'
 
 /** Subscribe helper that returns an unsubscribe function. */
@@ -55,6 +57,13 @@ const api = {
   /** Scale the whole renderer (text, padding, buttons) like browser zoom. */
   setZoomFactor: (factor: number): void => webFrame.setZoomFactor(factor),
 
+  /** Toggle the detection "Pick pixel" mode (next outside left click picks). */
+  detectionPickPixel: (on: boolean): Promise<void> =>
+    ipcRenderer.invoke(IPC.DetectionPickPixel, on),
+  /** Toggle the detection "Capture region" mode (two outside clicks = corners). */
+  detectionCaptureRegion: (on: boolean, purpose: 'template' | 'search'): Promise<void> =>
+    ipcRenderer.invoke(IPC.DetectionCaptureRegion, { on, purpose }),
+
   macroRecordStart: (): Promise<void> => ipcRenderer.invoke(IPC.MacroRecordStart),
   macroRecordStop: (): Promise<void> => ipcRenderer.invoke(IPC.MacroRecordStop),
   macroPlay: (events: MacroEvent[]): Promise<void> => ipcRenderer.invoke(IPC.MacroPlay, events),
@@ -66,7 +75,11 @@ const api = {
   onHotkeyConflict: (cb: (c: HotkeyConflict) => void) => on<HotkeyConflict>(IPC.HotkeyConflict, cb),
   onDataUpdated: (cb: (data: PersistedData) => void) => on<PersistedData>(IPC.DataUpdated, cb),
   onMacroRecording: (cb: (recording: boolean) => void) => on<boolean>(IPC.MacroRecording, cb),
-  onMacroPlaying: (cb: (playing: boolean) => void) => on<boolean>(IPC.MacroPlaying, cb)
+  onMacroPlaying: (cb: (playing: boolean) => void) => on<boolean>(IPC.MacroPlaying, cb),
+  onPixelPicked: (cb: (p: PixelPickedPayload) => void) =>
+    on<PixelPickedPayload>(IPC.PixelPicked, cb),
+  onRegionCaptured: (cb: (r: RegionCapturedPayload) => void) =>
+    on<RegionCapturedPayload>(IPC.RegionCaptured, cb)
 }
 
 export type AutoSpammerApi = typeof api

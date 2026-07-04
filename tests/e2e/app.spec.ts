@@ -42,7 +42,7 @@ test('main process is reachable via evaluate()', async () => {
   expect(name).toBe('auto-spammer')
 })
 
-test('renders all seven cards with accent dots and descriptions', async () => {
+test('renders all eight cards with accent dots and descriptions', async () => {
   for (const heading of [
     'Tap keys',
     'Timed key presses',
@@ -50,7 +50,8 @@ test('renders all seven cards with accent dots and descriptions', async () => {
     'Hold triggers',
     'Click positions',
     'Text function',
-    'Macro'
+    'Macro',
+    'Detection triggers'
   ]) {
     const sec = section(heading)
     await expect(sec).toBeVisible()
@@ -67,7 +68,8 @@ test('renders all seven cards with accent dots and descriptions', async () => {
     ['Tap keys', '+ Add key'],
     ['Timed key presses', '+ Add timed press'],
     ['Hold keys down', '+ Add key'],
-    ['Click positions', '+ Add position']
+    ['Click positions', '+ Add position'],
+    ['Detection triggers', '+ Add trigger']
   ] as const) {
     await expect(section(heading).getByRole('button', { name, exact: true })).toHaveClass(
       /chipbtn--accent/
@@ -259,6 +261,41 @@ test('Click positions: empty state and renamed action buttons', async () => {
   await expect(positions.getByRole('button', { name: '● Record clicks' })).toBeVisible()
 })
 
+test('Detection triggers: empty state, add a trigger, mode + action controls, remove', async () => {
+  const det = section('Detection triggers')
+  await expect(det.locator('.section__desc')).toContainText('color or image appears')
+  await expect(det.getByText('No triggers yet — add one below.')).toBeVisible()
+
+  // Add a trigger: color mode by default, with the pick + tolerance controls.
+  await det.getByRole('button', { name: '+ Add trigger' }).click()
+  const row = det.locator('.trigrow').first()
+  await expect(row.locator('select').first()).toHaveValue('color')
+  await expect(row.getByRole('button', { name: 'Pick pixel' })).toBeVisible()
+
+  // Image mode swaps in the capture-region controls.
+  await row.locator('select').first().selectOption('image')
+  await expect(row.getByRole('button', { name: 'Capture image' })).toBeVisible()
+  await expect(row.getByRole('button', { name: 'Search: screen' })).toBeVisible()
+
+  // The action select swaps its companion control (key capture vs. positions).
+  const action = row.locator('select').nth(1)
+  await expect(action).toHaveValue('key')
+  await action.selectOption('position')
+  await expect(row.locator('select').nth(2)).toHaveValue('')
+  await action.selectOption('mouse-left')
+
+  // The poll-interval field holds the default and commits edits on blur.
+  const poll = det.locator('.detrow__poll')
+  await expect(poll).toHaveValue('250')
+  await poll.fill('500')
+  await poll.blur()
+  await expect(poll).toHaveValue('500')
+
+  // Remove the row (its own ×, not the search-area reset).
+  await row.locator('.rowx').last().click()
+  await expect(det.getByText('No triggers yet — add one below.')).toBeVisible()
+})
+
 test('Macro card: empty state, record + hotkey + play controls', async () => {
   const macro = section('Macro')
   await expect(macro.locator('.section__desc')).toContainText('replay it on loop')
@@ -394,20 +431,20 @@ test('pressing the start/stop hotkey during capture binds it instead of starting
 })
 
 test('renders draggable splitters between sections', async () => {
-  // Columns of 3 (left) and 4 (right) cards -> 2 + 3 = 5 splitters (last pane
+  // Columns of 4 (left) and 4 (right) cards -> 3 + 3 = 6 splitters (last pane
   // per column has none).
   const splitters = win.locator('.rs-splitter')
-  await expect(splitters).toHaveCount(5)
+  await expect(splitters).toHaveCount(6)
   await expect(splitters.first()).toHaveCSS('cursor', 'ns-resize')
 })
 
 test('sections reorder via the grip handle (not the whole pane) + Reset Layout', async () => {
-  // 7 panes, each a stable reorder target...
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
+  // 8 panes, each a stable reorder target...
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(8)
   // ...but the PANE itself must NOT be draggable (that hijacks body inputs and
   // the nested key-row drags). Only the grip handle carries draggable.
   await expect(win.locator('[data-rs-pane][draggable="true"]')).toHaveCount(0)
-  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(7)
+  await expect(win.locator('.section__grip[draggable="true"]')).toHaveCount(8)
   await expect(win.locator('.section__grip').first()).toBeVisible()
   // Reset layout now lives in the Options footer.
   const modal = await openOptions()
@@ -450,7 +487,7 @@ test('drag-to-resize a section works at a normal window size', async () => {
 
 test('every card can be collapsed via its header chevron', async () => {
   // One collapse button per card.
-  await expect(win.locator('.section__collapse')).toHaveCount(7)
+  await expect(win.locator('.section__collapse')).toHaveCount(8)
 
   const keys = section('Tap keys')
   await expect(keys.locator('.section__body')).toBeVisible()
@@ -560,8 +597,8 @@ test('Options modal: Display / Hotkeys / Window groups per the mockup', async ()
 })
 
 test('the Sections dropdown hides and restores a card', async () => {
-  // Default: all 7 cards render.
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
+  // Default: all 8 cards render.
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(8)
   await expect(section('Macro')).toBeVisible()
 
   // The "Sections ▾" button opens an anchored dropdown (not a modal).
@@ -576,20 +613,20 @@ test('the Sections dropdown hides and restores a card', async () => {
 
   // Every section is listed — including Text function — with an accent dot
   // and an accent-colored switch.
-  await expect(menu.locator('.secmenu__row')).toHaveCount(7)
-  await expect(menu.locator('.secmenu__row .section__dot')).toHaveCount(7)
+  await expect(menu.locator('.secmenu__row')).toHaveCount(8)
+  await expect(menu.locator('.secmenu__row .section__dot')).toHaveCount(8)
   await expect(menu.locator('.secmenu__row', { hasText: 'Text function' })).toBeVisible()
 
   // Switching "Macro" off hides its card; one fewer pane.
   const row = menu.locator('.secmenu__row', { hasText: 'Macro' })
   await expect(row.locator('input')).toBeChecked()
   await row.locator('input').uncheck()
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(6)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
   await expect(section('Macro')).toHaveCount(0)
 
   // "Show all" brings it back; Done closes the dropdown.
   await menu.getByRole('button', { name: 'Show all' }).click()
-  await expect(win.locator('[data-rs-pane]')).toHaveCount(7)
+  await expect(win.locator('[data-rs-pane]')).toHaveCount(8)
   await menu.getByRole('button', { name: 'Done' }).click()
   await expect(win.locator('.secmenu')).toHaveCount(0)
   await expect(section('Macro')).toBeVisible()

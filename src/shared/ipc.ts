@@ -28,6 +28,10 @@ export const IPC = {
   MacroRecordStop: 'macro:record-stop',
   MacroPlay: 'macro:play',
   MacroStopPlay: 'macro:stop',
+  // Detection triggers: one-shot "pick a pixel" / two-click "capture a region"
+  // flows driven by the global mouse hook (work while a game is focused).
+  DetectionPickPixel: 'detection:pick-pixel',
+  DetectionCaptureRegion: 'detection:capture-region',
 
   // main -> renderer (events)
   StatusChanged: 'event:status',
@@ -36,7 +40,9 @@ export const IPC = {
   HotkeyConflict: 'event:hotkey-conflict',
   DataUpdated: 'event:data-updated',
   MacroRecording: 'event:macro-recording',
-  MacroPlaying: 'event:macro-playing'
+  MacroPlaying: 'event:macro-playing',
+  PixelPicked: 'event:pixel-picked',
+  RegionCaptured: 'event:region-captured'
 } as const
 
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]

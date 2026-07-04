@@ -9,7 +9,14 @@ import type {
   RecordedKey,
   HotkeyConflict
 } from '@shared/types'
-import type { ClickPosition, MacroConfig, MacroEvent, WindowBounds } from '@shared/types'
+import type {
+  ClickPosition,
+  MacroConfig,
+  MacroEvent,
+  WindowBounds,
+  DetectionConfig,
+  DetectionRect
+} from '@shared/types'
 import { IPC } from '@shared/ipc'
 import { createDefaultProfile, makeId } from '@shared/defaults'
 import { loadData, saveData, flushDataSync, activeProfile } from './persistence'
@@ -19,7 +26,17 @@ import { getMousePosition } from './input'
 import { pointInRect } from './geometry'
 import { parseAccelerator } from './keymap'
 import { normalizeLayout, applyHiddenSections } from '@shared/sections'
-import { exportPayload, profileFromExport, uniqueProfileName, PROFILE_FILE_EXT } from '@shared/profileio'
+import {
+  exportPayload,
+  profileFromExport,
+  uniqueProfileName,
+  fixDetectionTrigger,
+  DETECTION_POLL_MIN_MS,
+  DETECTION_POLL_MAX_MS,
+  DETECTION_POLL_DEFAULT_MS,
+  PROFILE_FILE_EXT
+} from '@shared/profileio'
+import { pixelColorAt, captureTemplate } from './detection'
 import { MacroRecorder, MacroPlayer } from './macro'
 import { createTray, type TrayHandle } from './tray'
 import { WINDOW_ICON_DATA_URL } from './trayicon'
@@ -235,7 +252,19 @@ function sanitizeProfile(p: Profile): Profile {
     hiddenSections: sanitizeSectionFlags(p.hiddenSections),
     disabledSections: sanitizeSectionFlags(p.disabledSections),
     macro: sanitizeMacro(p.macro),
+    detection: sanitizeDetection(p.detection),
     sectionLayout: normalizeLayout(p.sectionLayout)
+  }
+}
+
+/** Validate an edited detection config: clamped poll rate, sane triggers. */
+function sanitizeDetection(raw: unknown): DetectionConfig {
+  const r = (raw ?? {}) as Partial<DetectionConfig>
+  const triggers = Array.isArray(r.triggers) ? r.triggers : []
+  return {
+    enabled: r.enabled !== false,
+    pollMs: clampInt(r.pollMs, DETECTION_POLL_MIN_MS, DETECTION_POLL_MAX_MS, DETECTION_POLL_DEFAULT_MS),
+    triggers: triggers.slice(0, 100).map(fixDetectionTrigger)
   }
 }
 
@@ -466,6 +495,50 @@ function registerIpc(): void {
   })
 
   ipcMain.handle(IPC.MacroStopPlay, () => macroPlayer.stop())
+
+  // Detection pick flows: the global mouse hook reports the chosen pixel /
+  // region corners even while a game is focused (same path as click recording).
+  ipcMain.handle(IPC.DetectionPickPixel, (_e, on: boolean) => {
+    globalInput.setPickingPixel(on === true)
+  })
+
+  ipcMain.handle(IPC.DetectionCaptureRegion, (_e, args: { on: boolean; purpose: string }) => {
+    regionPurpose = args?.purpose === 'search' ? 'search' : 'template'
+    globalInput.setPickingRegion(args?.on === true)
+  })
+}
+
+// What the in-flight "Capture region" is for: a template image or a search area.
+let regionPurpose: 'template' | 'search' = 'template'
+
+/** A pixel was picked — read its color and hand both to the renderer. */
+async function finishPixelPick(x: number, y: number): Promise<void> {
+  try {
+    const color = await pixelColorAt(x, y)
+    send(IPC.PixelPicked, { x, y, color })
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err)
+    send(IPC.ErrorEvent, `Could not read that pixel's color: ${detail}`)
+  }
+}
+
+/** Both region corners were clicked — grab the template if one is wanted. */
+async function finishRegionPick(rect: DetectionRect): Promise<void> {
+  try {
+    if (regionPurpose === 'search') {
+      send(IPC.RegionCaptured, { purpose: 'search', rect, image: null })
+      return
+    }
+    const captured = await captureTemplate(rect)
+    if (!captured) {
+      send(IPC.ErrorEvent, 'That region is outside the primary display — try again.')
+      return
+    }
+    send(IPC.RegionCaptured, { purpose: 'template', rect: captured.rect, image: captured.image })
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err)
+    send(IPC.ErrorEvent, `Could not capture that region: ${detail}`)
+  }
 }
 
 /**
@@ -564,6 +637,12 @@ if (!gotLock) {
       },
       onRecordPositionAt: (x, y, button) => appendClickPosition(x, y, button),
       onEmergencyStop: () => engine.stop(),
+      onPixelPicked: (x, y) => {
+        void finishPixelPick(x, y)
+      },
+      onRegionPicked: (rect) => {
+        void finishRegionPick(rect)
+      },
       isAppFocused: () => isMainWindowFocused(),
       isPointInAppWindow: (x, y) => isPointInMainWindow(x, y),
       onMacroToggleHotkey: () => toggleMacroRecording(),

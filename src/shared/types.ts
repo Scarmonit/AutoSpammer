@@ -105,6 +105,71 @@ export interface MacroConfig {
   events: MacroEvent[]
 }
 
+// ---------------------------------------------------------------------------
+// Detection triggers: watch a screen pixel/region and fire an action when a
+// color or a captured image appears there.
+// ---------------------------------------------------------------------------
+
+export type DetectionMode = 'color' | 'image'
+
+/** A screen rectangle in physical pixels (same space as Click Positions). */
+export interface DetectionRect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/** What a detection trigger does when its condition matches. */
+export interface DetectionAction {
+  kind: 'key' | 'mouse-left' | 'mouse-right' | 'position'
+  /** Logical key name when kind === 'key' (e.g. "f", "space"). */
+  key: string
+  /** Saved Click Position id when kind === 'position'. */
+  positionId: string
+}
+
+export interface DetectionTrigger {
+  id: string
+  enabled: boolean
+  mode: DetectionMode
+  /** Watched pixel (color mode). */
+  x: number
+  y: number
+  /** Expected pixel color as '#rrggbb' (color mode). */
+  color: string
+  /** Max per-RGB-channel difference that still matches (0 = exact). */
+  tolerance: number
+  /** Captured template as a PNG data URL (image mode). Null = not captured yet. */
+  image: string | null
+  /** Where to look for the template; null = the whole primary display. */
+  searchArea: DetectionRect | null
+  action: DetectionAction
+}
+
+export interface DetectionConfig {
+  /** Section master switch: run the triggers during a spam run. */
+  enabled: boolean
+  /** How often the screen is checked while running, in ms. */
+  pollMs: number
+  triggers: DetectionTrigger[]
+}
+
+/** Result of the one-shot "Pick pixel" flow (physical pixels + '#rrggbb'). */
+export interface PixelPickedPayload {
+  x: number
+  y: number
+  color: string
+}
+
+/** Result of the two-click "Capture region" flow. */
+export interface RegionCapturedPayload {
+  purpose: 'template' | 'search'
+  rect: DetectionRect
+  /** PNG data URL of the captured region (only for purpose === 'template'). */
+  image: string | null
+}
+
 export interface Profile {
   id: string
   name: string
@@ -144,6 +209,8 @@ export interface Profile {
   disabledSections: Record<string, boolean>
   /** Full keyboard + mouse macro recording for this profile. */
   macro: MacroConfig
+  /** Pixel-color / image detection triggers polled during a run. */
+  detection: DetectionConfig
   /** Drag-and-drop section order, per column. */
   sectionLayout: SectionLayout
 }

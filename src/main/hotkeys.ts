@@ -1,6 +1,13 @@
 import { globalShortcut } from 'electron'
 import { uIOhook, type UiohookKeyboardEvent, type UiohookMouseEvent } from 'uiohook-napi'
-import type { Profile, AppSettings, RecordedKey, HotkeyConflict, SpamMode } from '@shared/types'
+import type {
+  Profile,
+  AppSettings,
+  RecordedKey,
+  HotkeyConflict,
+  SpamMode,
+  DetectionRect
+} from '@shared/types'
 import type { SpamEngine } from './engine'
 import { applyHiddenSections } from '@shared/sections'
 import { consumeSyntheticUp } from './input'
@@ -29,6 +36,10 @@ interface Deps {
   /** A live click captured while click-recording mode is on. */
   onRecordPositionAt: (x: number, y: number, button: 'left' | 'right') => void
   onEmergencyStop: () => void
+  /** A pixel was picked (one-shot detection "Pick pixel" mode). */
+  onPixelPicked: (x: number, y: number) => void
+  /** Both corners of a detection region were clicked (normalized rect). */
+  onRegionPicked: (rect: DetectionRect) => void
   /** Is the Auto Spammer window the focused window right now? */
   isAppFocused: () => boolean
   /** Does the given screen point fall inside the (visible) Auto Spammer window? */
@@ -52,6 +63,10 @@ export class GlobalInput {
   private started = false
   private recording = false
   private recordingPositions = false
+  /** One-shot detection pick modes (the next left click outside our window). */
+  private pickingPixel = false
+  private pickingRegion = false
+  private regionCorner: { x: number; y: number } | null = null
   private macroRecording = false
   private macroPlaying = false
   private macroHotkey: ParsedAccelerator | null = null
@@ -305,6 +320,20 @@ export class GlobalInput {
     this.macroRecording = on
   }
 
+  /** Detection "Pick pixel": the next outside left click reports its position. */
+  setPickingPixel(on: boolean): void {
+    this.pickingPixel = on
+    if (on) this.pickingRegion = false
+    this.regionCorner = null
+  }
+
+  /** Detection "Capture region": the next two outside left clicks are corners. */
+  setPickingRegion(on: boolean): void {
+    this.pickingRegion = on
+    if (on) this.pickingPixel = false
+    this.regionCorner = null
+  }
+
   /** Suppress all global-hook handling while a macro is playing back. */
   setMacroPlaying(on: boolean): void {
     this.macroPlaying = on
@@ -391,6 +420,31 @@ export class GlobalInput {
     if (this.macroRecording) {
       if (!this.deps.isPointInAppWindow(e.x, e.y)) {
         this.deps.onMacroMouse('down', mouseButtonName(e.button), e.x, e.y)
+      }
+      return
+    }
+
+    // Detection pick modes: the next left click(s) outside our window choose a
+    // pixel / region corner instead of doing anything else. Same coordinate
+    // test as recording, so clicking our own "Cancel" button doesn't count.
+    if (this.pickingPixel || this.pickingRegion) {
+      if (this.deps.isPointInAppWindow(e.x, e.y)) return
+      if (button !== 1) return // only left clicks pick; others pass nowhere
+      if (this.pickingPixel) {
+        this.pickingPixel = false
+        this.deps.onPixelPicked(e.x, e.y)
+      } else if (this.regionCorner === null) {
+        this.regionCorner = { x: e.x, y: e.y }
+      } else {
+        const c = this.regionCorner
+        this.regionCorner = null
+        this.pickingRegion = false
+        this.deps.onRegionPicked({
+          x: Math.min(c.x, e.x),
+          y: Math.min(c.y, e.y),
+          width: Math.abs(e.x - c.x) + 1,
+          height: Math.abs(e.y - c.y) + 1
+        })
       }
       return
     }

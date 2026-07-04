@@ -13,6 +13,7 @@ import { HoldTriggersCard } from './components/HoldTriggersCard'
 import { TextFunctionPanel } from './components/TextFunctionPanel'
 import { ClickPositionsPanel } from './components/ClickPositionsPanel'
 import { MacroPanel } from './components/MacroPanel'
+import { DetectionCard } from './components/DetectionCard'
 import { StatusIndicator } from './components/StatusIndicator'
 import { ProfileBar } from './components/ProfileBar'
 import { LoopBar } from './components/LoopBar'
@@ -30,7 +31,8 @@ const SECTIONS: Record<string, JSX.Element> = {
   holdTriggers: <HoldTriggersCard />,
   clickPositions: <ClickPositionsPanel />,
   textFunction: <TextFunctionPanel />,
-  macro: <MacroPanel />
+  macro: <MacroPanel />,
+  detection: <DetectionCard />
 }
 
 interface DropTarget {

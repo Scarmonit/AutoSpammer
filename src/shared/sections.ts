@@ -20,7 +20,8 @@ export const SECTION_IDS = [
   'holdTriggers',
   'clickPositions',
   'textFunction',
-  'macro'
+  'macro',
+  'detection'
 ] as const
 
 export type SectionId = (typeof SECTION_IDS)[number]
@@ -33,7 +34,8 @@ export const SECTION_LABELS: Record<string, string> = {
   holdTriggers: 'Hold triggers',
   clickPositions: 'Click positions',
   textFunction: 'Text function',
-  macro: 'Macro'
+  macro: 'Macro',
+  detection: 'Detection triggers'
 }
 
 /** Accent color per section: the title dot + its header switch. */
@@ -44,12 +46,13 @@ export const SECTION_ACCENTS: Record<string, string> = {
   holdTriggers: '#a78bfa',
   clickPositions: '#f472b6',
   textFunction: '#22d3ee',
-  macro: '#e879f9'
+  macro: '#e879f9',
+  detection: '#fb923c'
 }
 
 /** The out-of-the-box arrangement. */
 export const DEFAULT_LAYOUT: SectionLayout = {
-  left: ['keys', 'timers', 'clickPositions'],
+  left: ['keys', 'timers', 'clickPositions', 'detection'],
   right: ['holdKeys', 'holdTriggers', 'textFunction', 'macro']
 }
 
@@ -168,6 +171,10 @@ export function applyHiddenSections(profile: Profile): Profile {
       ? { ...profile.textFunction, enabled: false }
       : profile.textFunction,
     macro: off('macro') ? { ...profile.macro, enabled: false } : profile.macro,
+    detection:
+      off('detection') && profile.detection
+        ? { ...profile.detection, enabled: false }
+        : profile.detection,
     holdToSpam: triggersOff ? { ...profile.holdToSpam, enabled: false } : profile.holdToSpam,
     focusHold: triggersOff ? { ...profile.focusHold, enabled: false } : profile.focusHold,
     rightClickHold: triggersOff

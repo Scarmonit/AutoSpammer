@@ -1044,6 +1044,44 @@ button.keychip:hover,
   margin: 0;
 }
 
+/* ---------- Detection triggers ---------- */
+.detrow__select {
+  width: auto;
+  flex: 0 0 auto;
+}
+.detrow__swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+.detrow__hex {
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 12px;
+  color: var(--text);
+}
+.detrow__xy {
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.detrow__thumb {
+  max-width: 96px;
+  max-height: 36px;
+  border: 1px solid var(--border-soft);
+  border-radius: 4px;
+  image-rendering: pixelated;
+}
+.detrow__tol {
+  flex: 0 0 60px;
+  text-align: center;
+}
+.detrow__poll {
+  flex: 0 0 76px;
+  text-align: center;
+}
+
 /* ---------- Click positions ---------- */
 .poslist {
   display: flex;

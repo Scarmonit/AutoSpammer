@@ -19,7 +19,7 @@
 
 <!-- DOWNLOAD BUTTONS -->
 <p align="center">
-  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.40.1.exe">
+  <a href="https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.0.exe">
     <img src="https://img.shields.io/badge/Download%20Latest%20Version-Windows-3b82f6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Latest Version (Windows)" height="46" />
   </a>
   &nbsp;
@@ -40,8 +40,8 @@ No setup or extra tools required — each option is a single file you just run.
 
 | Option | Best for | File |
 | --- | --- | --- |
-| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.40.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.40.1.exe)** |
-| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.40.1.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.40.1.exe)** |
+| **Portable** | Easiest — just run it. Nothing is installed. | **[Monit-Portable-1.41.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Portable-1.41.0.exe)** |
+| **Installer** | Adds Desktop and Start-menu shortcuts. | **[Monit-Setup-1.41.0.exe](https://github.com/Scarmonit/AutoSpammer/releases/latest/download/Monit-Setup-1.41.0.exe)** |
 
 You can also open the **[latest release page](https://github.com/Scarmonit/AutoSpammer/releases/latest)** and grab either file under **Assets**.
 
@@ -85,10 +85,11 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Sections dropdown** — the **Sections ▾** button in the top bar opens a panel listing every section with its accent dot and an accent-colored switch. Toggle one off to completely hide it from the window *and* skip its feature when spamming; toggle it back to restore it in its saved position. Saved per profile.
 - **Options dialog** — a gear button opens app settings: the Display toggles (hints, summary bar), **Text size**, the **Start / stop** and **Emergency stop** hotkey bindings, **Minimize to tray on close**, and **Reset layout**.
 - **Full macro recording and playback** — capture everything (keys, clicks, and mouse movement) with the exact timing between events, edit any delay, then replay it on a loop.
+- **Detection triggers** — watch a screen pixel (by color, with a tolerance) or a captured image (anywhere in a search area) and fire an action — press a key, click, or click a saved position — only while the condition matches on screen.
 - **Drag-and-drop sections** — grab any section header to reorder it, even across the two columns. **Reset layout** (in Options) restores the default order.
 - **Resizable sections** — drag the splitter between two panels to resize them; double-click to reset.
 - **Collapsible sections** — collapse any panel to just its title bar with the header chevron.
-- **Clean card-based UI** — every feature is its own rounded card with a colored accent dot, a friendly one-line description, and its own **toggle switch**: Tap keys, Timed key presses, Hold keys down, Hold triggers, Click positions, Text function, and Macro.
+- **Clean card-based UI** — every feature is its own rounded card with a colored accent dot, a friendly one-line description, and its own **toggle switch**: Tap keys, Timed key presses, Hold keys down, Hold triggers, Click positions, Text function, Macro, and Detection triggers.
 - **WHEN RUNNING summary bar** — a live plain-English readout of what your setup will do (e.g. *"tap 2, 3 every 10 ms · press 1 every 5 s — loops forever"*), including only what's switched on. Toggle it — and the hint text — in **Options → Display**.
 - **Independent enabling** — a switched-off card greys out (keeping its inner settings) and is skipped on the next run; switch it back on and everything resumes as it was.
 - **Text size** — a dropdown under **Options → Display** zooms the whole app (100–200%) for readability; double-click it to type a custom percentage.
@@ -104,6 +105,7 @@ You can also open the **[latest release page](https://github.com/Scarmonit/AutoS
 - **Loop** — repeat forever, once, or a set number of times (in the header toolbar).
 - **Hold keys down** + **Hold triggers** — keys/buttons held for the whole run, plus three hold-to-act modes that run only while you physically hold their key or button.
 - **Timed key presses** — keys/buttons pressed on their own schedules, alongside the tapping.
+- **Detection triggers** — pixel-color and image matching gate actions so they only fire when something appears on screen.
 - **Profiles** — save and switch between different setups from the header toolbar; everything is remembered.
 - **Global hotkeys** that work even while a game is focused, plus an **Esc** panic stop.
 - **System tray** — runs in the background with close-to-tray.
@@ -184,6 +186,21 @@ The **Macro** section records everything — every keystroke, every mouse click,
 Macro is mutually exclusive with Tap keys and Click positions: enabling Macro turns those two off, and turning either back on turns Macro off. The recording is saved with the profile.
 
 > **Tip:** pick a record hotkey you don't otherwise use in your game (F10 by default) — it's detected globally, so it also reaches the focused app.
+
+### Detection triggers (act only when something appears on screen)
+
+The **Detection triggers** card is a *gate*: while a run is active it watches the screen and fires each trigger's action **only while its condition matches**. Nothing fires when the color or image isn't there.
+
+Each trigger row has two halves:
+
+1. **When** — pick the match mode:
+   - **pixel color** — click **Pick pixel**, then left-click any spot on screen (even in a game). The pixel's position and color are captured and shown as a swatch with its hex value. The **±** field is the tolerance per RGB channel (0 = exact match; 10 forgives slight shading).
+   - **image appears** — click **Capture image**, then left-click two opposite corners of the thing to look for (a captured thumbnail appears). By default the whole screen is searched; **Search: screen** lets you click two corners to limit the search area (faster, fewer false hits), and its **×** resets to full screen. The same **±** tolerance applies per pixel.
+2. **then** — the action to run on a match: **press a key** (click the chip to capture one), **left click** / **right click** at the current cursor position, or **click a saved position** from the Click positions card.
+
+Each row has its own switch, and the card's header switch gates them all — both must be on, and only during a run (started with **F6**, the tray, or a hold trigger). **check every [n] ms** sets how often the screen is polled (250 ms default; lower is snappier but uses more CPU). While a trigger matches, its action fires once per check. Everything is saved with the profile and included in `.monit` exports.
+
+> **Tip:** for "click the button when it turns green", use **pixel color** on a pixel inside the button plus a **click a saved position** action — it's much cheaper than image matching.
 
 ### System tray
 

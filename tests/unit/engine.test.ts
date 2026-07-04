@@ -23,6 +23,38 @@ vi.mock('../../src/main/input', () => ({
   tapBinding: vi.fn(() => Promise.resolve())
 }))
 
+// Isolate the engine from the screen-capture layer (detection.ts pulls in
+// Electron + nut-js): a controllable runner records how it's driven.
+const detectionRunners: FakeDetectionRunner[] = []
+class FakeDetectionRunner {
+  started = false
+  stopped = false
+  constructor(
+    public config: unknown,
+    public positions: unknown,
+    public onError: (m: string) => void
+  ) {
+    detectionRunners.push(this)
+  }
+  hasWork(): boolean {
+    return true
+  }
+  start(): void {
+    this.started = true
+  }
+  stop(): void {
+    this.stopped = true
+  }
+}
+vi.mock('../../src/main/detection', () => ({
+  DetectionRunner: vi.fn(
+    (config: unknown, positions: unknown, onError: (m: string) => void) =>
+      new FakeDetectionRunner(config, positions, onError)
+  ),
+  isTriggerReady: (t: { enabled: boolean; mode: string; color: string; image: string | null }) =>
+    t.enabled && (t.mode === 'color' ? t.color !== '' : t.image !== null)
+}))
+
 import { SpamEngine } from '../../src/main/engine'
 import * as input from '../../src/main/input'
 
@@ -31,7 +63,10 @@ const typeText = vi.mocked(input.typeText)
 const clickMouse = vi.mocked(input.clickMouse)
 const clickAt = vi.mocked(input.clickAt)
 
-beforeEach(() => vi.clearAllMocks())
+beforeEach(() => {
+  vi.clearAllMocks()
+  detectionRunners.length = 0
+})
 
 /** Build a minimal, fast (zero-delay) profile. */
 function profile(mut: (p: Profile) => void): Profile {
@@ -445,6 +480,94 @@ describe('SpamEngine — Hold-to-Spam (full spam while held)', () => {
     engine.stop()
     await new Promise((r) => setTimeout(r, 30))
     expect(engine.isRunning()).toBe(false)
+  })
+})
+
+describe('SpamEngine — Detection triggers integration', () => {
+  const trigger = (mut: Partial<import('@shared/types').DetectionTrigger> = {}) => ({
+    id: 'dt1',
+    enabled: true,
+    mode: 'color' as const,
+    x: 10,
+    y: 20,
+    color: '#00ff00',
+    tolerance: 10,
+    image: null,
+    searchArea: null,
+    action: { kind: 'key' as const, key: 'f', positionId: '' },
+    ...mut
+  })
+
+  it('starts the detection watcher for the run and stops it on stop', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.detection = { enabled: true, pollMs: 100, triggers: [trigger()] }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    await runToIdle(p)
+    expect(detectionRunners.length).toBe(1)
+    expect(detectionRunners[0].started).toBe(true)
+    expect(detectionRunners[0].stopped).toBe(true)
+  })
+
+  it('runs detection-only (no taps): polls until stopped', async () => {
+    const p = profile((p) => {
+      p.entries = []
+      p.options.enableKeys = false
+      p.options.enableClickPositions = false
+      p.detection = { enabled: true, pollMs: 100, triggers: [trigger()] }
+      p.loop = { mode: 'forever', count: 1 }
+    })
+    const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
+    engine.start(p, 'manual')
+    await new Promise((r) => setTimeout(r, 20))
+
+    expect(engine.isRunning()).toBe(true)
+    expect(detectionRunners.length).toBe(1)
+    expect(detectionRunners[0].started).toBe(true)
+    expect(detectionRunners[0].stopped).toBe(false)
+
+    engine.stop()
+    await new Promise((r) => setTimeout(r, 20))
+    expect(detectionRunners[0].stopped).toBe(true)
+    expect(engine.isRunning()).toBe(false)
+  })
+
+  it('does not start the watcher when the section is disabled', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.detection = { enabled: false, pollMs: 100, triggers: [trigger()] }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    await runToIdle(p)
+    expect(detectionRunners.length).toBe(0)
+  })
+
+  it('does not start the watcher when every trigger is off or unset', async () => {
+    const p = profile((p) => {
+      p.entries = [key('a')]
+      p.detection = {
+        enabled: true,
+        pollMs: 100,
+        triggers: [trigger({ enabled: false }), trigger({ id: 'dt2', color: '' })]
+      }
+      p.loop = { mode: 'once', count: 1 }
+    })
+    await runToIdle(p)
+    expect(detectionRunners.length).toBe(0)
+  })
+
+  it('does not run detection for the focused hold modes', async () => {
+    const p = profile((p) => {
+      p.focusHold = { enabled: true, key: 'f', delayMs: 5 }
+      p.detection = { enabled: true, pollMs: 100, triggers: [trigger()] }
+    })
+    const engine = new SpamEngine({ onStatus: () => {}, onError: () => {} })
+    engine.start(p, 'focus-hold')
+    await new Promise((r) => setTimeout(r, 20))
+    engine.stop()
+    await new Promise((r) => setTimeout(r, 20))
+    expect(detectionRunners.length).toBe(0)
   })
 })
 

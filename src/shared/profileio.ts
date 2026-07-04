@@ -4,8 +4,16 @@
 // exported profile is exactly the persisted structure, wrapped in a small
 // typed envelope.
 
-import type { Profile, SpamEntry, PeriodicEntry, HoldConfig, ClickPosition } from './types'
-import { createDefaultProfile, makeId, DATA_VERSION } from './defaults'
+import type {
+  Profile,
+  SpamEntry,
+  PeriodicEntry,
+  HoldConfig,
+  ClickPosition,
+  DetectionTrigger,
+  DetectionRect
+} from './types'
+import { createDefaultProfile, createDefaultDetectionTrigger, makeId, DATA_VERSION } from './defaults'
 import { normalizeLayout } from './sections'
 
 /** Marker so a random JSON file can't be mistaken for a profile export. */
@@ -16,6 +24,62 @@ export const PROFILE_FILE_EXT = 'monit'
 
 const ENTRY_KINDS = new Set(['key', 'mouse-left', 'mouse-right'])
 const LOOP_MODES = new Set(['forever', 'once', 'count'])
+const DETECTION_ACTION_KINDS = new Set(['key', 'mouse-left', 'mouse-right', 'position'])
+
+/** Poll-interval bounds for the detection watcher (ms). */
+export const DETECTION_POLL_MIN_MS = 50
+export const DETECTION_POLL_MAX_MS = 10000
+export const DETECTION_POLL_DEFAULT_MS = 250
+
+/** Template PNGs bigger than this (as a data URL) are dropped on load. */
+const MAX_TEMPLATE_DATAURL_LENGTH = 3_000_000
+
+/** '#rrggbb' (lowercase or uppercase), or '' when unset. */
+function fixHexColor(v: unknown): string {
+  return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : ''
+}
+
+function fixDetectionRect(v: unknown): DetectionRect | null {
+  if (!v || typeof v !== 'object') return null
+  const r = v as Partial<DetectionRect>
+  if (![r.x, r.y, r.width, r.height].every((n) => Number.isFinite(n))) return null
+  const clampCoord = (n: number): number => Math.min(100000, Math.max(-100000, Math.round(n)))
+  const width = Math.min(100000, Math.max(1, Math.round(r.width as number)))
+  const height = Math.min(100000, Math.max(1, Math.round(r.height as number)))
+  return { x: clampCoord(r.x as number), y: clampCoord(r.y as number), width, height }
+}
+
+/** Coerce one persisted detection trigger into the current valid shape. */
+export function fixDetectionTrigger(v: unknown): DetectionTrigger {
+  const def = createDefaultDetectionTrigger()
+  if (!v || typeof v !== 'object') return def
+  const t = v as Partial<DetectionTrigger>
+  const action = (t.action ?? {}) as Partial<DetectionTrigger['action']>
+  const image =
+    typeof t.image === 'string' &&
+    t.image.startsWith('data:image/') &&
+    t.image.length <= MAX_TEMPLATE_DATAURL_LENGTH
+      ? t.image
+      : null
+  return {
+    id: typeof t.id === 'string' && t.id !== '' ? t.id : def.id,
+    enabled: t.enabled !== false,
+    mode: t.mode === 'image' ? 'image' : 'color',
+    x: Number.isFinite(t.x) ? Math.round(t.x as number) : 0,
+    y: Number.isFinite(t.y) ? Math.round(t.y as number) : 0,
+    color: fixHexColor(t.color),
+    tolerance: Number.isFinite(t.tolerance)
+      ? Math.min(255, Math.max(0, Math.round(t.tolerance as number)))
+      : def.tolerance,
+    image,
+    searchArea: fixDetectionRect(t.searchArea),
+    action: {
+      kind: DETECTION_ACTION_KINDS.has(action.kind as string) ? action.kind! : 'key',
+      key: typeof action.key === 'string' ? action.key : '',
+      positionId: typeof action.positionId === 'string' ? action.positionId : ''
+    }
+  }
+}
 
 /** The on-disk shape of an exported profile file. */
 export interface ProfileExport {
@@ -153,6 +217,17 @@ export function sanitizeProfile(p: Profile, defaultProfile: Profile): void {
   p.macro.events = p.macro.events.filter(
     (e) => !!e && typeof e === 'object' && typeof e.type === 'string'
   )
+
+  // Detection triggers (added in 1.41): default to an enabled, empty section.
+  if (!p.detection || typeof p.detection !== 'object') {
+    p.detection = { enabled: true, pollMs: DETECTION_POLL_DEFAULT_MS, triggers: [] }
+  }
+  if (typeof p.detection.enabled !== 'boolean') p.detection.enabled = true
+  p.detection.pollMs = Number.isFinite(p.detection.pollMs)
+    ? Math.min(DETECTION_POLL_MAX_MS, Math.max(DETECTION_POLL_MIN_MS, Math.round(p.detection.pollMs)))
+    : DETECTION_POLL_DEFAULT_MS
+  if (!Array.isArray(p.detection.triggers)) p.detection.triggers = []
+  p.detection.triggers = p.detection.triggers.slice(0, 100).map(fixDetectionTrigger)
 
   // v1.33 split "Keys to Spam" (spam + periodic) into Tap keys + Timers, and
   // "Hold Actions" into Hold keys down + Hold triggers. Carry old master

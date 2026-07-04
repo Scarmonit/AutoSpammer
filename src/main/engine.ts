@@ -1,4 +1,13 @@
-import type { Profile, SpamMode, StatusPayload, ActionKind, LoopConfig, MacroEvent } from '@shared/types'
+import type {
+  Profile,
+  SpamMode,
+  StatusPayload,
+  ActionKind,
+  LoopConfig,
+  MacroEvent,
+  ClickPosition,
+  DetectionConfig
+} from '@shared/types'
 import {
   pressKey,
   typeText,
@@ -13,6 +22,7 @@ import {
   tapBinding
 } from './input'
 import { playMacroEvent } from './macro'
+import { DetectionRunner, isTriggerReady } from './detection'
 
 interface Fireable {
   kind: ActionKind | 'text' | 'pos-click'
@@ -40,17 +50,21 @@ interface PeriodicTask {
  * Spam button / toggle hotkey:
  *  - holdKeys: keys/mouse-buttons held DOWN for the whole run.
  *  - periodic: any number of keys/buttons, each tapped on its own interval.
+ *  - detection: pixel/image watchers polled for the whole run, each firing its
+ *    action while its color/template condition matches.
  */
 interface RunAugment {
   holdKeys: string[]
   periodic: PeriodicTask[]
+  detection: { config: DetectionConfig; positions: ClickPosition[] } | null
 }
 
-const NO_AUGMENT: RunAugment = { holdKeys: [], periodic: [] }
+const NO_AUGMENT: RunAugment = { holdKeys: [], periodic: [], detection: null }
 
 interface AugmentState {
   held: string[]
   periodicTimers: Array<ReturnType<typeof setInterval>>
+  detection: DetectionRunner | null
 }
 
 function isMouseHold(key: string): 'left' | 'right' | null {
@@ -188,11 +202,21 @@ export class SpamEngine {
     const periodicTimers = aug.periodic.map((t) =>
       setInterval(() => void tapBinding(t.key), t.intervalMs)
     )
-    return { held, periodicTimers }
+
+    // Detection triggers poll for the whole run (a single sequential loop).
+    let detection: DetectionRunner | null = null
+    if (aug.detection) {
+      detection = new DetectionRunner(aug.detection.config, aug.detection.positions, (m) =>
+        this.cb.onError(m)
+      )
+      detection.start()
+    }
+    return { held, periodicTimers, detection }
   }
 
   /** Release everything beginAugment started. */
   private async endAugment(state: AugmentState): Promise<void> {
+    state.detection?.stop()
     for (const timer of state.periodicTimers) clearInterval(timer)
     for (const k of state.held) {
       try {
@@ -459,7 +483,7 @@ function activeHoldKeys(profile: Profile): string[] {
   return (profile.holdKeys.keys ?? []).filter((k) => k.trim() !== '')
 }
 
-/** Build the manual-run augmentation (Hold Keys Down + Periodic Key). */
+/** Build the manual-run augmentation (Hold Keys Down + Periodic Key + Detection). */
 function buildAugment(profile: Profile): RunAugment {
   const holdKeys = activeHoldKeys(profile)
   const pk = profile.periodicKey
@@ -471,11 +495,16 @@ function buildAugment(profile: Profile): RunAugment {
           intervalMs: Math.max(100, Math.round((e.intervalSec || 0) * 1000))
         }))
     : []
-  return { holdKeys, periodic }
+  const det = profile.detection
+  const detection =
+    det?.enabled && (det.triggers ?? []).some(isTriggerReady)
+      ? { config: det, positions: profile.clickPositions ?? [] }
+      : null
+  return { holdKeys, periodic, detection }
 }
 
 function hasAugment(aug: RunAugment): boolean {
-  return aug.holdKeys.length > 0 || aug.periodic.length > 0
+  return aug.holdKeys.length > 0 || aug.periodic.length > 0 || aug.detection !== null
 }
 
 function buildFocusFireable(key: string, delayMs: number): Fireable[] {
