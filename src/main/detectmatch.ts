@@ -62,35 +62,58 @@ export function boundingRect(points: Array<{ x: number; y: number }>): Detection
 // Repeat-while-true firing gate (level-triggered, not edge-triggered).
 //
 // A trigger fires the instant its condition becomes true, then keeps re-firing
-// every `repeatMs` for as long as it stays true — so a press that didn't "take"
-// (stunned, mid-cast, GCD) keeps retrying and lands the moment the character can
-// act. When the condition goes false the gate re-arms, so the next rising edge
-// fires immediately again. `lastFiredAt` starts at -Infinity to force that first
-// fire regardless of the clock.
+// every `repeatMs` for as long as it stays true — so a press/click that didn't
+// "take" (stunned, mid-cast, no valid target) keeps retrying and lands the
+// moment it can. The condition is considered "active" while it currently
+// matches OR matched within the last `lingerMs`, so a brief dip (an on-use
+// flash or global cooldown that momentarily changes the watched icon) does NOT
+// stop the spam. Once it has stayed unmatched past `lingerMs` the gate re-arms,
+// so the next real match fires immediately again. Timestamps start at -Infinity
+// to force that first fire regardless of the clock and to avoid a phantom
+// linger before the first-ever match.
 // ---------------------------------------------------------------------------
 export const NEVER_FIRED = Number.NEGATIVE_INFINITY
 
-export interface FireGate {
+/** Per-watch timing state carried between ticks. */
+export interface FireState {
+  /** When the action last fired (ms epoch); NEVER_FIRED until the first fire. */
+  lastFiredAt: number
+  /** When the condition was last true (ms epoch); NEVER_FIRED until first match. */
+  lastMatchedAt: number
+}
+
+export interface FireGate extends FireState {
   /** Whether to fire the action on this tick. */
   shouldFire: boolean
-  /** The `lastFiredAt` to carry into the next tick. */
-  lastFiredAt: number
 }
 
 /**
- * Decide whether a watched trigger should fire this tick given the current
- * match state and when it last fired. Pure, so the repeat cadence is unit-
- * tested without touching the screen or a timer.
+ * Decide whether a watched trigger should fire this tick. Pure, so the repeat
+ * cadence and the linger/grace behaviour are unit-tested without touching the
+ * screen or a timer.
+ *
+ * - `repeatMs`: how often to re-fire while the condition is active.
+ * - `lingerMs`: keep firing for this long after the condition last matched, so
+ *   a momentary false reading doesn't interrupt the spam (0 = stop instantly).
  */
 export function evaluateFireGate(
   matched: boolean,
   now: number,
-  lastFiredAt: number,
-  repeatMs: number
+  state: FireState,
+  repeatMs: number,
+  lingerMs: number
 ): FireGate {
-  if (!matched) return { shouldFire: false, lastFiredAt: NEVER_FIRED } // re-arm
-  if (now - lastFiredAt >= Math.max(0, repeatMs)) return { shouldFire: true, lastFiredAt: now }
-  return { shouldFire: false, lastFiredAt }
+  const lastMatchedAt = matched ? now : state.lastMatchedAt
+  // "Active" = matching now, or within the grace window since the last match.
+  const withinLinger =
+    !matched && lingerMs > 0 && now - state.lastMatchedAt <= Math.max(0, lingerMs)
+  const active = matched || withinLinger
+
+  if (!active) return { shouldFire: false, lastFiredAt: NEVER_FIRED, lastMatchedAt } // re-arm
+  if (now - state.lastFiredAt >= Math.max(0, repeatMs)) {
+    return { shouldFire: true, lastFiredAt: now, lastMatchedAt }
+  }
+  return { shouldFire: false, lastFiredAt: state.lastFiredAt, lastMatchedAt }
 }
 
 // ---------------------------------------------------------------------------

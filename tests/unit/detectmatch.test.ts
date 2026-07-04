@@ -73,48 +73,77 @@ describe('colorWithinTolerance', () => {
   })
 })
 
-describe('evaluateFireGate (repeat-while-true)', () => {
+describe('evaluateFireGate (repeat-while-true + linger)', () => {
+  const START = { lastFiredAt: NEVER_FIRED, lastMatchedAt: NEVER_FIRED }
+
   it('fires immediately on the rising edge (first-ever match)', () => {
-    const g = evaluateFireGate(true, 1000, NEVER_FIRED, 100)
+    const g = evaluateFireGate(true, 1000, START, 100, 0)
     expect(g.shouldFire).toBe(true)
     expect(g.lastFiredAt).toBe(1000)
+    expect(g.lastMatchedAt).toBe(1000)
   })
 
   it('holds fire until repeatMs has elapsed, then fires again', () => {
-    // Fired at t=1000; still true at t=1050 (<100 later) -> wait.
-    const wait = evaluateFireGate(true, 1050, 1000, 100)
+    const wait = evaluateFireGate(true, 1050, { lastFiredAt: 1000, lastMatchedAt: 1000 }, 100, 0)
     expect(wait.shouldFire).toBe(false)
-    expect(wait.lastFiredAt).toBe(1000) // unchanged
+    expect(wait.lastFiredAt).toBe(1000)
 
-    // Still true at t=1100 (>=100 later) -> re-fire.
-    const again = evaluateFireGate(true, 1100, 1000, 100)
+    const again = evaluateFireGate(true, 1100, { lastFiredAt: 1000, lastMatchedAt: 1000 }, 100, 0)
     expect(again.shouldFire).toBe(true)
     expect(again.lastFiredAt).toBe(1100)
   })
 
   it('keeps re-firing every repeatMs for as long as the condition stays true', () => {
-    let last = NEVER_FIRED
+    let state = { ...START }
     const fires: number[] = []
     for (let now = 0; now <= 500; now += 25) {
-      const g = evaluateFireGate(true, now, last, 100)
-      last = g.lastFiredAt
+      const g = evaluateFireGate(true, now, state, 100, 0)
+      state = { lastFiredAt: g.lastFiredAt, lastMatchedAt: g.lastMatchedAt }
       if (g.shouldFire) fires.push(now)
     }
-    // Immediate at 0, then ~every 100 ms: 0, 100, 200, 300, 400, 500.
     expect(fires).toEqual([0, 100, 200, 300, 400, 500])
   })
 
-  it('re-arms when the condition goes false, so the next true fires at once', () => {
-    const off = evaluateFireGate(false, 1200, 1000, 100)
+  it('with linger 0, re-arms the instant the condition goes false', () => {
+    const off = evaluateFireGate(false, 1200, { lastFiredAt: 1000, lastMatchedAt: 1000 }, 100, 0)
     expect(off.shouldFire).toBe(false)
-    expect(off.lastFiredAt).toBe(NEVER_FIRED)
+    expect(off.lastFiredAt).toBe(NEVER_FIRED) // re-armed
 
-    const backOn = evaluateFireGate(true, 1205, off.lastFiredAt, 100)
-    expect(backOn.shouldFire).toBe(true) // fires immediately despite only 5 ms passing
+    const backOn = evaluateFireGate(true, 1205, off, 100, 0)
+    expect(backOn.shouldFire).toBe(true) // fires at once despite only 5 ms
+  })
+
+  it('never lingers before the first-ever match', () => {
+    // Not matched, no prior match -> must not be "active".
+    const g = evaluateFireGate(false, 5, START, 100, 500)
+    expect(g.shouldFire).toBe(false)
+    expect(g.lastFiredAt).toBe(NEVER_FIRED)
+  })
+
+  it('keeps firing through a brief dip within the linger window', () => {
+    // Matched at t=1000 (fires). Dips false at t=1050 but within 300 ms linger:
+    // still active, and repeatMs (100) elapsed by t=1100 -> fires again.
+    const matched = evaluateFireGate(true, 1000, START, 100, 300)
+    expect(matched.shouldFire).toBe(true)
+
+    const dip = evaluateFireGate(false, 1050, matched, 100, 300)
+    expect(dip.shouldFire).toBe(false) // too soon since last fire, but still active
+    expect(dip.lastFiredAt).toBe(1000) // NOT re-armed
+    expect(dip.lastMatchedAt).toBe(1000) // preserved from the last real match
+
+    const stillDipping = evaluateFireGate(false, 1150, dip, 100, 300)
+    expect(stillDipping.shouldFire).toBe(true) // 150 ms since last fire, within linger
+  })
+
+  it('stops and re-arms once the dip outlasts the linger window', () => {
+    // Last matched at 1000, linger 300 -> inactive from 1300 on.
+    const past = evaluateFireGate(false, 1400, { lastFiredAt: 1200, lastMatchedAt: 1000 }, 100, 300)
+    expect(past.shouldFire).toBe(false)
+    expect(past.lastFiredAt).toBe(NEVER_FIRED) // re-armed for the next real match
   })
 
   it('treats a non-positive repeat interval as "every tick"', () => {
-    const g = evaluateFireGate(true, 500, 500, 0)
+    const g = evaluateFireGate(true, 500, { lastFiredAt: 500, lastMatchedAt: 500 }, 0, 0)
     expect(g.shouldFire).toBe(true)
   })
 })
@@ -146,6 +175,7 @@ describe('trigger readiness', () => {
     color: '#00ff00',
     tolerance: 25,
     repeatMs: 100,
+    lingerMs: 300,
     image: null,
     searchArea: null,
     action: { kind: 'key', key: 'f', positionId: '' }

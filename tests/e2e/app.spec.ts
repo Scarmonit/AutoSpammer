@@ -289,11 +289,15 @@ test('Detection triggers: empty state, add a trigger, mode + action controls, re
   await expect(row.locator('select').nth(2)).toHaveValue('')
   await action.selectOption('mouse-left')
 
-  // The per-trigger repeat interval defaults to 100 ms and is editable.
-  const repeat = row.locator('.detrow__repeat')
+  // The per-trigger repeat + linger fields default sensibly and are editable.
+  const repeat = row.locator('.detrow__repeat').first()
   await expect(repeat).toHaveValue('100')
   await repeat.fill('40')
   await expect(repeat).toHaveValue('40')
+  const linger = row.locator('.detrow__repeat').nth(1)
+  await expect(linger).toHaveValue('300')
+  await linger.fill('1000')
+  await expect(linger).toHaveValue('1000')
 
   // The poll-interval field holds the default and commits edits on blur.
   const poll = det.locator('.detrow__poll')

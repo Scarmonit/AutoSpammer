@@ -23,9 +23,17 @@ import {
   triggerIssue,
   NEVER_FIRED,
   type RawImage,
-  type Rgb
+  type Rgb,
+  type FireState
 } from './detectmatch'
-import { DETECTION_REPEAT_MIN_MS, DETECTION_REPEAT_MAX_MS, DETECTION_REPEAT_DEFAULT_MS } from '@shared/profileio'
+import {
+  DETECTION_REPEAT_MIN_MS,
+  DETECTION_REPEAT_MAX_MS,
+  DETECTION_REPEAT_DEFAULT_MS,
+  DETECTION_LINGER_MIN_MS,
+  DETECTION_LINGER_MAX_MS,
+  DETECTION_LINGER_DEFAULT_MS
+} from '@shared/profileio'
 import { tapBinding, clickAt } from './input'
 
 export { isTriggerReady } from './detectmatch'
@@ -132,12 +140,12 @@ function decodeTemplate(dataUrl: string): RawImage | null {
 }
 
 /** Fields shared by every resolved watch: its action + repeat-while-true state. */
-interface WatchBase {
+interface WatchBase extends FireState {
   tolerance: number
   /** Re-fire interval (ms) while the condition holds. */
   repeatMs: number
-  /** When this watch last fired (ms epoch); NEVER_FIRED until the first fire. */
-  lastFiredAt: number
+  /** Keep firing for this long (ms) after the condition last matched. */
+  lingerMs: number
   fire: () => Promise<void>
 }
 
@@ -159,6 +167,18 @@ function clampRepeatMs(ms: number): number {
   return Number.isFinite(ms)
     ? Math.min(DETECTION_REPEAT_MAX_MS, Math.max(DETECTION_REPEAT_MIN_MS, Math.round(ms)))
     : DETECTION_REPEAT_DEFAULT_MS
+}
+
+/** Clamp a trigger's stored linger (grace) window into the allowed range. */
+function clampLingerMs(ms: number): number {
+  return Number.isFinite(ms)
+    ? Math.min(DETECTION_LINGER_MAX_MS, Math.max(DETECTION_LINGER_MIN_MS, Math.round(ms)))
+    : DETECTION_LINGER_DEFAULT_MS
+}
+
+/** Initial timing state: nothing fired or matched yet. */
+function freshState(): FireState {
+  return { lastFiredAt: NEVER_FIRED, lastMatchedAt: NEVER_FIRED }
 }
 
 /** Is the template visible in its search area (whole screen when unset)? */
@@ -278,10 +298,11 @@ export class DetectionRunner {
       const fire = resolveAction(t, positions)
       if (!fire) continue // unreachable after isTriggerReady, but stay safe
       const repeatMs = clampRepeatMs(t.repeatMs)
+      const lingerMs = clampLingerMs(t.lingerMs)
       if (t.mode === 'color') {
         const rgb = hexToRgb(t.color)
         if (rgb) {
-          this.colors.push({ x: t.x, y: t.y, rgb, tolerance: t.tolerance, repeatMs, lastFiredAt: NEVER_FIRED, fire })
+          this.colors.push({ x: t.x, y: t.y, rgb, tolerance: t.tolerance, repeatMs, lingerMs, ...freshState(), fire })
         }
       } else {
         const needle = t.image ? decodeTemplate(t.image) : null
@@ -291,7 +312,8 @@ export class DetectionRunner {
             searchArea: t.searchArea,
             tolerance: t.tolerance,
             repeatMs,
-            lastFiredAt: NEVER_FIRED,
+            lingerMs,
+            ...freshState(),
             fire
           })
         }
@@ -348,11 +370,15 @@ export class DetectionRunner {
 
   /**
    * Fire the watch's action if it's due: immediately on the rising edge, then
-   * every `repeatMs` while the condition holds; re-arm when it goes false.
+   * every `repeatMs` while the condition holds — and keep firing through brief
+   * dips (an on-use flash / global cooldown that momentarily changes the icon)
+   * for up to `lingerMs` after the last real match. Re-arms once the condition
+   * has stayed false past the linger window.
    */
   private async applyGate(w: WatchBase, matched: boolean): Promise<void> {
-    const gate = evaluateFireGate(matched, Date.now(), w.lastFiredAt, w.repeatMs)
+    const gate = evaluateFireGate(matched, Date.now(), w, w.repeatMs, w.lingerMs)
     w.lastFiredAt = gate.lastFiredAt
+    w.lastMatchedAt = gate.lastMatchedAt
     if (gate.shouldFire) await w.fire()
   }
 

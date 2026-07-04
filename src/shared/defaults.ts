@@ -23,6 +23,9 @@ export function createDefaultDetectionTrigger(): DetectionTrigger {
     tolerance: 25,
     // Re-press ~10×/s while the condition holds, so an interrupted cast retries.
     repeatMs: 100,
+    // Bridge brief icon flashes / global-cooldown dims so the spam doesn't stop
+    // on a momentary miss; still stops ~⅓s after the ability truly goes down.
+    lingerMs: 300,
     image: null,
     searchArea: null,
     action: { kind: 'key', key: '', positionId: '' }

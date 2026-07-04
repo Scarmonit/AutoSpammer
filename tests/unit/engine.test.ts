@@ -491,6 +491,7 @@ describe('SpamEngine — Detection triggers integration', () => {
     color: '#00ff00',
     tolerance: 10,
     repeatMs: 100,
+    lingerMs: 0,
     image: null,
     searchArea: null,
     action: { kind: 'key' as const, key: 'f', positionId: '' },

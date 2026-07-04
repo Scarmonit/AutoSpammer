@@ -63,6 +63,7 @@ function config(over: Partial<DetectionConfig['triggers'][number]> = {}, pollMs 
         color: RED,
         tolerance: 10,
         repeatMs: 50,
+        lingerMs: 0,
         image: null,
         searchArea: null,
         action: { kind: 'key', key: 'a', positionId: '' },
@@ -121,8 +122,8 @@ describe('DetectionRunner — repeat while true', () => {
     expect(tapBinding.mock.calls.length).toBeGreaterThan(3)
   })
 
-  it('stops firing once the condition goes false again', async () => {
-    const r = new DetectionRunner(config({ repeatMs: 50 }, 10), noPositions, () => {})
+  it('stops firing once the condition goes false again (linger 0)', async () => {
+    const r = new DetectionRunner(config({ repeatMs: 50, lingerMs: 0 }, 10), noPositions, () => {})
     r.start()
     screenColor = { R: 255, G: 0, B: 0, A: 255 }
     await advance(120)
@@ -134,6 +135,36 @@ describe('DetectionRunner — repeat while true', () => {
     r.stop()
     // No further presses after the condition cleared.
     expect(tapBinding.mock.calls.length).toBe(afterTrue)
+  })
+
+  it('keeps firing through a brief dip within the linger window, then stops', async () => {
+    // linger 300 ms bridges a short false blip (icon flash / global cooldown).
+    const r = new DetectionRunner(config({ repeatMs: 50, lingerMs: 300 }, 10), noPositions, () => {})
+    r.start()
+    screenColor = { R: 255, G: 0, B: 0, A: 255 } // matches
+    await advance(120)
+    const beforeDip = tapBinding.mock.calls.length
+    expect(beforeDip).toBeGreaterThan(0)
+
+    // Brief dip (150 ms < 300 ms linger): firing must CONTINUE.
+    screenColor = { R: 0, G: 0, B: 0, A: 255 }
+    await advance(150)
+    const duringDip = tapBinding.mock.calls.length
+    expect(duringDip).toBeGreaterThan(beforeDip) // kept firing through the dip
+
+    // Condition returns — still going.
+    screenColor = { R: 255, G: 0, B: 0, A: 255 }
+    await advance(100)
+    const afterReturn = tapBinding.mock.calls.length
+    expect(afterReturn).toBeGreaterThan(duringDip)
+
+    // Now a LONG dip beyond the linger window: firing must stop.
+    screenColor = { R: 0, G: 0, B: 0, A: 255 }
+    await advance(400)
+    const settled = tapBinding.mock.calls.length
+    await advance(300)
+    r.stop()
+    expect(tapBinding.mock.calls.length).toBe(settled) // no fires after linger expired
   })
 
   it('fires nothing at all after stop()', async () => {

@@ -148,6 +148,13 @@ export interface DetectionTrigger {
    * poll interval.
    */
   repeatMs: number
+  /**
+   * Keep firing for this long (ms) after the condition last matched, so a brief
+   * dip in the watched pixel/image — an on-use flash, a global cooldown that
+   * momentarily dims the icon — does NOT stop the spam. 0 = stop the instant the
+   * condition is false.
+   */
+  lingerMs: number
   /** Captured template as a PNG data URL (image mode). Null = not captured yet. */
   image: string | null
   /** Where to look for the template; null = the whole primary display. */

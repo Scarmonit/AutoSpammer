@@ -40,6 +40,11 @@ export const DETECTION_REPEAT_MIN_MS = 10
 export const DETECTION_REPEAT_MAX_MS = 600000
 export const DETECTION_REPEAT_DEFAULT_MS = 100
 
+/** Per-trigger linger/grace bounds (ms): keep firing after the condition dips. */
+export const DETECTION_LINGER_MIN_MS = 0
+export const DETECTION_LINGER_MAX_MS = 10000
+export const DETECTION_LINGER_DEFAULT_MS = 300
+
 /** Template PNGs bigger than this (as a data URL) are dropped on load. */
 const MAX_TEMPLATE_DATAURL_LENGTH = 3_000_000
 
@@ -83,6 +88,9 @@ export function fixDetectionTrigger(v: unknown): DetectionTrigger {
     repeatMs: Number.isFinite(t.repeatMs)
       ? Math.min(DETECTION_REPEAT_MAX_MS, Math.max(DETECTION_REPEAT_MIN_MS, Math.round(t.repeatMs as number)))
       : def.repeatMs,
+    lingerMs: Number.isFinite(t.lingerMs)
+      ? Math.min(DETECTION_LINGER_MAX_MS, Math.max(DETECTION_LINGER_MIN_MS, Math.round(t.lingerMs as number)))
+      : def.lingerMs,
     image,
     searchArea: fixDetectionRect(t.searchArea),
     action: {

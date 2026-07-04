@@ -185,9 +185,12 @@ export function DetectionCard(): JSX.Element {
         match. The <strong>now</strong> readout shows live what Monit sees — if its ✓/✕ flickers,
         raise the ± tolerance. Triggers only fire <strong>while a run is active</strong> (start
         one with your Start/stop hotkey, default F6). While the condition stays true the action
-        keeps firing every <strong>repeat every</strong> ms — so an interrupted press (stun, cast)
-        retries until it lands. Pixel-color checks are cheap — set <strong>check every</strong> to
-        10–25 ms for near-instant reactions; image checks cost more, so give them a search area.
+        keeps firing every <strong>repeat every</strong> ms — so an interrupted press (stun, cast,
+        no target) retries until it lands. <strong>keep firing</strong> holds the spam through a
+        brief dip in the pixel/image (an on-use flash or global cooldown that momentarily changes
+        the icon); raise it if firing stops too early, set 0 to stop the instant it's false.
+        Pixel-color checks are cheap — set <strong>check every</strong> to 10–25 ms for near-instant
+        reactions; image checks cost more, so give them a search area.
       </p>
 
       <div className="trigrows">
@@ -366,6 +369,27 @@ export function DetectionCard(): JSX.Element {
                   onChange={(e) =>
                     patchAt(t.id, {
                       repeatMs: Math.min(600000, Math.max(10, Math.round(Number(e.target.value) || 0)))
+                    })
+                  }
+                />
+                <span className="keyrow__unit">ms</span>
+                <span
+                  className="keyrow__label"
+                  title="Keep firing for this long after the pixel/image briefly stops matching — bridges an on-use flash or global cooldown that momentarily changes the icon. 0 = stop the instant it's false."
+                >
+                  keep firing
+                </span>
+                <input
+                  className="input detrow__repeat"
+                  type="number"
+                  min={0}
+                  max={10000}
+                  step={50}
+                  value={t.lingerMs}
+                  title="Grace window (ms): keep firing this long after the condition dips, so a brief flash/global-cooldown doesn't stop the spam. 0 = stop instantly."
+                  onChange={(e) =>
+                    patchAt(t.id, {
+                      lingerMs: Math.min(10000, Math.max(0, Math.round(Number(e.target.value) || 0)))
                     })
                   }
                 />
