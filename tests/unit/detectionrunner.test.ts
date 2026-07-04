@@ -40,10 +40,10 @@ vi.mock('@nut-tree-fork/nut-js', () => ({
 
 vi.mock('electron', () => ({ nativeImage: { createFromDataURL: vi.fn(), createFromBitmap: vi.fn() } }))
 
-const tapBinding = vi.fn(() => Promise.resolve())
+const tapBinding = vi.fn((_name: string, _holdMs: number) => Promise.resolve())
 vi.mock('../../src/main/input', () => ({
-  tapBinding: (name: string) => tapBinding(name),
-  clickAt: vi.fn(() => Promise.resolve())
+  tapBindingHeld: (name: string, holdMs: number) => tapBinding(name, holdMs),
+  clickAtHeld: vi.fn(() => Promise.resolve())
 }))
 
 import { DetectionRunner } from '../../src/main/detection'
@@ -64,6 +64,7 @@ function config(over: Partial<DetectionConfig['triggers'][number]> = {}, pollMs 
         tolerance: 10,
         repeatMs: 50,
         lingerMs: 0,
+        holdMs: 0,
         image: null,
         searchArea: null,
         action: { kind: 'key', key: 'a', positionId: '' },
@@ -109,7 +110,7 @@ describe('DetectionRunner — repeat while true', () => {
     const count = tapBinding.mock.calls.length
     expect(count).toBeGreaterThanOrEqual(4)
     expect(count).toBeLessThanOrEqual(6)
-    expect(tapBinding).toHaveBeenCalledWith('a')
+    expect(tapBinding).toHaveBeenCalledWith('a', expect.any(Number))
   })
 
   it('keeps firing while true even though the first press "did not take" (stun scenario)', async () => {
@@ -165,6 +166,15 @@ describe('DetectionRunner — repeat while true', () => {
     await advance(300)
     r.stop()
     expect(tapBinding.mock.calls.length).toBe(settled) // no fires after linger expired
+  })
+
+  it('passes the trigger hold duration through to the action', async () => {
+    const r = new DetectionRunner(config({ repeatMs: 50, holdMs: 75 }), noPositions, () => {})
+    r.start()
+    screenColor = { R: 255, G: 0, B: 0, A: 255 }
+    await advance(60)
+    r.stop()
+    expect(tapBinding).toHaveBeenCalledWith('a', 75) // name + holdMs
   })
 
   it('fires nothing at all after stop()', async () => {

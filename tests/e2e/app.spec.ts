@@ -289,12 +289,16 @@ test('Detection triggers: empty state, add a trigger, mode + action controls, re
   await expect(row.locator('select').nth(2)).toHaveValue('')
   await action.selectOption('mouse-left')
 
-  // The per-trigger repeat + linger fields default sensibly and are editable.
-  const repeat = row.locator('.detrow__repeat').first()
+  // Three ms fields on the action line, in DOM order: hold, repeat, keep firing.
+  const hold = row.locator('.detrow__repeat').nth(0)
+  await expect(hold).toHaveValue('50')
+  await hold.fill('80')
+  await expect(hold).toHaveValue('80')
+  const repeat = row.locator('.detrow__repeat').nth(1)
   await expect(repeat).toHaveValue('100')
   await repeat.fill('40')
   await expect(repeat).toHaveValue('40')
-  const linger = row.locator('.detrow__repeat').nth(1)
+  const linger = row.locator('.detrow__repeat').nth(2)
   await expect(linger).toHaveValue('300')
   await linger.fill('1000')
   await expect(linger).toHaveValue('1000')

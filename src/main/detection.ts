@@ -32,9 +32,12 @@ import {
   DETECTION_REPEAT_DEFAULT_MS,
   DETECTION_LINGER_MIN_MS,
   DETECTION_LINGER_MAX_MS,
-  DETECTION_LINGER_DEFAULT_MS
+  DETECTION_LINGER_DEFAULT_MS,
+  DETECTION_HOLD_MIN_MS,
+  DETECTION_HOLD_MAX_MS,
+  DETECTION_HOLD_DEFAULT_MS
 } from '@shared/profileio'
-import { tapBinding, clickAt } from './input'
+import { tapBindingHeld, clickAtHeld } from './input'
 
 export { isTriggerReady } from './detectmatch'
 
@@ -176,6 +179,13 @@ function clampLingerMs(ms: number): number {
     : DETECTION_LINGER_DEFAULT_MS
 }
 
+/** Clamp a trigger's stored action-hold duration into the allowed range. */
+function clampHoldMs(ms: number): number {
+  return Number.isFinite(ms)
+    ? Math.min(DETECTION_HOLD_MAX_MS, Math.max(DETECTION_HOLD_MIN_MS, Math.round(ms)))
+    : DETECTION_HOLD_DEFAULT_MS
+}
+
 /** Initial timing state: nothing fired or matched yet. */
 function freshState(): FireState {
   return { lastFiredAt: NEVER_FIRED, lastMatchedAt: NEVER_FIRED }
@@ -198,19 +208,20 @@ async function imageOnScreen(
 /** Map a trigger's action to a fire function, or null when it's unset. */
 function resolveAction(
   trigger: DetectionTrigger,
-  positions: ClickPosition[]
+  positions: ClickPosition[],
+  holdMs: number
 ): (() => Promise<void>) | null {
   const a = trigger.action
   switch (a.kind) {
     case 'key':
-      return a.key.trim() !== '' ? (): Promise<void> => tapBinding(a.key.trim()) : null
+      return a.key.trim() !== '' ? (): Promise<void> => tapBindingHeld(a.key.trim(), holdMs) : null
     case 'mouse-left':
-      return (): Promise<void> => tapBinding('mouse-left')
+      return (): Promise<void> => tapBindingHeld('mouse-left', holdMs)
     case 'mouse-right':
-      return (): Promise<void> => tapBinding('mouse-right')
+      return (): Promise<void> => tapBindingHeld('mouse-right', holdMs)
     case 'position': {
       const pos = positions.find((p) => p.id === a.positionId)
-      return pos ? (): Promise<void> => clickAt(pos.x, pos.y, pos.button) : null
+      return pos ? (): Promise<void> => clickAtHeld(pos.x, pos.y, pos.button, holdMs) : null
     }
   }
 }
@@ -295,7 +306,8 @@ export class DetectionRunner {
       : DETECTION_POLL_DEFAULT_MS
     for (const t of config.triggers ?? []) {
       if (!isTriggerReady(t, positions)) continue
-      const fire = resolveAction(t, positions)
+      const holdMs = clampHoldMs(t.holdMs)
+      const fire = resolveAction(t, positions, holdMs)
       if (!fire) continue // unreachable after isTriggerReady, but stay safe
       const repeatMs = clampRepeatMs(t.repeatMs)
       const lingerMs = clampLingerMs(t.lingerMs)

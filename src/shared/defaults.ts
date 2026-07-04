@@ -26,6 +26,9 @@ export function createDefaultDetectionTrigger(): DetectionTrigger {
     // Bridge brief icon flashes / global-cooldown dims so the spam doesn't stop
     // on a momentary miss; still stops ~⅓s after the ability truly goes down.
     lingerMs: 300,
+    // Hold each press ~3 frames so state-polling games don't miss it. This is
+    // the fix for "the click/key fires but the game ignores it".
+    holdMs: 50,
     image: null,
     searchArea: null,
     action: { kind: 'key', key: '', positionId: '' }

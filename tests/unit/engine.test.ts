@@ -492,6 +492,7 @@ describe('SpamEngine — Detection triggers integration', () => {
     tolerance: 10,
     repeatMs: 100,
     lingerMs: 0,
+    holdMs: 0,
     image: null,
     searchArea: null,
     action: { kind: 'key' as const, key: 'f', positionId: '' },

@@ -176,6 +176,7 @@ describe('trigger readiness', () => {
     tolerance: 25,
     repeatMs: 100,
     lingerMs: 300,
+    holdMs: 50,
     image: null,
     searchArea: null,
     action: { kind: 'key', key: 'f', positionId: '' }

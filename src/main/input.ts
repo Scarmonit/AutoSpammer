@@ -130,6 +130,86 @@ export async function clickAt(x: number, y: number, button: 'left' | 'right'): P
   }
 }
 
+// ---------------------------------------------------------------------------
+// Held taps/clicks — hold the input DOWN for a few frames before releasing.
+//
+// nut-js's default click/type presses and releases within microseconds. Apps
+// reading the Windows message queue catch every one, but MANY GAMES poll the
+// raw button/key STATE once per rendered frame; an instantaneous press+release
+// lands between two polls and is never seen. Holding for ~40-60 ms guarantees
+// the state is sampled by at least one frame, so the game reliably registers
+// the click/press. `holdMs <= 0` falls back to the instantaneous path.
+// ---------------------------------------------------------------------------
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function nutButtonFor(button: 'left' | 'right' | 'middle'): Button {
+  return button === 'right' ? Button.RIGHT : button === 'middle' ? Button.MIDDLE : Button.LEFT
+}
+
+/** Press a mouse button, hold it `holdMs`, then release (accounted for). */
+async function heldClickButton(button: 'left' | 'right' | 'middle', holdMs: number): Promise<void> {
+  const num = button === 'right' ? 2 : button === 'middle' ? 3 : 1
+  const nutBtn = nutButtonFor(button)
+  await mouse.pressButton(nutBtn)
+  try {
+    if (holdMs > 0) await sleep(holdMs)
+  } finally {
+    recordSyntheticUp(`m:${num}`)
+    await mouse.releaseButton(nutBtn)
+  }
+}
+
+/** A key held down for `holdMs` then released. Returns false if unholdable. */
+async function heldKey(name: string, holdMs: number): Promise<boolean> {
+  const key = nutHoldKey(name)
+  if (key === null) return false
+  await keyboard.pressKey(key)
+  try {
+    if (holdMs > 0) await sleep(holdMs)
+  } finally {
+    recordSyntheticUp(keyToken(name))
+    await keyboard.releaseKey(key)
+  }
+  return true
+}
+
+/**
+ * Tap a key or mouse button but hold it down for `holdMs` so state-polling
+ * games register it. Used by Detection triggers. Keys nut-js can't hold (and
+ * any holdMs <= 0) fall back to the instantaneous tap.
+ */
+export async function tapBindingHeld(name: string, holdMs: number): Promise<void> {
+  if (holdMs <= 0) return tapBinding(name)
+  switch (name) {
+    case 'mouse-left':
+      return heldClickButton('left', holdMs)
+    case 'mouse-right':
+      return heldClickButton('right', holdMs)
+    case 'mouse-middle':
+      return heldClickButton('middle', holdMs)
+    case 'mouse-4':
+    case 'mouse-5':
+      return // not synthesizable
+    default:
+      // Fall back to an instant press for keys nut-js can't hold down.
+      if (!(await heldKey(name, holdMs))) return pressKey(name)
+  }
+}
+
+/** Move the cursor to a screen position and click, holding for `holdMs`. */
+export async function clickAtHeld(
+  x: number,
+  y: number,
+  button: 'left' | 'right',
+  holdMs: number
+): Promise<void> {
+  if (holdMs <= 0) return clickAt(x, y, button)
+  await mouse.setPosition(new Point(x, y))
+  await heldClickButton(button, holdMs)
+}
+
 /** Current cursor position, used when recording a click spot. */
 export async function getMousePosition(): Promise<MousePoint> {
   const p = await mouse.getPosition()

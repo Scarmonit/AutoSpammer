@@ -45,6 +45,11 @@ export const DETECTION_LINGER_MIN_MS = 0
 export const DETECTION_LINGER_MAX_MS = 10000
 export const DETECTION_LINGER_DEFAULT_MS = 300
 
+/** Per-trigger action hold bounds (ms): how long each press stays down. */
+export const DETECTION_HOLD_MIN_MS = 0
+export const DETECTION_HOLD_MAX_MS = 2000
+export const DETECTION_HOLD_DEFAULT_MS = 50
+
 /** Template PNGs bigger than this (as a data URL) are dropped on load. */
 const MAX_TEMPLATE_DATAURL_LENGTH = 3_000_000
 
@@ -91,6 +96,9 @@ export function fixDetectionTrigger(v: unknown): DetectionTrigger {
     lingerMs: Number.isFinite(t.lingerMs)
       ? Math.min(DETECTION_LINGER_MAX_MS, Math.max(DETECTION_LINGER_MIN_MS, Math.round(t.lingerMs as number)))
       : def.lingerMs,
+    holdMs: Number.isFinite(t.holdMs)
+      ? Math.min(DETECTION_HOLD_MAX_MS, Math.max(DETECTION_HOLD_MIN_MS, Math.round(t.holdMs as number)))
+      : def.holdMs,
     image,
     searchArea: fixDetectionRect(t.searchArea),
     action: {

@@ -155,6 +155,12 @@ export interface DetectionTrigger {
    * condition is false.
    */
   lingerMs: number
+  /**
+   * How long to hold the key/click DOWN each time it fires, in ms. Games that
+   * poll input per frame miss an instantaneous press; holding a few frames
+   * (~40-60 ms) makes the press reliably register. 0 = instantaneous.
+   */
+  holdMs: number
   /** Captured template as a PNG data URL (image mode). Null = not captured yet. */
   image: string | null
   /** Where to look for the template; null = the whole primary display. */

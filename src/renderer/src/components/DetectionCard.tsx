@@ -186,11 +186,13 @@ export function DetectionCard(): JSX.Element {
         raise the ± tolerance. Triggers only fire <strong>while a run is active</strong> (start
         one with your Start/stop hotkey, default F6). While the condition stays true the action
         keeps firing every <strong>repeat every</strong> ms — so an interrupted press (stun, cast,
-        no target) retries until it lands. <strong>keep firing</strong> holds the spam through a
-        brief dip in the pixel/image (an on-use flash or global cooldown that momentarily changes
-        the icon); raise it if firing stops too early, set 0 to stop the instant it's false.
-        Pixel-color checks are cheap — set <strong>check every</strong> to 10–25 ms for near-instant
-        reactions; image checks cost more, so give them a search area.
+        no target) retries until it lands. <strong>hold</strong> keeps each key/click pressed a few
+        frames so games that read input per frame don't ignore it (raise it if the game misses the
+        press). <strong>keep firing</strong> holds the spam through a brief dip in the pixel/image
+        (an on-use flash or global cooldown that momentarily changes the icon); raise it if firing
+        stops too early, set 0 to stop the instant it's false. Pixel-color checks are cheap — set
+        <strong>check every</strong> to 10–25 ms for near-instant reactions; image checks cost more,
+        so give them a search area.
       </p>
 
       <div className="trigrows">
@@ -355,6 +357,27 @@ export function DetectionCard(): JSX.Element {
                     ))}
                   </select>
                 )}
+                <span
+                  className="keyrow__label"
+                  title="How long to hold the key/click down each press. Games that read input per frame miss an instant click — ~50 ms makes it register. Raise it if the game still ignores the press; 0 = instant."
+                >
+                  hold
+                </span>
+                <input
+                  className="input detrow__repeat"
+                  type="number"
+                  min={0}
+                  max={2000}
+                  step={10}
+                  value={t.holdMs}
+                  title="Milliseconds to hold each press down so the game registers it (0 = instantaneous)."
+                  onChange={(e) =>
+                    patchAt(t.id, {
+                      holdMs: Math.min(2000, Math.max(0, Math.round(Number(e.target.value) || 0)))
+                    })
+                  }
+                />
+                <span className="keyrow__unit">ms</span>
                 <span className="keyrow__label" title="Keeps re-pressing this often while the condition stays true, so an interrupted action retries until it lands">
                   repeat every
                 </span>
